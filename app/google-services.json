@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "384838715080",
+    "project_id": "animal-shelter-2a6cc",
+    "storage_bucket": "animal-shelter-2a6cc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:384838715080:android:f23bc807a0ef7399e8c7fd",
+        "android_client_info": {
+          "package_name": "com.example.animalshelterfirebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_x0c_CBULGmv-nZYQ3BwtGOuS_4BgJm4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
