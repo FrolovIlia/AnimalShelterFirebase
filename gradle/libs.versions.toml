@@ -15,6 +15,7 @@ boomVersion = "33.12.0"
 firebaseStorageKtx = "21.0.1"
 runtimeAndroid = "1.7.8"
 uiAndroid = "1.7.8"
+firebaseAuthKtx = "23.2.0"
 
 
 [libraries]
@@ -23,6 +24,7 @@ coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose"
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "boomVersion" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
+firebase-auth = { module = "com.google.firebase:firebase-auth"}
 
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -41,6 +43,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 androidx-runtime-android = { group = "androidx.compose.runtime", name = "runtime-android", version.ref = "runtimeAndroid" }
 androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "uiAndroid" }
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

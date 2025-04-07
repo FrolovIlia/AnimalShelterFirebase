@@ -42,136 +42,14 @@ import com.google.firebase.storage.ktx.storage
 import java.io.ByteArrayOutputStream
 import java.util.Collections.emptyList
 import coil.compose.AsyncImage
+import com.example.animalshelterfirebase.ui.login.LoginScreen
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-            val fs = Firebase.firestore
-            val storage = Firebase.storage.reference.child("images")
-
-            val launcher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.PickVisualMedia()
-            ) { uri ->
-                if (uri == null) return@rememberLauncherForActivityResult
-
-                val task = storage.child("test_image.jpg").putBytes(
-                    bitmapToByteArray(this, uri)
-                )
-                task.addOnSuccessListener { uploadTask ->
-                    uploadTask.metadata?.reference
-                        ?.downloadUrl?.addOnCompleteListener { uriTask ->
-                            saveAnimal(fs, uriTask.result.toString())
-                        }
-                }
-            }
-
-            MainScreen {
-                launcher.launch(
-                    PickVisualMediaRequest(
-                        mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
-                    )
-                )
-            }
+            LoginScreen()
         }
     }
 }
-
-@Composable
-fun MainScreen(onClick: () -> Unit) {
-    val fs = Firebase.firestore
-
-    val list = remember {
-        mutableStateOf(emptyList<Animal>())
-    }
-
-    fs.collection("animals").addSnapshotListener { snapShot, exeption ->
-        list.value = snapShot?.toObjects(Animal::class.java) ?: emptyList()
-    }
-
-
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.8f)
-        ) {
-            items(list.value) { animal ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        AsyncImage(
-                            model = animal.imageUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .height(100.dp)
-                                .width(100.dp)
-                        )
-                        Text(
-                            text = animal.name,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth()
-
-                        )
-                    }
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
-            onClick = {
-                onClick()
-
-            }) {
-            Text(
-                text = "Add animal"
-            )
-        }
-    }
-}
-
-
-private fun bitmapToByteArray(context: Context, uri: Uri): ByteArray {
-
-    val inputStream = context.contentResolver.openInputStream(uri)
-    val bitmap = BitmapFactory.decodeStream(inputStream)
-    val baos = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 50, baos)
-    return baos.toByteArray()
-}
-
-private fun saveAnimal(fs: FirebaseFirestore, url: String) {
-    fs.collection("animals")
-        .document().set(
-            Animal(
-                name = "my dog",
-                description = "cute and active",
-                age = "2",
-                category = "mixed",
-                imageUrl = url
-            )
-        )
-}
-
-
-
-
-
-
-
-
