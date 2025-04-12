@@ -2,6 +2,6 @@
 <resources>
 
     <style name="Theme.AnimalShelterFirebase" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">#7D5260</item>
+        <item name="android:statusBarColor">#F5E1A4</item>
     </style>
 </resources>
