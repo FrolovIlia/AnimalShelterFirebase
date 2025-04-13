@@ -18,7 +18,7 @@ fun LoginButton(
         onClick = {
             onClick()
         },
-        modifier = Modifier.fillMaxWidth(0.5f),
+        modifier = Modifier.fillMaxWidth(0.6f),
         colors = ButtonDefaults.buttonColors(
             containerColor = ButtonColor
         )

@@ -11,9 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,19 +24,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.ui.theme.BoxFilterColor
-import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 
 @Composable
 fun LoginScreen() {
-//    val auth = Firebase.auth
+    val auth = remember { Firebase.auth }
 
+
+    val errorState = remember {
+        mutableStateOf("")
+    }
     val emailState = remember {
         mutableStateOf("")
     }
@@ -98,67 +102,89 @@ fun LoginScreen() {
 
         RoundedCornerTextField(
             text = passwordState.value,
-            label = "Password"
+            label = "Пароль"
         ) {
             passwordState.value = it
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        LoginButton(text = "Sign In") { }
+        if (errorState.value.isNotEmpty()) {
+            Text(
+                text = errorState.value,
+                color = Color.Red,
+                textAlign = TextAlign.Center
+            )
+        }
+        LoginButton(text = "Войти") {
+            signIn(
+                auth,
+                emailState.value,
+                passwordState.value,
+                onSignInSuccess = {
+                    Log.d("MyLog", "Sign In Success")
+                },
+                onSignInFailure = { error ->
+                    errorState.value = error
+                }
+            )
+        }
 
-        LoginButton(text = "Sign Up") { }
-
-
+        LoginButton(text = "Зарегистрироваться") {
+            signUp(
+                auth,
+                emailState.value,
+                passwordState.value,
+                onSignUpSuccess = {
+                    Log.d("MyLog", "Sign Up Success")
+                },
+                onSignUpFailure = { error ->
+                    errorState.value = error
+                }
+            )
+        }
     }
 }
 
-private fun signUp(auth: FirebaseAuth, email: String, password: String) {
+
+fun signUp(
+    auth: FirebaseAuth,
+    email: String,
+    password: String,
+    onSignUpSuccess: () -> Unit,
+    onSignUpFailure: (String) -> Unit,
+    ) {
+    if (email.isBlank() || password.isBlank()) {
+        onSignUpFailure("Email и пароль не могут быть пустыми")
+        return
+    }
+
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.d("Mylog", "Sign Up successful")
-            } else {
-                Log.d("Mylog", "Sign Up failure!")
-            }
+            if (task.isSuccessful) onSignUpSuccess()
+        }
+        .addOnFailureListener {
+            onSignUpFailure(it.message ?: "Sign Up Error")
         }
 }
 
 
-private fun signIn(auth: FirebaseAuth, email: String, password: String) {
+fun signIn(
+    auth: FirebaseAuth,
+    email: String,
+    password: String,
+    onSignInSuccess: () -> Unit,
+    onSignInFailure: (String) -> Unit,
+) {
+    if (email.isBlank() || password.isBlank()) {
+        onSignInFailure("Email и пароль не могут быть пустыми")
+        return
+    }
+
     auth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                Log.d("Mylog", "Sign In successful")
-            } else {
-                Log.d("Mylog", "Sign In failure!")
-            }
-
+            if (task.isSuccessful) onSignInSuccess()
+        }
+        .addOnFailureListener { onSignInFailure(it.message ?: "Sign In Error")
         }
 }
-
-
-private fun signOut(auth: FirebaseAuth) {
-    auth.signOut()
-}
-
-private fun deleteAccount(auth: FirebaseAuth, email: String, password: String) {
-    val credential = EmailAuthProvider.getCredential(email, password)
-
-    auth.currentUser?.reauthenticate(credential)?.addOnCompleteListener {
-        if (it.isSuccessful) {
-            auth.currentUser?.delete()?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("Mylog", "Account was deleted!")
-                } else {
-                    Log.d("Mylog", "Failure delete account!")
-                }
-            }
-        } else {
-            Log.d("Mylog", "Failure re-authenticate!")
-
-        }
-    }
-}
-
-
