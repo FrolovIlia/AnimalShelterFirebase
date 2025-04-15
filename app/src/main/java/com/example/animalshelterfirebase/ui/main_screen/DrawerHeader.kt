@@ -22,7 +22,7 @@ import com.example.animalshelterfirebase.ui.theme.DarkBlue
 
 
 @Composable
-fun DrawerHeader() {
+fun DrawerHeader(email: String) {
     Column(
         Modifier
             .fillMaxWidth()
@@ -40,10 +40,9 @@ fun DrawerHeader() {
 
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            text = "Майский День",
-            color = Color.White,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
+            text = email,
+            color = Color.Gray,
+            fontSize = 16.sp
         )
     }
 }

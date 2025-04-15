@@ -11,19 +11,19 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Preview
 @Composable
-fun MainScreen() {
+fun MainScreen(navData: MainScreenDataObject) {
     val drawerState = rememberDrawerState(DrawerValue.Open)
     ModalNavigationDrawer(
         drawerState = drawerState,
         modifier = Modifier.fillMaxWidth(),
         drawerContent = {
             Column(Modifier.fillMaxWidth(0.7f)) {
-                DrawerHeader()
+                DrawerHeader(navData.email)
                 DrawerBody()
             }
         }
