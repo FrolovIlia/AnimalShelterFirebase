@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.animalshelterfirebase.data.MainScreenDataObject
+import com.example.animalshelterfirebase.ui.add_animal_screen.AddAnimalScreen
+import com.example.animalshelterfirebase.ui.data.AddScreenObject
 import com.example.animalshelterfirebase.ui.login.LoginScreen
 import com.example.animalshelterfirebase.ui.login.LoginScreenObject
 import com.example.animalshelterfirebase.ui.main_screen.MainScreen
@@ -20,17 +22,29 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
 
-            NavHost(navController = navController, startDestination = LoginScreenObject) {
+            NavHost(
+                navController = navController,
+                startDestination = LoginScreenObject
+            ) {
 
                 composable<LoginScreenObject> {
-                    LoginScreen { navData->
+                    LoginScreen { navData ->
                         navController.navigate(navData)
                     }
                 }
 
-                composable<MainScreenDataObject> { navEntry->
+                composable<MainScreenDataObject> { navEntry ->
                     val navData = navEntry.toRoute<MainScreenDataObject>()
-                    MainScreen(navData)
+                    MainScreen(navData) {
+                        navController.navigate(AddScreenObject)
+                    }
+                }
+
+                composable<AddScreenObject> {
+                    AddAnimalScreen {
+                        navController.popBackStack()
+
+                    }
                 }
 
             }

@@ -15,10 +15,13 @@ import com.example.animalshelterfirebase.ui.theme.ButtonColor
 
 @Composable
 fun RoundedCornerTextField(
+    maxLines: Int = 1,
+    singleLine: Boolean = true,
     text: String,
     label: String,
     onValueChange: (String) -> Unit
 ) {
+
 
     TextField(
         value = text,
@@ -38,6 +41,7 @@ fun RoundedCornerTextField(
         label = {
             Text(text = label, color = Color.Gray)
         },
-        singleLine = true
+        singleLine = singleLine,
+        maxLines = maxLines
     )
 }

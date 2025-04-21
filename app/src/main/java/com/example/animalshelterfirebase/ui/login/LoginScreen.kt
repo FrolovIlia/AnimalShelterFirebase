@@ -25,10 +25,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.data.MainScreenDataObject
+import com.example.animalshelterfirebase.ui.theme.AnimalFont
 import com.example.animalshelterfirebase.ui.theme.BoxFilterColor
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -85,11 +87,11 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.size(10.dp))
         Text(
-            text = "Animal Shelter App",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Serif,
-            fontSize = 30.sp
+            text = "Майский День",
+            color = Color.Black,
+//            fontWeight = FontWeight.Bold,
+            fontFamily = AnimalFont,
+            fontSize = 35.sp
         )
 
         Spacer(modifier = Modifier.size(10.dp))

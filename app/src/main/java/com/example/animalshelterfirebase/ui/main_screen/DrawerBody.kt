@@ -39,7 +39,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
 @Composable
-fun DrawerBody() {
+fun DrawerBody(
+    onAdminClick: () -> Unit = {}
+
+) {
     val categoriesList = listOf(
         "О приюте",
         "События и новости",
@@ -124,7 +127,9 @@ fun DrawerBody() {
             }
 
             if (isAdminState.value) Button(
-                onClick = {},
+                onClick = {
+                    onAdminClick()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp),
