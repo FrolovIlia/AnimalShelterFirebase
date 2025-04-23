@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.ui.theme.ButtonColor
+import com.example.animalshelterfirebase.ui.theme.ButtonColorDark
 import com.example.animalshelterfirebase.ui.theme.GrayLight
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
@@ -67,7 +68,11 @@ fun DrawerBody(
 
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(ButtonColorDark)
+    ) {
         Image(
             modifier = Modifier.fillMaxSize(),
             painter = painterResource(id = R.drawable.dog),
