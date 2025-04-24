@@ -1,13 +1,19 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -20,7 +26,11 @@ import coil.compose.AsyncImage
 import com.example.animalshelterfirebase.data.Animal
 
 @Composable
-fun AnimalListItemUI(animal: Animal) {
+fun AnimalListItemUI(
+    showEditButton: Boolean = false,
+    animal: Animal,
+    onEditClick: (Animal) -> Unit ={}
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -59,10 +69,26 @@ fun AnimalListItemUI(animal: Animal) {
         )
         Spacer(modifier = Modifier.height(5.dp))
 
-        Text(
-            text = animal.age,
-            color = Color.Blue,
-            fontSize = 18.sp
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                text = animal.age,
+                color = Color.Blue,
+                fontSize = 18.sp
+            )
+
+            if (showEditButton) IconButton(onClick = {
+                onEditClick(animal)
+            }) {
+                Icon(Icons.Default.Edit, contentDescription = "")
+            }
+
+        }
+
     }
 }

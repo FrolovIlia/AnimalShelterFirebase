@@ -35,18 +35,30 @@ class MainActivity : ComponentActivity() {
 
                 composable<MainScreenDataObject> { navEntry ->
                     val navData = navEntry.toRoute<MainScreenDataObject>()
-                    MainScreen(navData) {
-                        navController.navigate(AddScreenObject)
+                    MainScreen(
+                        navData,
+                        onAnimalEditClick = { animal ->
+                            navController.navigate(
+                                AddScreenObject(
+                                    key = animal.key,
+                                    name = animal.name,
+                                    description = animal.description,
+                                    age = animal.age,
+                                    category = animal.category,
+                                    imageUrl = animal.imageUrl
+                                )
+                            )
+                        }
+                    ) {
+                        navController.navigate(AddScreenObject())
                     }
                 }
 
-                composable<AddScreenObject> {
-                    AddAnimalScreen {
-                        navController.popBackStack()
+                composable<AddScreenObject> { navEntry ->
+                    val navData = navEntry.toRoute<AddScreenObject>()
 
-                    }
+                    AddAnimalScreen(navData)
                 }
-
             }
         }
     }

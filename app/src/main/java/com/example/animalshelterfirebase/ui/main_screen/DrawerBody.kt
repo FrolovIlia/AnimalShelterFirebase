@@ -41,6 +41,7 @@ import com.google.firebase.ktx.Firebase
 
 @Composable
 fun DrawerBody(
+    onAdmin: (Boolean) -> Unit,
     onAdminClick: () -> Unit = {}
 
 ) {
@@ -53,8 +54,6 @@ fun DrawerBody(
 
     val isAdminState = remember {
         mutableStateOf(false)
-
-
     }
 
 
@@ -62,6 +61,7 @@ fun DrawerBody(
     LaunchedEffect(Unit) {
         isAdmin { isAdmin ->
             isAdminState.value = isAdmin
+            onAdmin(isAdmin)
         }
 
     }

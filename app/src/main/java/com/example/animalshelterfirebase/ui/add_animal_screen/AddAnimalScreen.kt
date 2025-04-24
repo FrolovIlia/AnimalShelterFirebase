@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.animalshelterfirebase.data.Animal
+import com.example.animalshelterfirebase.ui.data.AddScreenObject
 import com.example.animalshelterfirebase.ui.login.LoginButton
 import com.example.animalshelterfirebase.ui.login.RoundedCornerTextField
 import com.example.animalshelterfirebase.ui.theme.BoxFilterColor
@@ -43,19 +44,20 @@ import com.google.firebase.storage.ktx.storage
 @Preview(showBackground = true)
 @Composable
 fun AddAnimalScreen(
+    navData: AddScreenObject = AddScreenObject(),
     onSaved: () -> Unit = {}
 
 ) {
-    var selectedCategory = "Дворянская"
+    var selectedCategory = navData.category
     val name = remember {
-        mutableStateOf("")
+        mutableStateOf(navData.name)
     }
     val description = remember {
-        mutableStateOf("")
+        mutableStateOf(navData.description)
     }
 
     val age = remember {
-        mutableStateOf("")
+        mutableStateOf(navData.age)
     }
     val selectedImageUri = remember {
         mutableStateOf<Uri?>(null)

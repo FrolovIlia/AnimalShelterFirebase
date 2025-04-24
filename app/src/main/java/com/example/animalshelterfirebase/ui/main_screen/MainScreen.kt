@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainScreen(
     navData: MainScreenDataObject,
+    onAnimalEditClick: (Animal) -> Unit,
     onAdminClick: () -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Open)
@@ -36,6 +37,10 @@ fun MainScreen(
 
     val animalsListState = remember {
         mutableStateOf(emptyList<Animal>())
+    }
+
+    val isAdminState = remember {
+        mutableStateOf(false)
     }
 
     LaunchedEffect(Unit) {
@@ -53,7 +58,11 @@ fun MainScreen(
         drawerContent = {
             Column(Modifier.fillMaxWidth(0.7f)) {
                 DrawerHeader(navData.email)
-                DrawerBody {
+                DrawerBody(
+                    onAdmin = { isAdmin ->
+                        isAdminState.value = isAdmin
+                    }
+                ) {
                     //если нужно чтобы боковая панель всегда сворачивалась - раскомментировать
                     coroutineScope.launch {
                         drawerState.close()
@@ -76,7 +85,9 @@ fun MainScreen(
                     .padding(paddingValues)
             ) {
                 items(animalsListState.value) { animal ->
-                    AnimalListItemUI(animal)
+                    AnimalListItemUI(isAdminState.value, animal) { animal ->
+                        onAnimalEditClick(animal)
+                    }
                 }
             }
         }
