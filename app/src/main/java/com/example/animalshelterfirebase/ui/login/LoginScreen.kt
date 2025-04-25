@@ -1,19 +1,11 @@
 package com.example.animalshelterfirebase.ui.login
 
 import android.util.Log
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,19 +14,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
-import com.example.animalshelterfirebase.ui.theme.BoxFilterColor
+
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+
 
 @Composable
 fun LoginScreen(
@@ -42,116 +35,155 @@ fun LoginScreen(
 ) {
     val auth = remember { Firebase.auth }
 
+    val errorState = remember { mutableStateOf("") }
+    val emailState = remember { mutableStateOf("") }
+    val passwordState = remember { mutableStateOf("") }
 
-    val errorState = remember {
-        mutableStateOf("")
-    }
-    val emailState = remember {
-        mutableStateOf("")
-    }
-    val passwordState = remember {
-        mutableStateOf("")
-    }
+    // Управление статус баром
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setSystemBarsColor(color = Color.Transparent) // Прозрачный статус бар
 
-    Image(
-        painter = painterResource(
-            id = R.drawable.dog
-        ),
-        contentDescription = "BG",
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop,
-    )
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BoxFilterColor)
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                start = 50.dp,
-                end = 50.dp
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Фоновое изображение, растянутое на весь экран (включая статус бар)
         Image(
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = "logo",
+            painter = painterResource(id = R.drawable.unsplash_img), // Убедитесь, что изображение существует
+            contentDescription = "Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(), // Растягиваем изображение на весь экран
+        )
+
+        // Прозрачная подложка, которая накрывает изображение
+        Box(
             modifier = Modifier
-                .size(150.dp)
-        )
-        Spacer(modifier = Modifier.size(10.dp))
-        Text(
-            text = "Майский День",
-            color = Color.Black,
-//            fontWeight = FontWeight.Bold,
-            fontFamily = AnimalFont,
-            fontSize = 35.sp
+                .fillMaxSize()
+                .background(Color.White.copy(alpha = 0f)) // полностью прозрачная подложка
         )
 
-        Spacer(modifier = Modifier.size(10.dp))
-        RoundedCornerTextField(
-            text = emailState.value,
-            label = "Email"
+        // Основной контент
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp), // отступы по бокам
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            emailState.value = it
-        }
-        Spacer(modifier = Modifier.height(10.dp))
 
-        RoundedCornerTextField(
-            text = passwordState.value,
-            label = "Пароль"
-        ) {
-            passwordState.value = it
-        }
+            Row(
+                modifier = Modifier
+                    .padding(top = 100.dp),
+                verticalAlignment = Alignment.CenterVertically
 
-        Spacer(modifier = Modifier.height(10.dp))
+            ) {
+                // Логотип
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    contentDescription = "logo",
+                    modifier = Modifier.size(120.dp),
 
-        if (errorState.value.isNotEmpty()) {
-            Text(
-                text = errorState.value,
-                color = Color.Red,
-                textAlign = TextAlign.Center
-            )
-        }
-        LoginButton(text = "Войти") {
-            signIn(
-                auth,
-                emailState.value,
-                passwordState.value,
-                onSignInSuccess = {navData->
-                    onNavigateToMainScreen(navData)
-                    Log.d("MyLog", "Sign In Success")
-                },
-                onSignInFailure = { error ->
-                    errorState.value = error
+                    )
+
+                // Заголовок
+                Text(
+                    text = "Майский День",
+                    color = Color.Black,
+                    fontFamily = AnimalFont,
+                    fontSize = 32.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(250.dp))
+
+
+
+
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp)
+                    .padding(bottom = 30.dp), // отступы по бокам
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+                Text(
+                    text = "Счастье ближе чем ты думаешь!",
+                    color = Color.Black,
+                    fontFamily = AnimalFont,
+                    fontSize = 24.sp,
+
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Поле ввода email
+                RoundedCornerTextField(
+                    text = emailState.value,
+                    label = "Email"
+                ) { emailState.value = it }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Поле ввода пароля
+                RoundedCornerTextField(
+                    text = passwordState.value,
+                    label = "Пароль"
+                ) { passwordState.value = it }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Ошибка при неправильном вводе
+                if (errorState.value.isNotEmpty()) {
+                    Text(
+                        text = errorState.value,
+                        color = Color.Red,
+                        textAlign = TextAlign.Center
+                    )
                 }
-            )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Кнопка "Войти"
+                LoginButton(text = "Войти") {
+                    signIn(
+                        auth,
+                        emailState.value,
+                        passwordState.value,
+                        onSignInSuccess = { navData ->
+                            onNavigateToMainScreen(navData)
+                            Log.d("MyLog", "Sign In Success")
+                        },
+                        onSignInFailure = { error ->
+                            errorState.value = error
+                        }
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                // Кнопка "Зарегистрироваться"
+                LoginButton(text = "Зарегистрироваться") {
+                    signUp(
+                        auth,
+                        emailState.value,
+                        passwordState.value,
+                        onSignUpSuccess = { navData ->
+                            onNavigateToMainScreen(navData)
+                            Log.d("MyLog", "Sign Up Success")
+                        },
+                        onSignUpFailure = { error ->
+                            errorState.value = error
+                        }
+                    )
+                }
+
+            }
+
         }
 
-        LoginButton(text = "Зарегистрироваться") {
-            signUp(
-                auth,
-                emailState.value,
-                passwordState.value,
-                onSignUpSuccess = {navData->
-                    onNavigateToMainScreen(navData)
-                    Log.d("MyLog", "Sign Up Success")
-                },
-                onSignUpFailure = { error ->
-                    errorState.value = error
-                }
-            )
-        }
+
     }
 }
 
 
+// Firebase auth methods (не менялись)
 fun signUp(
     auth: FirebaseAuth,
     email: String,
@@ -166,19 +198,19 @@ fun signUp(
 
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
-            if (task.isSuccessful) onSignUpSuccess(
-                MainScreenDataObject(
-                    task.result.user?.uid!!,
-                    task.result.user?.email!!
+            if (task.isSuccessful) {
+                onSignUpSuccess(
+                    MainScreenDataObject(
+                        task.result.user?.uid!!,
+                        task.result.user?.email!!
+                    )
                 )
-
-            )
+            }
         }
         .addOnFailureListener {
             onSignUpFailure(it.message ?: "Sign Up Error")
         }
 }
-
 
 fun signIn(
     auth: FirebaseAuth,
@@ -194,13 +226,14 @@ fun signIn(
 
     auth.signInWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
-            if (task.isSuccessful) onSignInSuccess(
-                MainScreenDataObject(
-                    task.result.user?.uid!!,
-                    task.result.user?.email!!
+            if (task.isSuccessful) {
+                onSignInSuccess(
+                    MainScreenDataObject(
+                        task.result.user?.uid!!,
+                        task.result.user?.email!!
+                    )
                 )
-
-            )
+            }
         }
         .addOnFailureListener {
             onSignInFailure(it.message ?: "Sign In Error")

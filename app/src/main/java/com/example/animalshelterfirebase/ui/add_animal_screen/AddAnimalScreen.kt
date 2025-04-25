@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,7 +33,7 @@ import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.ui.data.AddScreenObject
 import com.example.animalshelterfirebase.ui.login.LoginButton
 import com.example.animalshelterfirebase.ui.login.RoundedCornerTextField
-import com.example.animalshelterfirebase.ui.theme.BoxFilterColor
+import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -82,7 +81,7 @@ fun AddAnimalScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BoxFilterColor)
+            .background(BackgroundWhite)
     )
 
     Column(

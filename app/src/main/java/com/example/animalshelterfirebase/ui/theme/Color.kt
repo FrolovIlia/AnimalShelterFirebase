@@ -10,8 +10,9 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
+val BackgroundWhite = Color(0xFFFFFFFF)
+val BackgroundGray = Color(0xFF8E918F)
 
-val BoxFilterColor = Color(0xFFF5E1A4)
 val ButtonColor = Color(0x9C7D5260)
 val ButtonColorDark = Color(0xFF7D5260)
 val DarkBlue = Color(0xFFF5E1A4)

@@ -6,5 +6,5 @@ import com.example.animalshelterfirebase.R
 
 
 val AnimalFont = FontFamily(
-    Font(R.font.animal_font) // если у тебя animal_font.ttf
+    Font(R.font.montserrat)
 )

@@ -70,4 +70,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+
+    implementation("androidx.compose.ui:ui-tooling:1.0.0")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.20.3")
+
 }
