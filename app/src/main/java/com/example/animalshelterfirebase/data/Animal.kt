@@ -7,5 +7,6 @@ data class Animal(
     val description: String = "",
     val age: String = "",
     val category: String = "",
-    val imageUrl: String = ""
+    val imageUrl: String = "",
+    val isFavourite: Boolean = false
 )

@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -29,7 +32,8 @@ import com.example.animalshelterfirebase.data.Animal
 fun AnimalListItemUI(
     showEditButton: Boolean = false,
     animal: Animal,
-    onEditClick: (Animal) -> Unit ={}
+    onEditClick: (Animal) -> Unit = {},
+    onFavouriteClick: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
@@ -87,6 +91,17 @@ fun AnimalListItemUI(
             }) {
                 Icon(Icons.Default.Edit, contentDescription = "")
             }
+
+            IconButton(onClick = {
+                onFavouriteClick()
+            }) {
+                Icon(
+                    if (animal.isFavourite) {
+                        Icons.Default.Favorite
+                    } else Icons.Default.FavoriteBorder, contentDescription = ""
+                )
+            }
+
 
         }
 

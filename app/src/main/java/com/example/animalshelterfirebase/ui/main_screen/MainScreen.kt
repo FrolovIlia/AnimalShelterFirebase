@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.example.animalshelterfirebase.data.Animal
+import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
 import com.google.firebase.firestore.FirebaseFirestore
@@ -43,13 +44,17 @@ fun MainScreen(
         mutableStateOf(false)
     }
 
-    LaunchedEffect(Unit) {
-        val db = Firebase.firestore
-        getAllAnimals(db) { animal ->
-            animalsListState.value = animal
-        }
+    val db = remember {
+        Firebase.firestore
     }
 
+    LaunchedEffect(Unit) {
+        getAllFavsIds(db, navData.uid) { favs ->
+            getAllAnimals(db, favs) { animal ->
+                animalsListState.value = animal
+            }
+        }
+    }
 
 
     ModalNavigationDrawer(
@@ -85,9 +90,28 @@ fun MainScreen(
                     .padding(paddingValues)
             ) {
                 items(animalsListState.value) { animal ->
-                    AnimalListItemUI(isAdminState.value, animal) { animal ->
-                        onAnimalEditClick(animal)
-                    }
+                    AnimalListItemUI(
+                        isAdminState.value,
+                        animal,
+                        onEditClick = {
+                            onAnimalEditClick(it)
+                        },
+                        onFavouriteClick = {
+                            animalsListState.value = animalsListState.value.map { anim ->
+                                if (anim.key == animal.key) {
+                                    onFavs(
+                                        db,
+                                        navData.uid,
+                                        Favourite(anim.key),
+                                        !anim.isFavourite
+                                    )
+                                    anim.copy(isFavourite = true)
+                                } else {
+                                    anim
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -96,16 +120,64 @@ fun MainScreen(
 
 fun getAllAnimals(
     db: FirebaseFirestore,
+    idsList: List<String>,
     onAnimals: (List<Animal>) -> Unit
 ) {
     db.collection("animals")
         .get()
         .addOnSuccessListener { task ->
-            val animalsList = task.toObjects(Animal::class.java)
+            val animalsList = task.toObjects(Animal::class.java).map {
+                if (idsList.contains(it.key)) {
+                    it.copy(isFavourite = true)
+                } else {
+                    it
+                }
+            }
             onAnimals(animalsList)
 
         }
         .addOnFailureListener {
 
         }
+}
+
+fun getAllFavsIds(
+    db: FirebaseFirestore,
+    uid: String,
+    onFavs: (List<String>) -> Unit
+) {
+    db.collection("users")
+        .document(uid)
+        .collection("favourites")
+        .get()
+        .addOnSuccessListener { task ->
+            val idsList = task.toObjects(Favourite::class.java)
+            val keysList = arrayListOf<String>()
+            idsList.forEach {
+                keysList.add(it.key)
+            }
+            onFavs(keysList)
+        }
+
+}
+
+private fun onFavs(
+    db: FirebaseFirestore,
+    uid: String,
+    favourite: Favourite,
+    isFav: Boolean
+) {
+    if (isFav) {
+        db.collection("users")
+            .document(uid)
+            .collection("favourites")
+            .document(favourite.key)
+            .set(favourite)
+    } else {
+        db.collection("users")
+            .document(uid)
+            .collection("favourites")
+            .document(favourite.key)
+            .delete()
+    }
 }
