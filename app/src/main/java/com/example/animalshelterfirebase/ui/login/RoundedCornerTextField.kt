@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.animalshelterfirebase.ui.theme.ButtonColor
+import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 
 @Composable
@@ -37,7 +37,7 @@ fun RoundedCornerTextField(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, ButtonColor, RoundedCornerShape(25.dp)),
+            .border(1.dp, ButtonColorBlue, RoundedCornerShape(25.dp)),
         label = {
             Text(text = label, color = Color.Gray)
         },

@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.animalshelterfirebase.ui.theme.ButtonColor
+import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 
 @Composable
@@ -35,7 +35,7 @@ fun RoundedCornerDropDownMenu(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = ButtonColor,
+                color = ButtonColorBlue,
                 shape = RoundedCornerShape(25.dp)
             )
             .clip(RoundedCornerShape(25.dp))

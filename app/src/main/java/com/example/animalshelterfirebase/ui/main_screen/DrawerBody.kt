@@ -1,6 +1,5 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,7 +17,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.R
-import com.example.animalshelterfirebase.ui.theme.ButtonColor
+import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.example.animalshelterfirebase.ui.theme.ButtonColorDark
 import com.example.animalshelterfirebase.ui.theme.GrayLight
 import com.google.firebase.auth.ktx.auth
@@ -43,7 +41,6 @@ import com.google.firebase.ktx.Firebase
 fun DrawerBody(
     onAdmin: (Boolean) -> Unit,
     onAdminClick: () -> Unit = {}
-
 ) {
     val categoriesList = listOf(
         "О приюте",
@@ -56,14 +53,11 @@ fun DrawerBody(
         mutableStateOf(false)
     }
 
-
-
     LaunchedEffect(Unit) {
         isAdmin { isAdmin ->
             isAdminState.value = isAdmin
             onAdmin(isAdmin)
         }
-
     }
 
 
@@ -138,7 +132,7 @@ fun DrawerBody(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(5.dp),
-                colors = ButtonDefaults.buttonColors(ButtonColor)
+                colors = ButtonDefaults.buttonColors(ButtonColorBlue)
             ) {
                 Text(
                     text = "Админ панель"

@@ -10,18 +10,18 @@ sealed class BottomMenuItem(
     object Home : BottomMenuItem(
         route = "",
         title = "Главная",
-        iconId = R.drawable.ic_home
+        iconId = R.drawable.home_menu
     )
 
     object Favs : BottomMenuItem(
         route = "",
         title = "Любимцы",
-        iconId = R.drawable.ic_favs
+        iconId = R.drawable.favourite_menu
     )
 
     object Settings : BottomMenuItem(
         route = "",
-        title = "Настройки",
-        iconId = R.drawable.ic_settings
+        title = "Профиль",
+        iconId = R.drawable.profile_menu
     )
 }

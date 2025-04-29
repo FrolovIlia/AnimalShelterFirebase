@@ -44,141 +44,118 @@ fun LoginScreen(
     systemUiController.setSystemBarsColor(color = Color.Transparent) // Прозрачный статус бар
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Фоновое изображение, растянутое на весь экран (включая статус бар)
+        // Фон
         Image(
-            painter = painterResource(id = R.drawable.unsplash_img), // Убедитесь, что изображение существует
+            painter = painterResource(id = R.drawable.unsplash_img),
             contentDescription = "Background",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(), // Растягиваем изображение на весь экран
+            modifier = Modifier.fillMaxSize()
         )
 
-        // Прозрачная подложка, которая накрывает изображение
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White.copy(alpha = 0f)) // полностью прозрачная подложка
+                .background(Color.White.copy(alpha = 0.3f))
         )
 
-        // Основной контент
-        Column(
+        // ЛОГО + ЗАГОЛОВОК (в линию, по центру, сверху)
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 32.dp), // отступы по бокам
-            horizontalAlignment = Alignment.CenterHorizontally
+                .align(Alignment.TopCenter)
+                .padding(top = 100.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "logo",
+                modifier = Modifier.size(120.dp)
+            )
 
-            Row(
-                modifier = Modifier
-                    .padding(top = 100.dp),
-                verticalAlignment = Alignment.CenterVertically
-
-            ) {
-                // Логотип
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "logo",
-                    modifier = Modifier.size(120.dp),
-
-                    )
-
-                // Заголовок
-                Text(
-                    text = "Майский День",
-                    color = Color.Black,
-                    fontFamily = AnimalFont,
-                    fontSize = 32.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(250.dp))
-
-
-
-
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 32.dp)
-                    .padding(bottom = 30.dp), // отступы по бокам
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                Text(
-                    text = "Счастье ближе чем ты думаешь!",
-                    color = Color.Black,
-                    fontFamily = AnimalFont,
-                    fontSize = 24.sp,
-
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Поле ввода email
-                RoundedCornerTextField(
-                    text = emailState.value,
-                    label = "Email"
-                ) { emailState.value = it }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Поле ввода пароля
-                RoundedCornerTextField(
-                    text = passwordState.value,
-                    label = "Пароль"
-                ) { passwordState.value = it }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Ошибка при неправильном вводе
-                if (errorState.value.isNotEmpty()) {
-                    Text(
-                        text = errorState.value,
-                        color = Color.Red,
-                        textAlign = TextAlign.Center
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Кнопка "Войти"
-                LoginButton(text = "Войти") {
-                    signIn(
-                        auth,
-                        emailState.value,
-                        passwordState.value,
-                        onSignInSuccess = { navData ->
-                            onNavigateToMainScreen(navData)
-                            Log.d("MyLog", "Sign In Success")
-                        },
-                        onSignInFailure = { error ->
-                            errorState.value = error
-                        }
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Кнопка "Зарегистрироваться"
-                LoginButton(text = "Зарегистрироваться") {
-                    signUp(
-                        auth,
-                        emailState.value,
-                        passwordState.value,
-                        onSignUpSuccess = { navData ->
-                            onNavigateToMainScreen(navData)
-                            Log.d("MyLog", "Sign Up Success")
-                        },
-                        onSignUpFailure = { error ->
-                            errorState.value = error
-                        }
-                    )
-                }
-
-            }
-
+            Text(
+                text = "Майский \nДень",
+                color = Color.Black,
+                fontFamily = AnimalFont,
+                fontSize = 32.sp
+            )
         }
 
+        // Форма и кнопки внизу, с отступами
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(horizontal = 16.dp, vertical = 30.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                text = "Счастье ближе чем ты думаешь!",
+                color = Color.Black,
+                fontFamily = AnimalFont,
+                fontSize = 24.sp
+            )
 
+            Spacer(modifier = Modifier.height(20.dp))
+
+            RoundedCornerTextField(
+                text = emailState.value,
+                label = "Email"
+            ) { emailState.value = it }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            RoundedCornerTextField(
+                text = passwordState.value,
+                label = "Пароль"
+            ) { passwordState.value = it }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            if (errorState.value.isNotEmpty()) {
+                Text(
+                    text = errorState.value,
+                    color = Color.Red,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(modifier = Modifier.height(5.dp))
+
+            ButtonBlue(text = "Войти") {
+                signIn(
+                    auth,
+                    emailState.value,
+                    passwordState.value,
+                    onSignInSuccess = { navData -> onNavigateToMainScreen(navData) },
+                    onSignInFailure = { errorState.value = it }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ButtonWhite(text = "Зарегистрироваться") {
+                signUp(
+                    auth,
+                    emailState.value,
+                    passwordState.value,
+                    onSignUpSuccess = { navData -> onNavigateToMainScreen(navData) },
+                    onSignUpFailure = { errorState.value = it }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            ButtonTransparent(text = "Открыть без регистрации") {
+                signUp(
+                    auth,
+                    emailState.value,
+                    passwordState.value,
+                    onSignUpSuccess = { navData -> onNavigateToMainScreen(navData) },
+                    onSignUpFailure = { errorState.value = it }
+                )
+            }
+        }
     }
 }
 

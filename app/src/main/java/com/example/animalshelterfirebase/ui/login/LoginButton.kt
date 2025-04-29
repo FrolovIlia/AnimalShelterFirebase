@@ -1,16 +1,23 @@
 package com.example.animalshelterfirebase.ui.login
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.animalshelterfirebase.ui.theme.ButtonColor
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.animalshelterfirebase.ui.theme.AnimalFont
+import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
+import com.example.animalshelterfirebase.ui.theme.ButtonColorWhite
 
 
 @Composable
-fun LoginButton(
+fun ButtonBlue(
     text: String,
     onClick: () -> Unit
 ) {
@@ -18,12 +25,77 @@ fun LoginButton(
         onClick = {
             onClick()
         },
-        modifier = Modifier.fillMaxWidth(0.7f),
+        modifier = Modifier.fillMaxWidth()
+            .height(52.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = ButtonColor
+            containerColor = ButtonColorBlue,
         )
 
     ) {
-        Text(text = text)
+        Text(
+            text = text,
+            color = Color.Black,
+            fontFamily = AnimalFont,
+            style = TextStyle(
+                fontSize = 16.sp,
+                lineHeight = 36.sp
+            )
+        )
+    }
+}
+
+@Composable
+fun ButtonWhite(
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = {
+            onClick()
+        },
+        modifier = Modifier.fillMaxWidth()
+            .height(52.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = ButtonColorWhite
+        )
+
+    ) {
+        Text(
+            text = text,
+            color = Color.Black,
+            fontFamily = AnimalFont,
+            style = TextStyle(
+                fontSize = 16.sp,
+                lineHeight = 36.sp
+            )
+        )
+    }
+}
+
+@Composable
+fun ButtonTransparent(
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = {
+            onClick()
+        },
+        modifier = Modifier.fillMaxWidth()
+            .height(52.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent
+        )
+
+    ) {
+        Text(
+            text = text,
+            color = Color.Black,
+            fontFamily = AnimalFont,
+            style = TextStyle(
+                fontSize = 16.sp,
+                lineHeight = 36.sp // Явно задаёт высоту строки
+            )
+        )
     }
 }

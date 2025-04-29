@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.ui.data.AddScreenObject
-import com.example.animalshelterfirebase.ui.login.LoginButton
+import com.example.animalshelterfirebase.ui.login.ButtonWhite
 import com.example.animalshelterfirebase.ui.login.RoundedCornerTextField
 import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
 import com.google.firebase.firestore.FirebaseFirestore
@@ -145,11 +145,11 @@ fun AddAnimalScreen(
         }
         Spacer(modifier = Modifier.height(10.dp))
 
-        LoginButton(text = "Выбрать изображение") {
+        ButtonWhite(text = "Выбрать изображение") {
             imageLauncher.launch("image/*")
         }
 
-        LoginButton(text = "Сохранить") {
+        ButtonWhite(text = "Сохранить") {
             saveAnimalImage(
                 selectedImageUri.value!!,
                 storage,

@@ -21,6 +21,7 @@ import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -80,7 +81,23 @@ fun MainScreen(
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
-                BottomMenu()
+                BottomMenu(
+                    onFavsClick = {
+                        getAllFavsIds(db, navData.uid) { favs ->
+                            getAllFavsAnimals(db, favs) { animal ->
+                                animalsListState.value = animal
+                            }
+                        }
+                    },
+                    onHomeClick = {
+                        getAllFavsIds(db, navData.uid) { favs ->
+                            getAllAnimals(db, favs) { animal ->
+                                animalsListState.value = animal
+                            }
+                        }
+                    }
+
+                )
             }
         ) { paddingValues ->
             LazyVerticalGrid(
@@ -140,6 +157,31 @@ fun getAllAnimals(
 
         }
 }
+
+fun getAllFavsAnimals(
+    db: FirebaseFirestore,
+    idsList: List<String>,
+    onAnimals: (List<Animal>) -> Unit
+) {
+    db.collection("animals")
+        .whereIn(FieldPath.documentId(), idsList)
+        .get()
+        .addOnSuccessListener { task ->
+            val animalsList = task.toObjects(Animal::class.java).map {
+                if (idsList.contains(it.key)) {
+                    it.copy(isFavourite = true)
+                } else {
+                    it
+                }
+            }
+            onAnimals(animalsList)
+
+        }
+        .addOnFailureListener {
+
+        }
+}
+
 
 fun getAllFavsIds(
     db: FirebaseFirestore,
