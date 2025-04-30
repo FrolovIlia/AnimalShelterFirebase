@@ -9,19 +9,19 @@ sealed class BottomMenuItem(
 ) {
     object Home : BottomMenuItem(
         route = "",
-        title = "Главная",
+        title = "",
         iconId = R.drawable.home_menu
     )
 
     object Favs : BottomMenuItem(
         route = "",
-        title = "Любимцы",
+        title = "",
         iconId = R.drawable.favourite_menu
     )
 
     object Settings : BottomMenuItem(
         route = "",
-        title = "Профиль",
+        title = "",
         iconId = R.drawable.profile_menu
     )
 }

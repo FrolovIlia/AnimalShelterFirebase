@@ -43,10 +43,9 @@ fun DrawerBody(
     onAdminClick: () -> Unit = {}
 ) {
     val categoriesList = listOf(
-        "О приюте",
-        "События и новости",
-        "Волонтёрство и\n поддержка",
-        "Профиль пользователя"
+        "Все",
+        "Котики",
+        "Собачки"
     )
 
     val isAdminState = remember {
