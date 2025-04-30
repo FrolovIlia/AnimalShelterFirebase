@@ -26,8 +26,8 @@ fun RoundedCornerDropDownMenu(
 
 ) {
     val expanded = remember { mutableStateOf(false) }
-    val selectedOption = remember { mutableStateOf("Дворянские") }
-    val categoriesList = listOf("Дворянские", "Породистые", "Метисы")
+    val selectedOption = remember { mutableStateOf("Собачки") }
+    val categoriesList = listOf("Собачки", "Котики", "Остальные")
 
 
     Box(

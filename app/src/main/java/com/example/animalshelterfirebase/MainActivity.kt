@@ -56,8 +56,12 @@ class MainActivity : ComponentActivity() {
 
                 composable<AddScreenObject> { navEntry ->
                     val navData = navEntry.toRoute<AddScreenObject>()
-
-                    AddAnimalScreen(navData)
+                    AddAnimalScreen(
+                        navData = navData,
+                        onSaved = {
+                            navController.popBackStack() // возвращение назад
+                        }
+                    )
                 }
             }
         }

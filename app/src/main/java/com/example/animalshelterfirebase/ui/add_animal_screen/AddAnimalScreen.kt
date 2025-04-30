@@ -40,6 +40,9 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
+
 @Preview(showBackground = true)
 @Composable
 fun AddAnimalScreen(
@@ -47,7 +50,9 @@ fun AddAnimalScreen(
     onSaved: () -> Unit = {}
 
 ) {
-    var selectedCategory = navData.category
+    val isLoading = remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var selectedCategory = remember { mutableStateOf(navData.category) }
     val name = remember {
         mutableStateOf(navData.name)
     }
@@ -101,6 +106,12 @@ fun AddAnimalScreen(
             fontFamily = FontFamily.Serif,
             fontSize = 25.sp
         )
+
+        if (isLoading.value) {
+            androidx.compose.material3.CircularProgressIndicator()
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         Spacer(modifier = Modifier.size(10.dp))
 
         Image(
@@ -115,7 +126,7 @@ fun AddAnimalScreen(
         Spacer(modifier = Modifier.size(10.dp))
 
         RoundedCornerDropDownMenu { selectedItem ->
-            selectedCategory = selectedItem
+            selectedCategory.value = selectedItem
         }
         Spacer(modifier = Modifier.size(10.dp))
 
@@ -143,30 +154,39 @@ fun AddAnimalScreen(
         ) {
             age.value = it
         }
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         ButtonWhite(text = "Выбрать изображение") {
             imageLauncher.launch("image/*")
         }
+        Spacer(modifier = Modifier.height(8.dp))
 
         ButtonWhite(text = "Сохранить") {
-            saveAnimalImage(
-                selectedImageUri.value!!,
-                storage,
-                firestore,
-                Animal(
-                    name = name.value,
-                    description = description.value,
-                    age = age.value,
-                    category = selectedCategory
-                ),
-                onSaved = {
-                    onSaved()
-                },
-                onError = {
-
-                }
-            )
+            val imageUri = selectedImageUri.value
+            if (imageUri != null) {
+                isLoading.value = true
+                saveAnimalImage(
+                    imageUri,
+                    storage,
+                    firestore,
+                    Animal(
+                        name = name.value,
+                        description = description.value,
+                        age = age.value,
+                        category = selectedCategory.value
+                    ),
+                    onSaved = {
+                        Toast.makeText(context, "Животное успешно добавлено", Toast.LENGTH_SHORT).show()
+                        onSaved() // вызовет popBackStack и вернёт на предыдущий экран
+                    },
+                    onError = {
+                        Toast.makeText(context, "Ошибка при сохранении", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            } else {
+                // Уведомление пользователю, что изображение не выбрано
+                Toast.makeText(context, "Выберите изображение", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
@@ -178,34 +198,37 @@ private fun saveAnimalImage(
     animal: Animal,
     onSaved: () -> Unit,
     onError: () -> Unit
-
-
 ) {
-
     val timeStamp = System.currentTimeMillis()
-    val storageRef = storage.reference
+    val imageRef = storage.reference
         .child("animal_images")
         .child("image_$timeStamp.jpg")
-    val uploadTask = storageRef.putFile(uri)
-    uploadTask.addOnSuccessListener {
-        storageRef.downloadUrl.addOnCompleteListener { url ->
-            saveAnimalToFireStore(
-                firestore,
-                url.toString(),
-                animal,
-                onSaved = {
-                    onSaved()
-                },
-                onError = {
+
+    // Загружаем изображение
+    imageRef.putFile(uri)
+        .addOnSuccessListener {
+            // Получаем ССЫЛКУ на файл
+            imageRef.downloadUrl
+                .addOnSuccessListener { downloadUri ->
+                    // Используем реальный URI
+                    val imageUrl = downloadUri.toString()
+
+                    saveAnimalToFireStore(
+                        firestore,
+                        imageUrl,
+                        animal,
+                        onSaved,
+                        onError
+                    )
+                }
+                .addOnFailureListener {
                     onError()
                 }
-
-            )
-
         }
-    }
+        .addOnFailureListener {
+            onError()
+        }
 }
-
 
 private fun saveAnimalToFireStore(
     firestore: FirebaseFirestore,
@@ -216,13 +239,9 @@ private fun saveAnimalToFireStore(
 ) {
     val db = firestore.collection("animals")
     val key = db.document().id
+
     db.document(key)
-        .set(
-            animal.copy(
-                key = key,
-                imageUrl = url
-            )
-        )
+        .set(animal.copy(key = key, imageUrl = url))
         .addOnSuccessListener {
             onSaved()
         }
