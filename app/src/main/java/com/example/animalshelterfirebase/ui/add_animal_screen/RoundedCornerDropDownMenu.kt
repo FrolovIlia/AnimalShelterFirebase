@@ -22,12 +22,17 @@ import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 @Composable
 fun RoundedCornerDropDownMenu(
+    defCategory: String,
     onOptionSelected: (String) -> Unit
 
 ) {
     val expanded = remember { mutableStateOf(false) }
-    val selectedOption = remember { mutableStateOf("Собачки") }
-    val categoriesList = listOf("Собачки", "Котики", "Остальные")
+    val selectedOption = remember { mutableStateOf(defCategory) }
+    val categoriesList = listOf(
+        "Собачки",
+        "Котики",
+        "Остальные"
+    )
 
 
     Box(
