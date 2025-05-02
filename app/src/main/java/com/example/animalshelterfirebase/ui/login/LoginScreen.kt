@@ -1,6 +1,7 @@
 package com.example.animalshelterfirebase.ui.login
 
-import android.util.Log
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,10 +35,13 @@ fun LoginScreen(
     onNavigateToMainScreen: (MainScreenDataObject) -> Unit
 ) {
     val auth = remember { Firebase.auth }
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("auth_prefs", Context.MODE_PRIVATE) }
+
 
     val errorState = remember { mutableStateOf("") }
-    val emailState = remember { mutableStateOf("") }
-    val passwordState = remember { mutableStateOf("") }
+    val emailState = remember { mutableStateOf(prefs.getString("email", "") ?: "") }
+    val passwordState = remember { mutableStateOf(prefs.getString("password", "") ?: "") }
 
     // Управление статус баром
     val systemUiController = rememberSystemUiController()
@@ -127,10 +131,19 @@ fun LoginScreen(
                     auth,
                     emailState.value,
                     passwordState.value,
-                    onSignInSuccess = { navData -> onNavigateToMainScreen(navData) },
+                    onSignInSuccess = { navData ->
+                        // Сохраняем email и пароль
+                        with(prefs.edit()) {
+                            putString("email", emailState.value)
+                            putString("password", passwordState.value)
+                            apply()
+                        }
+                        onNavigateToMainScreen(navData)
+                    },
                     onSignInFailure = { errorState.value = it }
                 )
             }
+
 
             Spacer(modifier = Modifier.height(8.dp))
 
