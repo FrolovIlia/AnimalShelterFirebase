@@ -87,6 +87,7 @@ fun MainScreen(
                 BottomMenu(
                     onFavsClick = {
                         getAllFavsIds(db, navData.uid) { favs ->
+                            //Разница в том, что здесь получаем только избранных животных
                             getAllFavsAnimals(db, favs) { animal ->
                                 animalsListState.value = animal
                             }
@@ -103,10 +104,6 @@ fun MainScreen(
                 )
             }
         ) { paddingValues ->
-
-            //Экспериментальный блок
-
-
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -130,7 +127,7 @@ fun MainScreen(
                                         Favourite(anim.key),
                                         !anim.isFavourite
                                     )
-                                    anim.copy(isFavourite = true)
+                                    anim.copy(isFavourite = !anim.isFavourite)
                                 } else {
                                     anim
                                 }

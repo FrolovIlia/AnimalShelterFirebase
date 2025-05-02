@@ -101,7 +101,11 @@ fun AnimalListItemUI(
             }) {
                 Image(
                     painter = painterResource(
-                        id = if (animal.isFavourite) R.drawable.favourite else R.drawable.favourite_border
+                        if (animal.isFavourite) {
+                            R.drawable.favourite
+                        } else {
+                            R.drawable.favourite_border
+                        }
                     ),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)

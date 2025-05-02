@@ -40,10 +40,10 @@ fun BottomMenu(
                         contentDescription = null
                     )
                 },
-//                label = {
-//                    Text(text = item.title)
-//
-//                }
+                label = {
+                    Text(text = item.title)
+
+                }
             )
         }
     }
