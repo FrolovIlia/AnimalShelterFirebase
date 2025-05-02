@@ -3,10 +3,8 @@ package com.example.animalshelterfirebase.ui.main_screen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.DrawerValue
@@ -15,11 +13,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
@@ -29,7 +28,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.launch
-
 
 @Composable
 fun MainScreen(
@@ -52,14 +50,15 @@ fun MainScreen(
         Firebase.firestore
     }
 
+    // Состояние текущей вкладки: false = Все, true = Избранные
+    var isFavoritesOnly by remember { mutableStateOf(false) }
+
+    // При старте сразу грузим все животные:
     LaunchedEffect(Unit) {
-        getAllFavsIds(db, navData.uid) { favs ->
-            getAllAnimals(db, favs) { animal ->
-                animalsListState.value = animal
-            }
+        loadAllAnimals(db, navData.uid) { list ->
+            animalsListState.value = list
         }
     }
-
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -72,7 +71,6 @@ fun MainScreen(
                         isAdminState.value = isAdmin
                     }
                 ) {
-                    //если нужно чтобы боковая панель всегда сворачивалась - раскомментировать
                     coroutineScope.launch {
                         drawerState.close()
                     }
@@ -85,22 +83,22 @@ fun MainScreen(
             modifier = Modifier.fillMaxSize(),
             bottomBar = {
                 BottomMenu(
-                    onFavsClick = {
-                        getAllFavsIds(db, navData.uid) { favs ->
-                            //Разница в том, что здесь получаем только избранных животных
-                            getAllFavsAnimals(db, favs) { animal ->
-                                animalsListState.value = animal
-                            }
+                    isFavoritesOnly = isFavoritesOnly,        // Прокидываем состояние
+                    onHomeClick = {
+                        isFavoritesOnly = false               // Переключаем вкладку на "Все"
+                        loadAllAnimals(db, navData.uid) { list ->
+                            animalsListState.value = list
                         }
                     },
-                    onHomeClick = {
-                        getAllFavsIds(db, navData.uid) { favs ->
-                            getAllAnimals(db, favs) { animal ->
-                                animalsListState.value = animal
-                            }
+                    onFavsClick = {
+                        isFavoritesOnly = true                // Переключаем вкладку на "Избранные"
+                        loadFavsAnimals(db, navData.uid) { list ->
+                            animalsListState.value = list
                         }
+                    },
+                    onProfile = {
+                        // Логика для кнопки "Профиль", если необходимо
                     }
-
                 )
             }
         ) { paddingValues ->
@@ -140,6 +138,21 @@ fun MainScreen(
     }
 }
 
+// Функция для загрузки всех животных
+private fun loadAllAnimals(db: FirebaseFirestore, uid: String, onResult: (List<Animal>) -> Unit) {
+    getAllFavsIds(db, uid) { favs ->
+        getAllAnimals(db, favs, onResult)
+    }
+}
+
+// Функция для загрузки только избранных животных
+private fun loadFavsAnimals(db: FirebaseFirestore, uid: String, onResult: (List<Animal>) -> Unit) {
+    getAllFavsIds(db, uid) { favs ->
+        getAllFavsAnimals(db, favs, onResult)
+    }
+}
+
+// Функции для получения животных и избранных животных, которые остаются такими же
 fun getAllAnimals(
     db: FirebaseFirestore,
     idsList: List<String>,
@@ -156,7 +169,6 @@ fun getAllAnimals(
                 }
             }
             onAnimals(animalsList)
-
         }
         .addOnFailureListener {
 
@@ -180,13 +192,11 @@ fun getAllFavsAnimals(
                 }
             }
             onAnimals(animalsList)
-
         }
         .addOnFailureListener {
 
         }
 }
-
 
 fun getAllFavsIds(
     db: FirebaseFirestore,
@@ -205,7 +215,6 @@ fun getAllFavsIds(
             }
             onFavs(keysList)
         }
-
 }
 
 private fun onFavs(
