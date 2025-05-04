@@ -1,9 +1,12 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,9 +31,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.data.Animal
+import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
 
 @Composable
 fun AnimalListItemUI(
@@ -42,22 +47,44 @@ fun AnimalListItemUI(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(
-                start = 8.dp,
-                top = 8.dp,
-                end = 8.dp,
-                bottom = 8.dp
-            )
+            .padding(8.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .background(BackgroundWhite)
     ) {
-        AsyncImage(
-            model = animal.imageUrl,
-            contentDescription = "",
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(170.dp)
-                .clip(RoundedCornerShape(15.dp)),
-            contentScale = ContentScale.Crop
-        )
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(130.dp)
+        ) {
+            AsyncImage(
+                model = animal.imageUrl,
+                contentDescription = "",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(15.dp)),
+                contentScale = ContentScale.Crop
+            )
+
+            IconButton(
+                onClick = onFavouriteClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(24.dp)
+                    .zIndex(1f) // чтобы быть поверх изображения
+            ) {
+                Image(
+                    painter = painterResource(
+                        if (animal.isFavourite) {
+                            R.drawable.favourite
+                        } else {
+                            R.drawable.favourite_border
+                        }
+                    ),
+                    contentDescription = "Favorite icon"
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(10.dp))
 
         Text(
@@ -66,6 +93,7 @@ fun AnimalListItemUI(
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )
+
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
@@ -75,6 +103,7 @@ fun AnimalListItemUI(
             maxLines = 3,
             overflow = TextOverflow.Ellipsis
         )
+
         Spacer(modifier = Modifier.height(5.dp))
 
         Row(
@@ -83,33 +112,16 @@ fun AnimalListItemUI(
         ) {
             Text(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .weight(1f),
                 text = animal.age,
                 color = Color.Blue,
                 fontSize = 18.sp
             )
 
-            if (showEditButton) IconButton(onClick = {
-                onEditClick(animal)
-            }) {
-                Icon(Icons.Default.Edit, contentDescription = "")
-            }
-
-            IconButton(onClick = {
-                onFavouriteClick()
-            }) {
-                Image(
-                    painter = painterResource(
-                        if (animal.isFavourite) {
-                            R.drawable.favourite
-                        } else {
-                            R.drawable.favourite_border
-                        }
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
+            if (showEditButton) {
+                IconButton(onClick = { onEditClick(animal) }) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                }
             }
         }
     }

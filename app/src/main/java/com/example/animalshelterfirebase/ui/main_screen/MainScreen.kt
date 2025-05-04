@@ -1,6 +1,7 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,6 +43,8 @@ import com.example.animalshelterfirebase.data.AnimalCategories
 import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
+import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
+import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
