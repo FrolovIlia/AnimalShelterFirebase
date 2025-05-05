@@ -73,6 +73,10 @@ fun MainScreen(
         Firebase.firestore
     }
 
+    // LazyRow — фиксированная категория
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
+
+
     // Состояние текущей вкладки: false = Все, true = Избранные
     var isFavoritesOnly by remember { mutableStateOf(false) }
 
@@ -85,10 +89,11 @@ fun MainScreen(
     )
 
 
-    // При старте сразу грузим все животные:
     LaunchedEffect(Unit) {
-        loadAllAnimals(db, navData.uid) { list ->
-            animalsListState.value = list
+        getAllFavsIds(db, navData.uid) { favs ->
+            getAllAnimals(db, favs, category = "Все") { animals ->
+                animalsListState.value = animals
+            }
         }
     }
 
@@ -101,13 +106,32 @@ fun MainScreen(
                 DrawerBody(
                     onAdmin = { isAdmin ->
                         isAdminState.value = isAdmin
+                    },
+                    onFavClick = {
+                        isFavoritesOnly = true
+                        loadFavsAnimals(db, navData.uid) { list ->
+                            animalsListState.value = list
+                        }
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
+                    },
+                    onAdminClick = {
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
+                        onAdminClick()
+                    },
+                    onCategoryClick = { category ->
+                        getAllFavsIds(db, navData.uid) { favs ->
+                            getAllAnimals(db, favs, category) { animals ->
+                                animalsListState.value = animals
+
+                            }
+                        }
                     }
-                ) {
-                    coroutineScope.launch {
-                        drawerState.close()
-                    }
-                    onAdminClick()
-                }
+
+                )
             }
         }
     ) {
@@ -118,8 +142,11 @@ fun MainScreen(
                     isFavoritesOnly = isFavoritesOnly,
                     onHomeClick = {
                         isFavoritesOnly = false
-                        loadAllAnimals(db, navData.uid) { list ->
-                            animalsListState.value = list
+                        selectedCategory = "Все" // если используешь выделение
+                        getAllFavsIds(db, navData.uid) { favs ->
+                            getAllAnimals(db, favs, category = "Все") { animals ->
+                                animalsListState.value = animals
+                            }
                         }
                     },
                     onFavsClick = {
@@ -139,8 +166,6 @@ fun MainScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // LazyRow — фиксированная категория
-                var selectedCategory by remember { mutableStateOf<String?>(null) }
 
                 LazyRow(
                     modifier = Modifier
@@ -155,7 +180,15 @@ fun MainScreen(
                             modifier = Modifier
                                 .height(52.dp),
                             shape = RoundedCornerShape(30.dp),
-                            onClick = { selectedCategory = category.categoryName }
+                            onClick = {
+                                selectedCategory = category.categoryName
+
+                                getAllFavsIds(db, navData.uid) { favs ->
+                                    getAllAnimals(db, favs, category.categoryName) { animals ->
+                                        animalsListState.value = animals
+                                    }
+                                }
+                            }
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -219,11 +252,14 @@ fun MainScreen(
 }
 
 // Функция для загрузки всех животных
-private fun loadAllAnimals(db: FirebaseFirestore, uid: String, onResult: (List<Animal>) -> Unit) {
-    getAllFavsIds(db, uid) { favs ->
-        getAllAnimals(db, favs, onResult)
-    }
-}
+//private fun loadAllAnimals(
+//    db: FirebaseFirestore,
+//    uid: String, onResult: (List<Animal>) -> Unit
+//) {
+//    getAllFavsIds(db, uid) { favs ->
+//        getAllAnimals(db, favs, category = "Котики", onResult)
+//    }
+//}
 
 // Функция для загрузки только избранных животных
 private fun loadFavsAnimals(db: FirebaseFirestore, uid: String, onResult: (List<Animal>) -> Unit) {
@@ -236,10 +272,18 @@ private fun loadFavsAnimals(db: FirebaseFirestore, uid: String, onResult: (List<
 fun getAllAnimals(
     db: FirebaseFirestore,
     idsList: List<String>,
+    category: String,
     onAnimals: (List<Animal>) -> Unit
 ) {
-    db.collection("animals")
-        .get()
+    val collection = db.collection("animals")
+
+    val query = if (category == "Все") {
+        collection // без фильтра
+    } else {
+        collection.whereEqualTo("category", category)
+    }
+
+    query.get()
         .addOnSuccessListener { task ->
             val animalsList = task.toObjects(Animal::class.java).map {
                 if (idsList.contains(it.key)) {
@@ -251,7 +295,7 @@ fun getAllAnimals(
             onAnimals(animalsList)
         }
         .addOnFailureListener {
-
+            // обработка ошибки при необходимости
         }
 }
 

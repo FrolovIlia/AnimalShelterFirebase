@@ -19,7 +19,7 @@ fun BottomMenu(
             icon = {
                 Icon(
                     painter = painterResource(id = R.drawable.home_menu),
-                    contentDescription = "Все"
+                    contentDescription = "Домашний экран"
                 )
             },
             selected = !isFavoritesOnly,
