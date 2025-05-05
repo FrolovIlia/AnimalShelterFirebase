@@ -1,5 +1,6 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,7 @@ import com.example.animalshelterfirebase.data.AnimalCategories
 import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
+import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
 import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
 import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
@@ -50,6 +52,7 @@ import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.launch
 
 @Composable
@@ -64,6 +67,8 @@ fun MainScreen(
     val animalsListState = remember {
         mutableStateOf(emptyList<Animal>())
     }
+
+    val selectedBottomItemState = remember { mutableStateOf(BottomMenuItem.Home.title) }
 
     val isAdminState = remember {
         mutableStateOf(false)
@@ -129,8 +134,10 @@ fun MainScreen(
 
                             }
                         }
+                        coroutineScope.launch {
+                            drawerState.close()
+                        }
                     }
-
                 )
             }
         }
@@ -157,6 +164,7 @@ fun MainScreen(
                     },
                     onProfile = {
                         // Логика для кнопки "Профиль", если необходимо
+
                     }
                 )
             }
@@ -230,16 +238,26 @@ fun MainScreen(
                                 onAnimalEditClick(it)
                             },
                             onFavouriteClick = {
+                                val wasFavourite = animal.isFavourite
+
                                 animalsListState.value = animalsListState.value.map { anim ->
                                     if (anim.key == animal.key) {
                                         onFavs(
                                             db,
                                             navData.uid,
                                             Favourite(anim.key),
-                                            !anim.isFavourite
+                                            !wasFavourite
                                         )
-                                        anim.copy(isFavourite = !anim.isFavourite)
-                                    } else anim
+                                        anim.copy(isFavourite = !wasFavourite)
+                                    } else {
+                                        anim
+                                    }
+                                }
+
+                                // Обновляем список только если сейчас отображаются избранные
+                                if (isFavoritesOnly) {
+                                    animalsListState.value =
+                                        animalsListState.value.filter { it.isFavourite }
                                 }
                             }
                         )
@@ -247,19 +265,9 @@ fun MainScreen(
                 }
             }
         }
-
     }
 }
 
-// Функция для загрузки всех животных
-//private fun loadAllAnimals(
-//    db: FirebaseFirestore,
-//    uid: String, onResult: (List<Animal>) -> Unit
-//) {
-//    getAllFavsIds(db, uid) { favs ->
-//        getAllAnimals(db, favs, category = "Котики", onResult)
-//    }
-//}
 
 // Функция для загрузки только избранных животных
 private fun loadFavsAnimals(db: FirebaseFirestore, uid: String, onResult: (List<Animal>) -> Unit) {
