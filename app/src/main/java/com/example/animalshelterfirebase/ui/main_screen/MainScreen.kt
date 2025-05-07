@@ -1,8 +1,7 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
-import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,7 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -45,15 +43,15 @@ import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
-import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
-import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
+
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.currentCoroutineContext
+
 import kotlinx.coroutines.launch
+
 
 @Composable
 fun MainScreen(
@@ -73,6 +71,11 @@ fun MainScreen(
     val isAdminState = remember {
         mutableStateOf(false)
     }
+
+    val isFavListEmptyState = remember {
+        mutableStateOf(false)
+    }
+
 
     val db = remember {
         Firebase.firestore
@@ -128,16 +131,17 @@ fun MainScreen(
                         onAdminClick()
                     },
                     onCategoryClick = { category ->
+                        isFavoritesOnly = false // <--- ВАЖНО
                         getAllFavsIds(db, navData.uid) { favs ->
                             getAllAnimals(db, favs, category) { animals ->
                                 animalsListState.value = animals
-
                             }
                         }
                         coroutineScope.launch {
                             drawerState.close()
                         }
                     }
+
                 )
             }
         }
@@ -225,44 +229,50 @@ fun MainScreen(
                 }
 
                 // LazyVerticalGrid — скроллится отдельно
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    items(animalsListState.value) { animal ->
-                        AnimalListItemUI(
-                            isAdminState.value,
-                            animal,
-                            onEditClick = {
-                                onAnimalEditClick(it)
-                            },
-                            onFavouriteClick = {
-                                val wasFavourite = animal.isFavourite
+                if (animalsListState.value.isEmpty()) {
+                    EmptyStateScreen()
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        items(animalsListState.value) { animal ->
+                            AnimalListItemUI(
+                                isAdminState.value,
+                                animal,
+                                onEditClick = {
+                                    onAnimalEditClick(it)
+                                },
+                                onFavouriteClick = {
+                                    val wasFavourite = animal.isFavourite
 
-                                animalsListState.value = animalsListState.value.map { anim ->
-                                    if (anim.key == animal.key) {
-                                        onFavs(
-                                            db,
-                                            navData.uid,
-                                            Favourite(anim.key),
-                                            !wasFavourite
-                                        )
-                                        anim.copy(isFavourite = !wasFavourite)
-                                    } else {
-                                        anim
+                                    // Обновляем список животных, включая новое значение isFavourite
+                                    animalsListState.value = animalsListState.value.map { anim ->
+                                        if (anim.key == animal.key) {
+                                            onFavs(
+                                                db,
+                                                navData.uid,
+                                                Favourite(anim.key),
+                                                !wasFavourite
+                                            )
+                                            anim.copy(isFavourite = !wasFavourite)
+                                        } else {
+                                            anim
+                                        }
+                                    }
+
+                                    // Важно: фильтровать нужно только если реально в режиме "Избранные"
+                                    if (isFavoritesOnly) {
+                                        animalsListState.value =
+                                            animalsListState.value.filter { it.isFavourite }
                                     }
                                 }
-
-                                // Обновляем список только если сейчас отображаются избранные
-                                if (isFavoritesOnly) {
-                                    animalsListState.value =
-                                        animalsListState.value.filter { it.isFavourite }
-                                }
-                            }
-                        )
+                            )
+                        }
                     }
                 }
+
             }
         }
     }
@@ -312,22 +322,29 @@ fun getAllFavsAnimals(
     idsList: List<String>,
     onAnimals: (List<Animal>) -> Unit
 ) {
-    db.collection("animals")
-        .whereIn(FieldPath.documentId(), idsList)
-        .get()
-        .addOnSuccessListener { task ->
-            val animalsList = task.toObjects(Animal::class.java).map {
-                if (idsList.contains(it.key)) {
-                    it.copy(isFavourite = true)
-                } else {
-                    it
-                }
-            }
-            onAnimals(animalsList)
-        }
-        .addOnFailureListener {
+    if (idsList.isNotEmpty()) {
 
-        }
+
+        db.collection("animals")
+            .whereIn(FieldPath.documentId(), idsList)
+            .get()
+            .addOnSuccessListener { task ->
+                val animalsList = task.toObjects(Animal::class.java).map {
+                    if (idsList.contains(it.key)) {
+                        it.copy(isFavourite = true)
+                    } else {
+                        it
+                    }
+                }
+                onAnimals(animalsList)
+            }
+            .addOnFailureListener {
+
+            }
+
+    } else {
+        onAnimals(emptyList())
+    }
 }
 
 fun getAllFavsIds(
@@ -369,3 +386,4 @@ private fun onFavs(
             .delete()
     }
 }
+
