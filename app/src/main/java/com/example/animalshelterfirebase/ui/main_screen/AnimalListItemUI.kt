@@ -51,9 +51,10 @@ fun AnimalListItemUI(
             .clip(RoundedCornerShape(15.dp))
             .background(BackgroundWhite)
     ) {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(130.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(130.dp)
         ) {
             AsyncImage(
                 model = animal.imageUrl,
@@ -70,7 +71,7 @@ fun AnimalListItemUI(
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
                     .size(24.dp)
-                    .zIndex(1f) // чтобы быть поверх изображения
+                    .zIndex(1f)
             ) {
                 Image(
                     painter = painterResource(
@@ -83,46 +84,58 @@ fun AnimalListItemUI(
                     contentDescription = "Favorite icon"
                 )
             }
+
+            if (showEditButton) {
+                IconButton(
+                    onClick = { onEditClick(animal) },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                        .zIndex(1f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = Color.Black
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Text(
-            text = animal.name,
-            color = Color.Black,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.sp
-        )
+        Column(modifier = Modifier.padding(8.dp)) {
 
-        Spacer(modifier = Modifier.height(5.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = animal.name,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.weight(1f)
+                )
 
-        Text(
-            text = animal.description,
-            color = Color.Gray,
-            fontSize = 16.sp,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis
-        )
-
-        Spacer(modifier = Modifier.height(5.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                modifier = Modifier
-                    .weight(1f),
-                text = animal.age,
-                color = Color.Blue,
-                fontSize = 18.sp
-            )
-
-            if (showEditButton) {
-                IconButton(onClick = { onEditClick(animal) }) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
-                }
+                Text(
+                    text = animal.age,
+                    color = Color.LightGray,
+                    fontSize = 16.sp
+                )
             }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = animal.description,
+                color = Color.Gray,
+                fontSize = 14.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

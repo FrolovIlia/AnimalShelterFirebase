@@ -1,6 +1,7 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,7 +43,7 @@ import com.example.animalshelterfirebase.data.AnimalCategories
 import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
-import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
+import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
 import com.google.firebase.firestore.FieldPath
@@ -66,26 +67,17 @@ fun MainScreen(
         mutableStateOf(emptyList<Animal>())
     }
 
-    val selectedBottomItemState = remember { mutableStateOf(BottomMenuItem.Home.title) }
-
     val isAdminState = remember {
         mutableStateOf(false)
     }
-
-    val isFavListEmptyState = remember {
-        mutableStateOf(false)
-    }
-
 
     val db = remember {
         Firebase.firestore
     }
 
-    // LazyRow — фиксированная категория
     var selectedCategory by remember { mutableStateOf<String?>(null) }
 
 
-    // Состояние текущей вкладки: false = Все, true = Избранные
     var isFavoritesOnly by remember { mutableStateOf(false) }
 
 
@@ -176,6 +168,7 @@ fun MainScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(BackgroundGray)
                     .padding(paddingValues)
             ) {
 
