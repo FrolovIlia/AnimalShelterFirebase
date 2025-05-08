@@ -63,34 +63,17 @@ fun MainScreen(
     onAnimalEditClick: (Animal) -> Unit,
     onAdminClick: () -> Unit
 ) {
-    val drawerState = rememberDrawerState(DrawerValue.Open)
-    val coroutineScope = rememberCoroutineScope()
-
-    val animalsListState = remember {
-        mutableStateOf(emptyList<Animal>())
-    }
-
-    val isAdminState = remember {
-        mutableStateOf(false)
-    }
-
-    val db = remember {
-        Firebase.firestore
-    }
-
+    val animalsListState = remember { mutableStateOf(emptyList<Animal>()) }
+    val isAdminState = remember { mutableStateOf(false) }
+    val db = remember { Firebase.firestore }
     var selectedCategory by remember { mutableStateOf<String?>(null) }
-
-
     var isFavoritesOnly by remember { mutableStateOf(false) }
 
-
-    // Создаём список категорий
     val categories = listOf(
         AnimalCategories(R.drawable.ic_all_animals, "Все"),
         AnimalCategories(R.drawable.ic_cats, "Котики"),
         AnimalCategories(R.drawable.ic_dogs, "Собачки")
     )
-
 
     LaunchedEffect(Unit) {
         getAllFavsIds(db, navData.uid) { favs ->
@@ -100,200 +83,136 @@ fun MainScreen(
         }
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        modifier = Modifier.fillMaxWidth(),
-        drawerContent = {
-            Column(Modifier.fillMaxWidth(0.7f)) {
-                DrawerHeader(navData.email)
-                DrawerBody(
-                    onAdmin = { isAdmin ->
-                        isAdminState.value = isAdmin
-                    },
-                    onFavClick = {
-                        isFavoritesOnly = true
-                        loadFavsAnimals(db, navData.uid) { list ->
-                            animalsListState.value = list
-                        }
-                        coroutineScope.launch {
-                            drawerState.close()
-                        }
-                    },
-                    onAdminClick = {
-                        coroutineScope.launch {
-                            drawerState.close()
-                        }
-                        onAdminClick()
-                    },
-                    onCategoryClick = { category ->
-                        isFavoritesOnly = false
-                        getAllFavsIds(db, navData.uid) { favs ->
-                            getAllAnimals(db, favs, category) { animals ->
-                                animalsListState.value = animals
-                            }
-                        }
-                        coroutineScope.launch {
-                            drawerState.close()
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            BottomMenu(
+                isFavoritesOnly = isFavoritesOnly,
+                onHomeClick = {
+                    isFavoritesOnly = false
+                    selectedCategory = "Все"
+                    getAllFavsIds(db, navData.uid) { favs ->
+                        getAllAnimals(db, favs, category = "Все") { animals ->
+                            animalsListState.value = animals
                         }
                     }
-
-                )
-            }
+                },
+                onFavsClick = {
+                    isFavoritesOnly = true
+                    loadFavsAnimals(db, navData.uid) { list ->
+                        animalsListState.value = list
+                    }
+                },
+                onProfile = {
+                    // логика профиля (если нужна)
+                }
+            )
         }
-    ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            bottomBar = {
-                BottomMenu(
-                    isFavoritesOnly = isFavoritesOnly,
-                    onHomeClick = {
-                        isFavoritesOnly = false
-                        selectedCategory = "Все"
-                        getAllFavsIds(db, navData.uid) { favs ->
-                            getAllAnimals(db, favs, category = "Все") { animals ->
-                                animalsListState.value = animals
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(BackgroundGray)
+                .padding(paddingValues)
+        ) {
+            if (isAdminState.value) {
+                Button(
+                    onClick = { onAdminClick() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp),
+                    colors = ButtonDefaults.buttonColors(ButtonColorBlue)
+                ) {
+                    Text(text = "Добавить животное")
+                }
+            }
+
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp)
+            ) {
+                items(categories) { category ->
+                    Card(
+                        modifier = Modifier.height(52.dp),
+                        shape = RoundedCornerShape(30.dp),
+                        onClick = {
+                            selectedCategory = category.categoryName
+                            getAllFavsIds(db, navData.uid) { favs ->
+                                getAllAnimals(db, favs, category.categoryName) { animals ->
+                                    animalsListState.value = animals
+                                }
                             }
                         }
-                    },
-                    onFavsClick = {
-                        isFavoritesOnly = true
-                        loadFavsAnimals(db, navData.uid) { list ->
-                            animalsListState.value = list
-                        }
-                    },
-                    onProfile = {
-                        // Логика для кнопки "Профиль", если необходимо
-
-                    }
-                )
-            }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(BackgroundGray)
-                    .padding(paddingValues)
-            ) {
-                if (isAdminState.value) {
-                    Button(
-                        onClick = {
-                            onAdminClick()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(5.dp),
-                        colors = ButtonDefaults.buttonColors(ButtonColorBlue)
                     ) {
-                        Text(
-                            text = "Добавить животное"
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 12.dp)
+                        ) {
+                            Image(
+                                painter = painterResource(id = category.imageCategory),
+                                contentDescription = category.categoryName,
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .height(40.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .padding(end = 8.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                            Text(text = category.categoryName, color = TextSecondary)
+                        }
+                    }
+                }
+            }
+
+            if (animalsListState.value.isEmpty()) {
+                EmptyStateScreen()
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(animalsListState.value) { animal ->
+                        AnimalListItemUI(
+                            isAdminState.value,
+                            animal,
+                            onEditClick = { onAnimalEditClick(it) },
+                            onFavouriteClick = {
+                                val wasFavourite = animal.isFavourite
+                                val updatedFavourite = !wasFavourite
+
+                                onFavs(
+                                    db = db,
+                                    uid = navData.uid,
+                                    favourite = Favourite(animal.key),
+                                    isFav = updatedFavourite
+                                )
+
+                                animalsListState.value = animalsListState.value.map { current ->
+                                    if (current.key == animal.key) {
+                                        current.copy(isFavourite = updatedFavourite)
+                                    } else current
+                                }
+
+                                if (isFavoritesOnly) {
+                                    loadFavsAnimals(db, navData.uid) { updatedList ->
+                                        animalsListState.value = updatedList
+                                    }
+                                }
+                            }
                         )
                     }
                 }
-
-
-
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(horizontal = 16.dp)
-                ) {
-                    items(categories) { category ->
-
-                        Card(
-                            modifier = Modifier
-                                .height(52.dp),
-                            shape = RoundedCornerShape(30.dp),
-                            onClick = {
-                                selectedCategory = category.categoryName
-
-                                getAllFavsIds(db, navData.uid) { favs ->
-                                    getAllAnimals(db, favs, category.categoryName) { animals ->
-                                        animalsListState.value = animals
-                                    }
-                                }
-                            }
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 12.dp)
-                            ) {
-                                Image(
-                                    painter = painterResource(id = category.imageCategory),
-                                    contentDescription = category.categoryName,
-                                    modifier = Modifier
-                                        .width(40.dp)
-                                        .height(40.dp)
-                                        .clip(RoundedCornerShape(20.dp))
-                                        .padding(end = 8.dp),
-                                    contentScale = ContentScale.Crop
-                                )
-                                Text(
-                                    text = category.categoryName,
-                                    color = TextSecondary
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // LazyVerticalGrid — скроллится отдельно
-                if (animalsListState.value.isEmpty()) {
-                    EmptyStateScreen()
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxSize()
-                    ) {
-                        items(animalsListState.value) { animal ->
-                            AnimalListItemUI(
-                                isAdminState.value,
-                                animal,
-                                onEditClick = {
-                                    onAnimalEditClick(it)
-                                },
-                                onFavouriteClick = {
-                                    val wasFavourite = animal.isFavourite
-                                    val updatedFavourite = !wasFavourite
-
-                                    onFavs(
-                                        db = db,
-                                        uid = navData.uid,
-                                        favourite = Favourite(animal.key),
-                                        isFav = updatedFavourite
-                                    )
-
-
-                                    animalsListState.value = animalsListState.value.map { currentAnimal ->
-                                        if (currentAnimal.key == animal.key) {
-                                            currentAnimal.copy(isFavourite = updatedFavourite)
-                                        } else {
-                                            currentAnimal
-                                        }
-                                    }
-
-                                    if (isFavoritesOnly) {
-                                        loadFavsAnimals(db, navData.uid) { updatedList ->
-                                            animalsListState.value = updatedList
-                                        }
-                                    }
-                                }
-
-
-                            )
-                        }
-                    }
-                }
-
             }
         }
     }
 }
+
 
 
 // Функция для загрузки только избранных животных
