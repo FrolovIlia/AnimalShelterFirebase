@@ -239,28 +239,32 @@ fun MainScreen(
                                 },
                                 onFavouriteClick = {
                                     val wasFavourite = animal.isFavourite
+                                    val updatedFavourite = !wasFavourite
 
-                                    // Обновляем список животных, включая новое значение isFavourite
-                                    animalsListState.value = animalsListState.value.map { anim ->
-                                        if (anim.key == animal.key) {
-                                            onFavs(
-                                                db,
-                                                navData.uid,
-                                                Favourite(anim.key),
-                                                !wasFavourite
-                                            )
-                                            anim.copy(isFavourite = !wasFavourite)
+                                    onFavs(
+                                        db = db,
+                                        uid = navData.uid,
+                                        favourite = Favourite(animal.key),
+                                        isFav = updatedFavourite
+                                    )
+
+
+                                    animalsListState.value = animalsListState.value.map { currentAnimal ->
+                                        if (currentAnimal.key == animal.key) {
+                                            currentAnimal.copy(isFavourite = updatedFavourite)
                                         } else {
-                                            anim
+                                            currentAnimal
                                         }
                                     }
 
-                                    // Важно: фильтровать нужно только если реально в режиме "Избранные"
                                     if (isFavoritesOnly) {
-                                        animalsListState.value =
-                                            animalsListState.value.filter { it.isFavourite }
+                                        loadFavsAnimals(db, navData.uid) { updatedList ->
+                                            animalsListState.value = updatedList
+                                        }
                                     }
                                 }
+
+
                             )
                         }
                     }
