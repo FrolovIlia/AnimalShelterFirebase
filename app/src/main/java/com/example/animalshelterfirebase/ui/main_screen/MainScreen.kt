@@ -2,6 +2,7 @@ package com.example.animalshelterfirebase.ui.main_screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,17 +22,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.CardDefaults
+
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberDrawerState
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,8 +54,6 @@ import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -135,17 +134,23 @@ fun MainScreen(
                 contentPadding = PaddingValues(horizontal = 16.dp)
             ) {
                 items(categories) { category ->
+                    val isSelected = selectedCategory == category.categoryName
+
                     Card(
-                        modifier = Modifier.height(52.dp),
-                        shape = RoundedCornerShape(30.dp),
-                        onClick = {
-                            selectedCategory = category.categoryName
-                            getAllFavsIds(db, navData.uid) { favs ->
-                                getAllAnimals(db, favs, category.categoryName) { animals ->
-                                    animalsListState.value = animals
+                        modifier = Modifier
+                            .height(52.dp)
+                            .clickable {
+                                selectedCategory = category.categoryName
+                                getAllFavsIds(db, navData.uid) { favs ->
+                                    getAllAnimals(db, favs, category.categoryName) { animals ->
+                                        animalsListState.value = animals
+                                    }
                                 }
-                            }
-                        }
+                            },
+                        shape = RoundedCornerShape(30.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected) ButtonColorBlue else androidx.compose.material3.MaterialTheme.colorScheme.surface
+                        )
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -164,11 +169,15 @@ fun MainScreen(
                                     .padding(end = 8.dp),
                                 contentScale = ContentScale.Crop
                             )
-                            Text(text = category.categoryName, color = TextSecondary)
+                            Text(
+                                text = category.categoryName,
+                                color = TextSecondary
+                            )
                         }
                     }
                 }
             }
+
 
             if (animalsListState.value.isEmpty()) {
                 EmptyStateScreen()
