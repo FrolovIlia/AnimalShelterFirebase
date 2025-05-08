@@ -14,6 +14,8 @@ import com.example.animalshelterfirebase.ui.data.AddScreenObject
 import com.example.animalshelterfirebase.ui.login.LoginScreen
 import com.example.animalshelterfirebase.ui.login.LoginScreenObject
 import com.example.animalshelterfirebase.ui.main_screen.MainScreen
+import com.example.animalshelterfirebase.ui.registration.RegisterScreen
+import com.example.animalshelterfirebase.ui.registration.RegisterScreenObject
 
 
 class MainActivity : ComponentActivity() {
@@ -63,6 +65,18 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+
+                composable<RegisterScreenObject> {
+                    RegisterScreen(
+                        onRegistered = { navData ->
+                            navController.navigate(navData) // переходит в MainScreenDataObject
+                        },
+                        onBack = {
+                            navController.popBackStack() // вернуться на экран логина
+                        }
+                    )
+                }
+
             }
         }
     }

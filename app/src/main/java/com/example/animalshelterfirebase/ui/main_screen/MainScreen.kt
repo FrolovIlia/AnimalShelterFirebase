@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalNavigationDrawer
@@ -44,6 +46,7 @@ import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
 import com.example.animalshelterfirebase.ui.theme.BackgroundGray
+import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
 import com.google.firebase.firestore.FieldPath
@@ -123,7 +126,7 @@ fun MainScreen(
                         onAdminClick()
                     },
                     onCategoryClick = { category ->
-                        isFavoritesOnly = false // <--- ВАЖНО
+                        isFavoritesOnly = false
                         getAllFavsIds(db, navData.uid) { favs ->
                             getAllAnimals(db, favs, category) { animals ->
                                 animalsListState.value = animals
@@ -145,7 +148,7 @@ fun MainScreen(
                     isFavoritesOnly = isFavoritesOnly,
                     onHomeClick = {
                         isFavoritesOnly = false
-                        selectedCategory = "Все" // если используешь выделение
+                        selectedCategory = "Все"
                         getAllFavsIds(db, navData.uid) { favs ->
                             getAllAnimals(db, favs, category = "Все") { animals ->
                                 animalsListState.value = animals
@@ -171,6 +174,23 @@ fun MainScreen(
                     .background(BackgroundGray)
                     .padding(paddingValues)
             ) {
+                if (isAdminState.value) {
+                    Button(
+                        onClick = {
+                            onAdminClick()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(5.dp),
+                        colors = ButtonDefaults.buttonColors(ButtonColorBlue)
+                    ) {
+                        Text(
+                            text = "Добавить животное"
+                        )
+                    }
+                }
+
+
 
                 LazyRow(
                     modifier = Modifier
