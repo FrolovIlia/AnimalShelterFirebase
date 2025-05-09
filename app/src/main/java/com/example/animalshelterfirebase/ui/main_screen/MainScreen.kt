@@ -68,6 +68,7 @@ fun MainScreen(
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var isFavoritesOnly by remember { mutableStateOf(false) }
 
+
     val categories = listOf(
         AnimalCategories(R.drawable.ic_all_animals, "Все"),
         AnimalCategories(R.drawable.ic_cats, "Котики"),
