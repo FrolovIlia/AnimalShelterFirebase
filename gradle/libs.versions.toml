@@ -1,29 +1,32 @@
 [versions]
-agp = "8.9.1"
+accompanistSystemuicontroller = "0.20.3"
+agp = "8.9.2"
 
 coilCompose = "2.5.0"
 kotlin = "2.0.21"
-coreKtx = "1.15.0"
+coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.7"
+lifecycleRuntimeKtx = "2.9.0"
 activityCompose = "1.10.1"
-composeBom = "2024.09.00"
+composeBom = "2025.05.00"
 gmsVersion = "4.4.2"
-boomVersion = "33.12.0"
+boomVersion = "33.13.0"
 firebaseStorageKtx = "21.0.1"
-runtimeAndroid = "1.7.8"
-uiAndroid = "1.7.8"
+runtimeAndroid = "1.8.1"
+uiAndroid = "1.8.1"
 firebaseAuthKtx = "23.2.0"
 
-navigationCompose = "2.8.9"
+navigationCompose = "2.9.0"
 serializationVersion = "2.1.20"
 serializationKotlin = "1.7.1"
+uiTooling = "1.8.1"
 
 
 [libraries]
 
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "boomVersion" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
@@ -51,6 +54,7 @@ firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage
 androidx-runtime-android = { group = "androidx.compose.runtime", name = "runtime-android", version.ref = "runtimeAndroid" }
 androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "uiAndroid" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
+ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
