@@ -50,6 +50,7 @@ import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -76,6 +77,10 @@ fun MainScreen(
     )
 
     LaunchedEffect(Unit) {
+        isAdmin { isAdmin ->
+            isAdminState.value = isAdmin
+        }
+
         getAllFavsIds(db, navData.uid) { favs ->
             getAllAnimals(db, favs, category = "Все") { animals ->
                 animalsListState.value = animals
@@ -333,3 +338,21 @@ private fun onFavs(
     }
 }
 
+fun isAdmin(onResult: (Boolean) -> Unit) {
+    val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+    if (user == null) {
+        onResult(false)
+        return
+    }
+
+    Firebase.firestore.collection("admin")
+        .document(user.uid)
+        .get()
+        .addOnSuccessListener { doc ->
+            val isAdmin = doc.getBoolean("isAdmin") == true
+            onResult(isAdmin)
+        }
+        .addOnFailureListener {
+            onResult(false)
+        }
+}

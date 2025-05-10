@@ -151,10 +151,10 @@ fun DrawerBody(
     }
 }
 
-fun isAdmin(onAdmin: (Boolean) -> Unit) {
-    val uid = Firebase.auth.currentUser!!.uid
-    Firebase.firestore.collection("admin")
-        .document(uid).get().addOnSuccessListener {
-            onAdmin(it.get("isAdmin") as Boolean)
-        }
-}
+//fun isAdmin(onAdmin: (Boolean) -> Unit) {
+//    val uid = Firebase.auth.currentUser!!.uid
+//    Firebase.firestore.collection("admin")
+//        .document(uid).get().addOnSuccessListener {
+//            onAdmin(it.get("isAdmin") as Boolean)
+//        }
+//}
