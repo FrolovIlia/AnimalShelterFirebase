@@ -1,5 +1,6 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 
@@ -38,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.animalshelterfirebase.R
@@ -69,6 +72,9 @@ fun MainScreen(
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var isFavoritesOnly by remember { mutableStateOf(false) }
 
+    val isGuest = navData.uid == "guest"
+    val animals = remember { mutableStateListOf<Animal>() }
+    val context = LocalContext.current
 
     val categories = listOf(
         AnimalCategories(R.drawable.ic_all_animals, "Все"),
@@ -81,9 +87,15 @@ fun MainScreen(
             isAdminState.value = isAdmin
         }
 
-        getAllFavsIds(db, navData.uid) { favs ->
-            getAllAnimals(db, favs, category = "Все") { animals ->
+        if (isGuest) {
+            getAllAnimals(db, emptyList(), "Все") { animals ->
                 animalsListState.value = animals
+            }
+        } else {
+            getAllFavsIds(db, navData.uid) { favs ->
+                getAllAnimals(db, favs, "Все") { animals ->
+                    animalsListState.value = animals
+                }
             }
         }
     }
@@ -96,9 +108,15 @@ fun MainScreen(
                 onHomeClick = {
                     isFavoritesOnly = false
                     selectedCategory = "Все"
-                    getAllFavsIds(db, navData.uid) { favs ->
-                        getAllAnimals(db, favs, category = "Все") { animals ->
+                    if (isGuest) {
+                        getAllAnimals(db, emptyList(), "Все") { animals ->
                             animalsListState.value = animals
+                        }
+                    } else {
+                        getAllFavsIds(db, navData.uid) { favs ->
+                            getAllAnimals(db, favs, "Все") { animals ->
+                                animalsListState.value = animals
+                            }
                         }
                     }
                 },
@@ -120,7 +138,7 @@ fun MainScreen(
                 .background(BackgroundGray)
                 .padding(paddingValues)
         ) {
-            if (isAdminState.value) {
+            if (isAdminState.value && !isGuest) {
                 Button(
                     onClick = { onAdminClick() },
                     modifier = Modifier
@@ -147,9 +165,15 @@ fun MainScreen(
                             .height(52.dp)
                             .clickable {
                                 selectedCategory = category.categoryName
-                                getAllFavsIds(db, navData.uid) { favs ->
-                                    getAllAnimals(db, favs, category.categoryName) { animals ->
+                                if (isGuest) {
+                                    getAllAnimals(db, emptyList(), category.categoryName) { animals ->
                                         animalsListState.value = animals
+                                    }
+                                } else {
+                                    getAllFavsIds(db, navData.uid) { favs ->
+                                        getAllAnimals(db, favs, category.categoryName) { animals ->
+                                            animalsListState.value = animals
+                                        }
                                     }
                                 }
                             },
@@ -184,7 +208,6 @@ fun MainScreen(
                 }
             }
 
-
             if (animalsListState.value.isEmpty()) {
                 EmptyStateScreen()
             } else {
@@ -194,10 +217,15 @@ fun MainScreen(
                 ) {
                     items(animalsListState.value) { animal ->
                         AnimalListItemUI(
-                            isAdminState.value,
+                            showEditButton = !isGuest,
                             animal,
                             onEditClick = { onAnimalEditClick(it) },
                             onFavouriteClick = {
+                                if (isGuest) {
+                                    Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
+                                    return@AnimalListItemUI
+                                }
+
                                 val wasFavourite = animal.isFavourite
                                 val updatedFavourite = !wasFavourite
 
@@ -227,6 +255,7 @@ fun MainScreen(
         }
     }
 }
+
 
 
 

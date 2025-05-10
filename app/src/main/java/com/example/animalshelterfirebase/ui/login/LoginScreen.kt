@@ -160,12 +160,12 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             ButtonTransparent(text = "Открыть без регистрации") {
-                signUp(
-                    auth,
-                    emailState.value,
-                    passwordState.value,
-                    onSignUpSuccess = { navData -> onNavigateToMainScreen(navData) },
-                    onSignUpFailure = { errorState.value = it }
+                // Переход без регистрации, передаём заглушку или пустые данные
+                onNavigateToMainScreen(
+                    MainScreenDataObject(
+                        uid = "guest",
+                        email = "guest@anonymous.com"
+                    )
                 )
             }
         }
