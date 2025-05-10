@@ -11,6 +11,8 @@ import androidx.navigation.toRoute
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.add_animal_screen.AddAnimalScreen
 import com.example.animalshelterfirebase.ui.data.AddScreenObject
+import com.example.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
+import com.example.animalshelterfirebase.ui.details_screen.ui.DetailsScreen
 import com.example.animalshelterfirebase.ui.login.LoginScreen
 import com.example.animalshelterfirebase.ui.login.LoginScreenObject
 import com.example.animalshelterfirebase.ui.main_screen.MainScreen
@@ -39,6 +41,17 @@ class MainActivity : ComponentActivity() {
                     val navData = navEntry.toRoute<MainScreenDataObject>()
                     MainScreen(
                         navData,
+                        onAnimalClick = { anim ->
+                            navController.navigate(
+                                DetailsNavObject(
+                                    imageUrl = anim.imageUrl,
+                                    name = anim.name,
+                                    age = anim.age,
+                                    category = anim.category,
+                                    description = anim.description
+                                )
+                            )
+                        },
                         onAnimalEditClick = { animal ->
                             navController.navigate(
                                 AddScreenObject(
@@ -58,13 +71,17 @@ class MainActivity : ComponentActivity() {
 
                 composable<AddScreenObject> { navEntry ->
                     val navData = navEntry.toRoute<AddScreenObject>()
-                    AddAnimalScreen(
-                        navData = navData,
-                        onSaved = {
-                            navController.popBackStack() // возвращение назад
-                        }
-                    )
+                    AddAnimalScreen(navData) {
+                        navController.popBackStack()
+                    }
+
                 }
+
+                composable<DetailsNavObject> { navEntry ->
+                    val navData = navEntry.toRoute<DetailsNavObject>()
+                    DetailsScreen(navData)
+                }
+
 
                 composable<RegisterScreenObject> {
                     RegisterScreen(

@@ -64,6 +64,7 @@ import com.google.firebase.ktx.Firebase
 fun MainScreen(
     navData: MainScreenDataObject,
     onAnimalEditClick: (Animal) -> Unit,
+    onAnimalClick: (Animal) -> Unit,
     onAdminClick: () -> Unit
 ) {
     val animalsListState = remember { mutableStateOf(emptyList<Animal>()) }
@@ -219,6 +220,9 @@ fun MainScreen(
                         AnimalListItemUI(
                             showEditButton = !isGuest,
                             animal,
+                            onAnimalClick = { anim->
+                                onAnimalClick(anim)
+                            },
                             onEditClick = { onAnimalEditClick(it) },
                             onFavouriteClick = {
                                 if (isGuest) {

@@ -24,14 +24,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.animalshelterfirebase.R
+import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
 import com.example.animalshelterfirebase.ui.login.ButtonBlue
 import com.example.animalshelterfirebase.ui.login.ButtonWhite
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
 
 
-@Preview(showBackground = true)
 @Composable
 fun DetailsScreen(
     navObject: DetailsNavObject = DetailsNavObject()
@@ -53,16 +54,28 @@ fun DetailsScreen(
                     .padding(8.dp)
             )
             Column(modifier = Modifier.fillMaxWidth()) {
-                Image(
-                    painter = painterResource(R.drawable.dog),
+                AsyncImage(
+                    model = navObject.imageUrl,
                     contentDescription = "",
                     modifier = Modifier
                         .fillMaxWidth(1f)
                         .height(360.dp)
-                        .clip(RoundedCornerShape(30.dp))
-                        .background(Color.Blue),
+                        .clip(RoundedCornerShape(30.dp)),
                     contentScale = ContentScale.Crop
                 )
+
+
+
+//                Image(
+//                    painter = painterResource(R.drawable.dog),
+//                    contentDescription = "",
+//                    modifier = Modifier
+//                        .fillMaxWidth(1f)
+//                        .height(360.dp)
+//                        .clip(RoundedCornerShape(30.dp))
+//                        .background(Color.Blue),
+//                    contentScale = ContentScale.Crop
+//                )
                 Spacer(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -77,7 +90,7 @@ fun DetailsScreen(
 
 
                     Text(
-                        text = "Кличка",
+                        text = navObject.name,
                         color = Color.Black,
                         fontFamily = AnimalFont,
                         fontSize = 36.sp
@@ -85,15 +98,16 @@ fun DetailsScreen(
 
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth(1f)
+                            .fillMaxWidth()
                             .height(28.dp)
                     ) {
-                        Text(text = "Возраст")
+                        Text(text = navObject.age)
+//                        Text(text = navObject.category)
+
                     }
 
                     Text(
-                        text = "На этом месте будет описание животного, ориентировочно на 4 строки.\n" +
-                                "пока не знаю, будет ли ограничение по количеству строк или сделаем прокручивающийся",
+                        text = navObject.description,
                         color = Color.Gray,
                         fontFamily = AnimalFont,
                         fontSize = 16.sp
@@ -137,13 +151,13 @@ fun DetailsScreen(
                         ) {
                             Text(
                                 modifier = Modifier.padding(bottom = 5.dp),
-                                text = "Номер вольера",
+                                text = "Расположение",
                                 color = Color.Gray,
                                 fontFamily = AnimalFont,
                                 fontSize = 13.sp
                             )
                             Text(
-                                text = "34",
+                                text = "Вольер 4",
                                 color = Color.Gray,
                                 fontFamily = AnimalFont,
                                 fontSize = 16.sp

@@ -2,6 +2,7 @@ package com.example.animalshelterfirebase.ui.main_screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,11 +42,15 @@ fun AnimalListItemUI(
     animal: Animal,
     onEditClick: (Animal) -> Unit = {},
     onFavouriteClick: () -> Unit = {},
+    onAnimalClick: (Animal) ->Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
+            .clickable{
+                onAnimalClick(animal)
+            }
             .clip(RoundedCornerShape(15.dp))
             .background(BackgroundWhite)
     ) {
