@@ -33,6 +33,7 @@ import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.example.animalshelterfirebase.ui.theme.ButtonColorDark
 import com.example.animalshelterfirebase.ui.theme.GrayLight
+import com.example.animalshelterfirebase.utils.isAdmin
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
