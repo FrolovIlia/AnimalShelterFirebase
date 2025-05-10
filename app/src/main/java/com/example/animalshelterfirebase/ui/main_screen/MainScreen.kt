@@ -51,7 +51,6 @@ import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
 import com.example.animalshelterfirebase.utils.isAdmin
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
