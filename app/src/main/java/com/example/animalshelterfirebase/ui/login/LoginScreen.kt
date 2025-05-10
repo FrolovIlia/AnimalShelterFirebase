@@ -126,7 +126,10 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(5.dp))
 
-            ButtonBlue(text = "Войти") {
+            ButtonBlue(
+                text = "Войти",
+                modifier = Modifier.fillMaxWidth(1f)
+            ) {
                 signIn(
                     auth,
                     emailState.value,
@@ -147,7 +150,10 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ButtonWhite(text = "Зарегистрироваться") {
+            ButtonWhite(
+                text = "Зарегистрироваться",
+                modifier = Modifier.fillMaxWidth(1f)
+            ) {
                 signUp(
                     auth,
                     emailState.value,
@@ -159,7 +165,10 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ButtonTransparent(text = "Открыть без регистрации") {
+            ButtonTransparent(
+                text = "Открыть без регистрации",
+                modifier = Modifier.fillMaxWidth(1f)
+            ) {
                 // Переход без регистрации, передаём заглушку или пустые данные
                 onNavigateToMainScreen(
                     MainScreenDataObject(

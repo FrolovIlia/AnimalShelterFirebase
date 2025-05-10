@@ -1,6 +1,5 @@
 package com.example.animalshelterfirebase.ui.login
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -19,18 +18,15 @@ import com.example.animalshelterfirebase.ui.theme.ButtonColorWhite
 @Composable
 fun ButtonBlue(
     text: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Button(
-        onClick = {
-            onClick()
-        },
-        modifier = Modifier.fillMaxWidth()
-            .height(52.dp),
+        onClick = onClick,
+        modifier = modifier.height(52.dp), // без fillMaxWidth
         colors = ButtonDefaults.buttonColors(
-            containerColor = ButtonColorBlue,
+            containerColor = ButtonColorBlue
         )
-
     ) {
         Text(
             text = text,
@@ -47,18 +43,15 @@ fun ButtonBlue(
 @Composable
 fun ButtonWhite(
     text: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Button(
-        onClick = {
-            onClick()
-        },
-        modifier = Modifier.fillMaxWidth()
-            .height(52.dp),
+        onClick = onClick,
+        modifier = modifier.height(52.dp), // без fillMaxWidth
         colors = ButtonDefaults.buttonColors(
             containerColor = ButtonColorWhite
         )
-
     ) {
         Text(
             text = text,
@@ -75,14 +68,14 @@ fun ButtonWhite(
 @Composable
 fun ButtonTransparent(
     text: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Button(
         onClick = {
             onClick()
         },
-        modifier = Modifier.fillMaxWidth()
-            .height(52.dp),
+        modifier = modifier.height(52.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent
         )
@@ -94,7 +87,7 @@ fun ButtonTransparent(
             fontFamily = AnimalFont,
             style = TextStyle(
                 fontSize = 16.sp,
-                lineHeight = 36.sp // Явно задаёт высоту строки
+                lineHeight = 36.sp
             )
         )
     }

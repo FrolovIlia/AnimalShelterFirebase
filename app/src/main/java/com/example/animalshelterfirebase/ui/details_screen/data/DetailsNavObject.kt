@@ -4,7 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class DetailsNavObject(
-    val name: String,
-    val description: String,
-    val imageUrl: String
+    val imageUrl: String = "",
+    val name: String = "",
+    val age: String = "",
+    val category: String = "",
+    val description: String = "",
+    val volunteerPhone: String = "",
+    val location: String = ""
+
 )
