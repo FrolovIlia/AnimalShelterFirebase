@@ -79,17 +79,22 @@ class MainActivity : ComponentActivity() {
 
                 composable<DetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<DetailsNavObject>()
-                    DetailsScreen(navData)
+                    DetailsScreen(
+                        navObject = navData,
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
 
                 composable<RegisterScreenObject> {
                     RegisterScreen(
                         onRegistered = { navData ->
-                            navController.navigate(navData) // переходит в MainScreenDataObject
+                            navController.navigate(navData)
                         },
                         onBack = {
-                            navController.popBackStack() // вернуться на экран логина
+                            navController.popBackStack()
                         }
                     )
                 }

@@ -30,6 +30,7 @@ import androidx.compose.material3.Text
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -59,22 +60,28 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
+
 
 @Composable
 fun MainScreen(
     navData: MainScreenDataObject,
+    viewModel: MainScreenViewModel = viewModel(),
     onAnimalEditClick: (Animal) -> Unit,
     onAnimalClick: (Animal) -> Unit,
     onAdminClick: () -> Unit
 ) {
+
+
     val animalsListState = remember { mutableStateOf(emptyList<Animal>()) }
     val isAdminState = remember { mutableStateOf(false) }
     val db = remember { Firebase.firestore }
-    var selectedCategory by remember { mutableStateOf<String?>(null) }
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+    val selectedTab by viewModel.selectedTab.collectAsState()
     var isFavoritesOnly by remember { mutableStateOf(false) }
 
     val isGuest = navData.uid == "guest"
-    val animals = remember { mutableStateListOf<Animal>() }
     val context = LocalContext.current
 
     val categories = listOf(
@@ -83,19 +90,27 @@ fun MainScreen(
         AnimalCategories(R.drawable.ic_dogs, "Собачки")
     )
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(selectedTab, selectedCategory) {
         isAdmin { isAdmin ->
             isAdminState.value = isAdmin
         }
 
-        if (isGuest) {
-            getAllAnimals(db, emptyList(), "Все") { animals ->
-                animalsListState.value = animals
+        if (selectedTab == BottomMenuItem.Favs) {
+            // Загружаем избранное
+            loadFavsAnimals(db, navData.uid) { list ->
+                animalsListState.value = list
             }
         } else {
-            getAllFavsIds(db, navData.uid) { favs ->
-                getAllAnimals(db, favs, "Все") { animals ->
+            // Загружаем по категории
+            if (isGuest) {
+                getAllAnimals(db, emptyList(), selectedCategory) { animals ->
                     animalsListState.value = animals
+                }
+            } else {
+                getAllFavsIds(db, navData.uid) { favs ->
+                    getAllAnimals(db, favs, selectedCategory) { animals ->
+                        animalsListState.value = animals
+                    }
                 }
             }
         }
@@ -105,32 +120,32 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
             BottomMenu(
-                isFavoritesOnly = isFavoritesOnly,
-                onHomeClick = {
-                    isFavoritesOnly = false
-                    selectedCategory = "Все"
-                    if (isGuest) {
-                        getAllAnimals(db, emptyList(), "Все") { animals ->
-                            animalsListState.value = animals
+                selectedTab = selectedTab,
+                onTabSelected = { selected ->
+                    viewModel.selectTab(selected)
+                    viewModel.selectCategory("Все")
+                    isFavoritesOnly = selected == BottomMenuItem.Favs
+
+                    if (selected == BottomMenuItem.Favs) {
+                        loadFavsAnimals(db, navData.uid) { list ->
+                            animalsListState.value = list
                         }
                     } else {
-                        getAllFavsIds(db, navData.uid) { favs ->
-                            getAllAnimals(db, favs, "Все") { animals ->
+                        if (isGuest) {
+                            getAllAnimals(db, emptyList(), "Все") { animals ->
                                 animalsListState.value = animals
+                            }
+                        } else {
+                            getAllFavsIds(db, navData.uid) { favs ->
+                                getAllAnimals(db, favs, "Все") { animals ->
+                                    animalsListState.value = animals
+                                }
                             }
                         }
                     }
-                },
-                onFavsClick = {
-                    isFavoritesOnly = true
-                    loadFavsAnimals(db, navData.uid) { list ->
-                        animalsListState.value = list
-                    }
-                },
-                onProfile = {
-                    // логика профиля (если нужна)
                 }
             )
+
         }
     ) { paddingValues ->
         Column(
@@ -165,7 +180,7 @@ fun MainScreen(
                         modifier = Modifier
                             .height(52.dp)
                             .clickable {
-                                selectedCategory = category.categoryName
+                                viewModel.selectCategory(category.categoryName)
                                 if (isGuest) {
                                     getAllAnimals(db, emptyList(), category.categoryName) { animals ->
                                         animalsListState.value = animals

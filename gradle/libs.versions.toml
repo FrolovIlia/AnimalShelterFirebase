@@ -22,6 +22,7 @@ navigationCompose = "2.9.0"
 serializationVersion = "2.1.20"
 serializationKotlin = "1.7.1"
 uiTooling = "1.8.1"
+webkit = "1.13.0"
 
 
 [libraries]
@@ -55,6 +56,7 @@ androidx-runtime-android = { group = "androidx.compose.runtime", name = "runtime
 androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "uiAndroid" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
+androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

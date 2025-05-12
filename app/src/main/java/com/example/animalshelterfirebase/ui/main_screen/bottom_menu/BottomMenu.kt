@@ -20,22 +20,20 @@ import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 @Composable
 fun BottomMenu(
-    isFavoritesOnly: Boolean,
-    onHomeClick: () -> Unit,
-    onProfile: () -> Unit,
-    onFavsClick: () -> Unit
+    selectedTab: BottomMenuItem,
+    onTabSelected: (BottomMenuItem) -> Unit
 ) {
     NavigationBar {
         NavigationBarItem(
             icon = {
                 CircularIcon(
                     resId = R.drawable.home_menu,
-                    backgroundColor = if (!isFavoritesOnly) ButtonColorBlue else Color.Transparent,
+                    backgroundColor = if (selectedTab == BottomMenuItem.Home) ButtonColorBlue else Color.Transparent,
                     iconTint = Color.Gray
                 )
             },
-            selected = !isFavoritesOnly,
-            onClick = onHomeClick,
+            selected = selectedTab == BottomMenuItem.Home,
+            onClick = { onTabSelected(BottomMenuItem.Home) },
             alwaysShowLabel = false,
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Transparent
@@ -46,12 +44,12 @@ fun BottomMenu(
             icon = {
                 CircularIcon(
                     resId = R.drawable.favourite_menu,
-                    backgroundColor = if (isFavoritesOnly) ButtonColorBlue else Color.Transparent,
+                    backgroundColor = if (selectedTab == BottomMenuItem.Favs) ButtonColorBlue else Color.Transparent,
                     iconTint = Color.Gray
                 )
             },
-            selected = isFavoritesOnly,
-            onClick = onFavsClick,
+            selected = selectedTab == BottomMenuItem.Favs,
+            onClick = { onTabSelected(BottomMenuItem.Favs) },
             alwaysShowLabel = false,
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Transparent
@@ -66,14 +64,15 @@ fun BottomMenu(
                     iconTint = Color.Gray
                 )
             },
-            selected = false,
-            onClick = onProfile,
+            selected = selectedTab == BottomMenuItem.Settings,
+            onClick = { onTabSelected(BottomMenuItem.Settings) },
             alwaysShowLabel = false,
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Transparent
             )
         )
     }
+
 }
 
 
