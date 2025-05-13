@@ -55,12 +55,12 @@ fun DrawerBody(
         mutableStateOf(false)
     }
 
-    LaunchedEffect(Unit) {
-        isAdmin { isAdmin ->
-            isAdminState.value = isAdmin
-            onAdmin(isAdmin)
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        isAdmin { isAdmin ->
+//            isAdminState.value = isAdmin
+//            onAdmin(isAdmin)
+//        }
+//    }
 
 
 

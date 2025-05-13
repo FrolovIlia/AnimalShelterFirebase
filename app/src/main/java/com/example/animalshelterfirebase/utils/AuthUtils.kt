@@ -4,15 +4,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
-fun isAdmin(onResult: (Boolean) -> Unit) {
-    val user = FirebaseAuth.getInstance().currentUser
-    if (user == null) {
-        onResult(false)
-        return
-    }
-
+fun isAdmin(uid: String, onResult: (Boolean) -> Unit) {
     Firebase.firestore.collection("admin")
-        .document(user.uid)
+        .document(uid)
         .get()
         .addOnSuccessListener { doc ->
             val isAdmin = doc.getBoolean("isAdmin") == true

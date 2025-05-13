@@ -1,5 +1,6 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 
@@ -72,8 +72,6 @@ fun MainScreen(
     onAnimalClick: (Animal) -> Unit,
     onAdminClick: () -> Unit
 ) {
-
-
     val animalsListState = remember { mutableStateOf(emptyList<Animal>()) }
     val isAdminState = remember { mutableStateOf(false) }
     val db = remember { Firebase.firestore }
@@ -91,7 +89,7 @@ fun MainScreen(
     )
 
     LaunchedEffect(selectedTab, selectedCategory) {
-        isAdmin { isAdmin ->
+        isAdmin(navData.uid) { isAdmin ->
             isAdminState.value = isAdmin
         }
 
@@ -145,7 +143,6 @@ fun MainScreen(
                     }
                 }
             )
-
         }
     ) { paddingValues ->
         Column(
@@ -154,6 +151,7 @@ fun MainScreen(
                 .background(BackgroundGray)
                 .padding(paddingValues)
         ) {
+            // Кнопка "Добавить животное" только для администраторов
             if (isAdminState.value && !isGuest) {
                 Button(
                     onClick = { onAdminClick() },
@@ -166,6 +164,7 @@ fun MainScreen(
                 }
             }
 
+            // Отображение категорий
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -224,18 +223,21 @@ fun MainScreen(
                 }
             }
 
+            // Если животных нет, показываем пустой экран
             if (animalsListState.value.isEmpty()) {
                 EmptyStateScreen()
             } else {
+                // Отображение животных
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(animalsListState.value) { animal ->
                         AnimalListItemUI(
-                            showEditButton = !isGuest,
+                            // Показываем кнопку редактирования только для администраторов
+                            showEditButton = isAdminState.value, // Только администратор может редактировать
                             animal,
-                            onAnimalClick = { anim->
+                            onAnimalClick = { anim ->
                                 onAnimalClick(anim)
                             },
                             onEditClick = { onAnimalEditClick(it) },
@@ -274,6 +276,7 @@ fun MainScreen(
         }
     }
 }
+
 
 
 
