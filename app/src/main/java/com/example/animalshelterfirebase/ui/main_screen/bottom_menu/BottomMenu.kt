@@ -1,5 +1,6 @@
 package com.example.animalshelterfirebase.ui.main_screen.bottom_menu
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.animalshelterfirebase.R
@@ -21,8 +23,11 @@ import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 @Composable
 fun BottomMenu(
     selectedTab: BottomMenuItem,
-    onTabSelected: (BottomMenuItem) -> Unit
+    onTabSelected: (BottomMenuItem) -> Unit,
+    isRegistered: Boolean // Добавим параметр для проверки регистрации пользователя
 ) {
+    val context = LocalContext.current
+
     NavigationBar {
         NavigationBarItem(
             icon = {
@@ -49,7 +54,15 @@ fun BottomMenu(
                 )
             },
             selected = selectedTab == BottomMenuItem.Favs,
-            onClick = { onTabSelected(BottomMenuItem.Favs) },
+            onClick = {
+                if (isRegistered) {
+                    // Переход на экран избранных для зарегистрированного пользователя
+                    onTabSelected(BottomMenuItem.Favs)
+                } else {
+                    // Показать уведомление для незарегистрированных пользователей
+                    Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
+                }
+            },
             alwaysShowLabel = false,
             colors = NavigationBarItemDefaults.colors(
                 indicatorColor = Color.Transparent

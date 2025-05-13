@@ -141,7 +141,8 @@ fun MainScreen(
                             }
                         }
                     }
-                }
+                },
+                isRegistered = !isGuest
             )
         }
     ) { paddingValues ->
