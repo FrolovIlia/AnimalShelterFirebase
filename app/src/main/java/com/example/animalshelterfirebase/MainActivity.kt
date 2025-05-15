@@ -17,7 +17,7 @@ import com.example.animalshelterfirebase.ui.details_screen.ui.DetailsScreen
 
 import com.example.animalshelterfirebase.ui.login.LoginScreenObject
 import com.example.animalshelterfirebase.ui.main_screen.MainScreen
-import com.example.animalshelterfirebase.ui.registration.RegisterScreen
+import com.example.animalshelterfirebase.ui.registration.ui.RegisterScreen
 import com.example.animalshelterfirebase.ui.registration.RegisterScreenObject
 import com.example.animalshelterfirebase.ui.start_screen.ui.StartScreen
 import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
@@ -126,6 +126,7 @@ class MainActivity : ComponentActivity() {
 
                 composable<RegisterScreenObject> {
                     RegisterScreen(
+                        auth = FirebaseAuth.getInstance(),
                         onRegistered = { navData ->
                             navController.navigate(navData)
                         },
