@@ -100,32 +100,32 @@ fun LoginScreen(
                 fontSize = 24.sp
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
-
-            RoundedCornerTextField(
-                text = emailState.value,
-                label = "Email"
-            ) { emailState.value = it }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            RoundedCornerTextField(
-                text = passwordState.value,
-                label = "Пароль"
-            ) { passwordState.value = it }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            if (errorState.value.isNotEmpty()) {
-                Text(
-                    text = errorState.value,
-                    color = Color.Red,
-                    textAlign = TextAlign.Center
-                )
-            }
-
+//            Spacer(modifier = Modifier.height(20.dp))
+//
+//            RoundedCornerTextField(
+//                text = emailState.value,
+//                label = "Email"
+//            ) { emailState.value = it }
+//
+//            Spacer(modifier = Modifier.height(10.dp))
+//
+//            RoundedCornerTextField(
+//                text = passwordState.value,
+//                label = "Пароль"
+//            ) { passwordState.value = it }
+//
+//            Spacer(modifier = Modifier.height(10.dp))
+//
+//            if (errorState.value.isNotEmpty()) {
+//                Text(
+//                    text = errorState.value,
+//                    color = Color.Red,
+//                    textAlign = TextAlign.Center
+//                )
+//            }
+//
             Spacer(modifier = Modifier.height(5.dp))
-
+//
             ButtonBlue(
                 text = "Войти",
                 modifier = Modifier.fillMaxWidth(1f)
@@ -182,7 +182,7 @@ fun LoginScreen(
 }
 
 
-// Firebase auth methods (не менялись)
+
 fun signUp(
     auth: FirebaseAuth,
     email: String,

@@ -10,14 +10,18 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.add_animal_screen.AddAnimalScreen
+import com.example.animalshelterfirebase.ui.authorization.LoginScreen
 import com.example.animalshelterfirebase.ui.data.AddScreenObject
 import com.example.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
 import com.example.animalshelterfirebase.ui.details_screen.ui.DetailsScreen
-import com.example.animalshelterfirebase.ui.login.LoginScreen
+
 import com.example.animalshelterfirebase.ui.login.LoginScreenObject
 import com.example.animalshelterfirebase.ui.main_screen.MainScreen
 import com.example.animalshelterfirebase.ui.registration.RegisterScreen
 import com.example.animalshelterfirebase.ui.registration.RegisterScreenObject
+import com.example.animalshelterfirebase.ui.start_screen.ui.StartScreen
+import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
+import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : ComponentActivity() {
@@ -28,14 +32,46 @@ class MainActivity : ComponentActivity() {
 
             NavHost(
                 navController = navController,
-                startDestination = LoginScreenObject
+                startDestination = StartScreenObject
             ) {
 
                 composable<LoginScreenObject> {
-                    LoginScreen { navData ->
-                        navController.navigate(navData)
-                    }
+                    LoginScreen(
+                        auth = FirebaseAuth.getInstance(),
+                        prefs = getSharedPreferences("prefs", MODE_PRIVATE),
+                        onNavigateToMainScreen = { navData ->
+                            navController.navigate(navData)
+                        },
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
+
+
+
+
+                composable<StartScreenObject> {
+                    StartScreen(
+                        onLoginClick = {
+                            navController.navigate(LoginScreenObject)
+                        },
+                        onRegisterClick = {
+                            navController.navigate(RegisterScreenObject)
+                        },
+                        onGuestClick = {
+                            navController.navigate(
+                                MainScreenDataObject(
+                                    uid = "guest",
+                                    email = "guest@anonymous.com"
+                                )
+                            )
+                        }
+                    )
+                }
+
+
+
 
                 composable<MainScreenDataObject> { navEntry ->
                     val navData = navEntry.toRoute<MainScreenDataObject>()
