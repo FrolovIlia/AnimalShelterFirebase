@@ -22,11 +22,13 @@ import com.example.animalshelterfirebase.ui.registration.RegisterScreenObject
 import com.example.animalshelterfirebase.ui.start_screen.ui.StartScreen
 import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
 import com.google.firebase.auth.FirebaseAuth
-
+import androidx.core.view.WindowCompat
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val navController = rememberNavController()
 
