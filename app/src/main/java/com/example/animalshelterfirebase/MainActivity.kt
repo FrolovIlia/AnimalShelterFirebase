@@ -1,6 +1,5 @@
 package com.example.animalshelterfirebase
 
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,7 +22,6 @@ import com.example.animalshelterfirebase.ui.start_screen.ui.StartScreen
 import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.view.WindowCompat
-import android.content.Context
 import com.example.animalshelterfirebase.ui.authorization.createEncryptedPrefs
 
 class MainActivity : ComponentActivity() {

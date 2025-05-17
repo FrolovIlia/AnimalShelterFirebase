@@ -1,6 +1,5 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
