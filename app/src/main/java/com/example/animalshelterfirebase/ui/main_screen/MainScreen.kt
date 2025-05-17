@@ -3,6 +3,7 @@ package com.example.animalshelterfirebase.ui.main_screen
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +25,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -39,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -61,6 +64,7 @@ import com.google.firebase.ktx.Firebase
 
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
+import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
 
 
 @Composable
@@ -174,10 +178,15 @@ fun MainScreen(
             ) {
                 items(categories) { category ->
                     val isSelected = selectedCategory == category.categoryName
+                    val shape = RoundedCornerShape(30.dp)
 
                     Card(
                         modifier = Modifier
                             .height(52.dp)
+                            .then(
+                                if (!isSelected) Modifier.border(1.dp, BackgroundSecondary, shape) else Modifier
+                            )
+                            .clip(shape)
                             .clickable {
                                 viewModel.selectCategory(category.categoryName)
                                 if (isGuest) {
@@ -192,9 +201,9 @@ fun MainScreen(
                                     }
                                 }
                             },
-                        shape = RoundedCornerShape(30.dp),
+                        shape = shape,
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected) ButtonColorBlue else androidx.compose.material3.MaterialTheme.colorScheme.surface
+                            containerColor = if (isSelected) ButtonColorBlue else MaterialTheme.colorScheme.surface
                         )
                     ) {
                         Row(
@@ -222,6 +231,7 @@ fun MainScreen(
                     }
                 }
             }
+
 
             // Если животных нет, показываем пустой экран
             if (animalsListState.value.isEmpty()) {

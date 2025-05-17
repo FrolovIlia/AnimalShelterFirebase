@@ -19,6 +19,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
+import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
 
 import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
 import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
@@ -78,7 +79,7 @@ fun ButtonWhite(
         onClick = onClick,
         modifier = modifier
             .height(52.dp)
-            .border(1.dp, Color.Gray, shape) // теперь рамка повторяет форму
+            .border(1.dp, BackgroundSecondary, shape) // теперь рамка повторяет форму
             .clip(shape), // опционально, для предотвращения "выпадения" содержимого за края
         shape = shape,
         interactionSource = interactionSource,
