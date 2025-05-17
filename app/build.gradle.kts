@@ -74,5 +74,6 @@ dependencies {
 
     implementation(libs.ui.tooling)
     implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.androidx.security.crypto)
 
 }

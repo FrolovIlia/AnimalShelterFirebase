@@ -1,5 +1,6 @@
 package com.example.animalshelterfirebase.ui.authorization
 
+import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKeys
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.google.firebase.auth.FirebaseAuth
 
@@ -21,6 +24,11 @@ fun LoginScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        email = prefs.getString("email", "") ?: ""
+        password = prefs.getString("password", "") ?: ""
+    }
 
     Column(
         modifier = Modifier
@@ -111,4 +119,16 @@ fun signIn(
                 onSignInFailure(task.exception?.message ?: "Ошибка входа")
             }
         }
+}
+
+fun createEncryptedPrefs(context: Context): SharedPreferences {
+    val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+
+    return EncryptedSharedPreferences.create(
+        "secure_prefs",
+        masterKeyAlias,
+        context,
+        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+    )
 }

@@ -15,6 +15,7 @@ gmsVersion = "4.4.2"
 boomVersion = "33.13.0"
 firebaseStorageKtx = "21.0.1"
 runtimeAndroid = "1.8.1"
+securityCrypto = "1.1.0-alpha07"
 uiAndroid = "1.8.1"
 firebaseAuthKtx = "23.2.0"
 
@@ -28,6 +29,7 @@ webkit = "1.13.0"
 [libraries]
 
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
+androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "boomVersion" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }

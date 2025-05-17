@@ -23,6 +23,8 @@ import com.example.animalshelterfirebase.ui.start_screen.ui.StartScreen
 import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.view.WindowCompat
+import android.content.Context
+import com.example.animalshelterfirebase.ui.authorization.createEncryptedPrefs
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,6 +33,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val navController = rememberNavController()
+            val encryptedPrefs = createEncryptedPrefs(this)
 
             NavHost(
                 navController = navController,
@@ -40,7 +43,7 @@ class MainActivity : ComponentActivity() {
                 composable<LoginScreenObject> {
                     LoginScreen(
                         auth = FirebaseAuth.getInstance(),
-                        prefs = getSharedPreferences("prefs", MODE_PRIVATE),
+                        prefs = encryptedPrefs,
                         onNavigateToMainScreen = { navData ->
                             navController.navigate(navData)
                         },
@@ -49,9 +52,6 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
-
-
-
 
                 composable<StartScreenObject> {
                     StartScreen(
@@ -71,9 +71,6 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
-
-
-
 
                 composable<MainScreenDataObject> { navEntry ->
                     val navData = navEntry.toRoute<MainScreenDataObject>()
