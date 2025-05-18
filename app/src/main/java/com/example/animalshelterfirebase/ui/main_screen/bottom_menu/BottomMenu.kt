@@ -24,7 +24,7 @@ import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 fun BottomMenu(
     selectedTab: BottomMenuItem,
     onTabSelected: (BottomMenuItem) -> Unit,
-    isRegistered: Boolean // Добавим параметр для проверки регистрации пользователя
+    isRegistered: Boolean
 ) {
     val context = LocalContext.current
 

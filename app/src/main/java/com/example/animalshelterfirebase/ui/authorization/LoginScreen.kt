@@ -3,15 +3,22 @@ package com.example.animalshelterfirebase.ui.authorization
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import com.example.animalshelterfirebase.data.MainScreenDataObject
+import com.example.animalshelterfirebase.ui.login.ButtonBlue
+import com.example.animalshelterfirebase.ui.theme.AnimalFont
+import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
@@ -33,66 +40,121 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .statusBarsPadding()
+            .padding(16.dp)
     ) {
-        Text("Авторизация", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Электронная почта") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Пароль") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                signIn(
-                    auth = auth,
-                    email = email,
-                    password = password,
-                    onSignInSuccess = { userData ->
-                        with(prefs.edit()) {
-                            putString("email", email)
-                            putString("password", password)
-                            apply()
-                        }
-                        onNavigateToMainScreen(userData)
-                    },
-                    onSignInFailure = { error ->
-                        errorMessage = error
-                    }
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
+        // Верхняя панель с заголовком и кнопкой "назад"
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
         ) {
-            Text("Войти")
+            TextButton(
+                onClick = onBackClick,
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
+                Text(
+                    modifier = Modifier,
+                    fontSize = 16.sp,
+                    fontFamily = AnimalFont,
+                    text = "Назад",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Text(
+                fontSize = 20.sp,
+                fontFamily = AnimalFont,
+                text = "Авторизация",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.align(Alignment.Center),
+                fontWeight = FontWeight.Bold
+
+            )
         }
 
-        errorMessage?.let {
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Электронная почта") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = BackgroundGray,
+                    unfocusedContainerColor = BackgroundGray,
+                    disabledContainerColor = Color.LightGray,
+                    errorContainerColor = Color.LightGray,
+                    // Другие цвета, если необходимо
+                    focusedIndicatorColor = Color.Transparent, // Чтобы убрать цвет индикатора фокуса
+                    unfocusedIndicatorColor = Color.Transparent, // Чтобы убрать цвет индикатора не в фокусе
+                    disabledIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent
+                )
+
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = it, color = MaterialTheme.colorScheme.error)
-        }
 
-        TextButton(onClick = onBackClick) {
-            Text("Назад")
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Пароль") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = BackgroundGray,
+                    unfocusedContainerColor = BackgroundGray,
+                    disabledContainerColor = Color.LightGray,
+                    errorContainerColor = Color.LightGray,
+                    // Другие цвета, если необходимо
+                    focusedIndicatorColor = Color.Transparent, // Чтобы убрать цвет индикатора фокуса
+                    unfocusedIndicatorColor = Color.Transparent, // Чтобы убрать цвет индикатора не в фокусе
+                    disabledIndicatorColor = Color.Transparent,
+                    errorIndicatorColor = Color.Transparent
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ButtonBlue(
+                text = "Войти",
+                onClick = {
+                    signIn(
+                        auth = auth,
+                        email = email,
+                        password = password,
+                        onSignInSuccess = { userData ->
+                            with(prefs.edit()) {
+                                putString("email", email)
+                                putString("password", password)
+                                apply()
+                            }
+                            onNavigateToMainScreen(userData)
+                        },
+                        onSignInFailure = { error ->
+                            errorMessage = error
+                        }
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            errorMessage?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = it, color = MaterialTheme.colorScheme.error)
+            }
         }
     }
 }
+
 
 fun signIn(
     auth: FirebaseAuth,
