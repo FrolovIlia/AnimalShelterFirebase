@@ -1,5 +1,6 @@
 package com.example.animalshelterfirebase.ui.details_screen.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 
@@ -32,6 +33,8 @@ import com.example.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
 import com.example.animalshelterfirebase.ui.login.ButtonBlue
 import com.example.animalshelterfirebase.ui.login.ButtonWhite
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
+import com.example.animalshelterfirebase.ui.theme.BackgroundGray
+
 
 
 @Composable
@@ -44,6 +47,7 @@ fun DetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(BackgroundGray)
             .systemBarsPadding(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {

@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
 import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
 
-import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
+import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.example.animalshelterfirebase.ui.theme.ButtonColorWhite
 
@@ -35,7 +35,7 @@ fun ButtonBlue(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val backgroundColor = if (isPressed) BackgroundWhite else ButtonColorBlue
+    val backgroundColor = if (isPressed) BackgroundGray else ButtonColorBlue
     val shape = RoundedCornerShape(30.dp)
 
     Button(
@@ -71,7 +71,7 @@ fun ButtonWhite(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val backgroundColor = if (isPressed) BackgroundWhite else ButtonColorWhite
+    val backgroundColor = if (isPressed) BackgroundGray else ButtonColorWhite
 
     val shape = RoundedCornerShape(30.dp) // или любой другой радиус
 
@@ -111,7 +111,7 @@ fun ButtonTransparent(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val backgroundColor = if (isPressed) BackgroundWhite else Color.Transparent
+    val backgroundColor = if (isPressed) BackgroundGray else Color.Transparent
     val shape = RoundedCornerShape(30.dp)
 
     Button(

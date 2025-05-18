@@ -41,7 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -52,7 +52,6 @@ import com.example.animalshelterfirebase.data.AnimalCategories
 import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
-import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
@@ -65,6 +64,10 @@ import com.google.firebase.ktx.Firebase
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
 import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
+import com.example.animalshelterfirebase.ui.theme.BackgroundGray
+
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.runtime.SideEffect
 
 
 @Composable
@@ -115,6 +118,15 @@ fun MainScreen(
                 }
             }
         }
+    }
+
+
+    val systemUiController = rememberSystemUiController()
+    SideEffect {
+        systemUiController.setStatusBarColor(
+            color = BackgroundGray, // используй свой цвет из темы
+            darkIcons = true         // или false, если иконки должны быть белыми
+        )
     }
 
     Scaffold(

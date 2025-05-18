@@ -26,7 +26,7 @@ import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.ui.data.AddScreenObject
 import com.example.animalshelterfirebase.ui.login.ButtonWhite
 import com.example.animalshelterfirebase.ui.login.RoundedCornerTextField
-import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
+import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -62,7 +62,7 @@ fun AddAnimalScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundWhite)
+            .background(BackgroundGray)
     ) {
         Column(
             modifier = Modifier
