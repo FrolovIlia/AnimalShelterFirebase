@@ -1,13 +1,12 @@
 package com.example.animalshelterfirebase.ui.registration.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
+
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -22,14 +21,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.animalshelterfirebase.data.MainScreenDataObject
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.firestore
 import android.util.Patterns
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
+import com.example.animalshelterfirebase.ui.login.ButtonBlue
+import com.example.animalshelterfirebase.ui.theme.AnimalFont
+import com.example.animalshelterfirebase.ui.theme.BackgroundGray
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun RegisterScreen(
@@ -44,8 +55,6 @@ fun RegisterScreen(
     var password by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
 
-
-
     var emailError by remember { mutableStateOf(false) }
     var birthDateError by remember { mutableStateOf(false) }
     var phoneError by remember { mutableStateOf(false) }
@@ -53,106 +62,162 @@ fun RegisterScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .statusBarsPadding()
+            .padding(16.dp)
     ) {
-        Text("Регистрация", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Имя") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-
-
-        OutlinedTextField(
-            value = birthDate,
-            onValueChange = {
-                birthDate = it
-                birthDateError = !isValidDate(it)
-            },
-            label = { Text("Дата рождения (дд.мм.гггг)") },
-            isError = birthDateError,
-            modifier = Modifier.fillMaxWidth()
-        )
-        if (birthDateError) {
-            Text("Некорректный формат даты", color = MaterialTheme.colorScheme.error)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = phone,
-            onValueChange = {
-                phone = it
-                phoneError = !isPhoneValid(it)
-            },
-            label = { Text("Телефон (+7XXXXXXXXXX)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true,
-            isError = phoneError,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
-        )
-        if (phoneError) {
-            Text("Введите корректный номер телефона, начиная с +7", color = MaterialTheme.colorScheme.error)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = {
-                email = it
-                emailError = !isValidEmail(it)
-            },
-            label = { Text("Электронная почта") },
-            isError = emailError,
-            modifier = Modifier.fillMaxWidth()
-        )
-        if (emailError) {
-            Text("Некорректный формат email", color = MaterialTheme.colorScheme.error)
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Пароль") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        error?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(it, color = MaterialTheme.colorScheme.error)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(
-            onClick = {
-                signUp(
-                    auth,
-                    email,
-                    password,
-                    name,
-                    birthDate,
-                    phone,
-                    onSignUpSuccess = onRegistered,
-                    onSignUpFailure = { error = it }
-                )
-            },
-            modifier = Modifier.fillMaxWidth()
+        // Верхняя панель
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
         ) {
-            Text("Зарегистрироваться")
+            TextButton(
+                onClick = onBack,
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
+                Text(
+                    text = "Назад",
+                    fontSize = 16.sp,
+                    fontFamily = AnimalFont,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Text(
+                text = "Регистрация",
+                fontSize = 20.sp,
+                fontFamily = AnimalFont,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.align(Alignment.Center)
+            )
         }
 
-        TextButton(onClick = onBack) {
-            Text("Назад")
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            fun modifierField() = Modifier
+                .fillMaxWidth()
+
+            @Composable
+            fun fieldColors() = TextFieldDefaults.colors(
+                focusedContainerColor = BackgroundGray,
+                unfocusedContainerColor = BackgroundGray,
+                disabledContainerColor = Color.LightGray,
+                errorContainerColor = Color.LightGray,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent,
+                errorIndicatorColor = Color.Transparent
+            )
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Имя") },
+                modifier = modifierField(),
+                shape = RoundedCornerShape(10.dp),
+                colors = fieldColors()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = birthDate,
+                onValueChange = {
+                    birthDate = it
+                    birthDateError = !isValidDate(it)
+                },
+                label = { Text("Дата рождения (дд.мм.гггг)") },
+                isError = birthDateError,
+                modifier = modifierField(),
+                shape = RoundedCornerShape(10.dp),
+                colors = fieldColors()
+            )
+            if (birthDateError) {
+                Text("Некорректный формат даты", color = MaterialTheme.colorScheme.error)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = phone,
+                onValueChange = {
+                    phone = it
+                    phoneError = !isPhoneValid(it)
+                },
+                label = { Text("Телефон (+7XXXXXXXXXX)") },
+                isError = phoneError,
+                modifier = modifierField(),
+                shape = RoundedCornerShape(10.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                colors = fieldColors()
+            )
+            if (phoneError) {
+                Text("Введите корректный номер телефона, начиная с +7", color = MaterialTheme.colorScheme.error)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = {
+                    email = it
+                    emailError = !isValidEmail(it)
+                },
+                label = { Text("Электронная почта") },
+                isError = emailError,
+                modifier = modifierField(),
+                shape = RoundedCornerShape(10.dp),
+                colors = fieldColors()
+            )
+            if (emailError) {
+                Text("Некорректный формат email", color = MaterialTheme.colorScheme.error)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Пароль") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = modifierField(),
+                shape = RoundedCornerShape(10.dp),
+                colors = fieldColors()
+            )
+
+            error?.let {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(it, color = MaterialTheme.colorScheme.error)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            ButtonBlue(
+                text = "Зарегистрироваться",
+                onClick = {
+                    signUp(
+                        auth,
+                        email,
+                        password,
+                        name,
+                        birthDate,
+                        phone,
+                        onSignUpSuccess = onRegistered,
+                        onSignUpFailure = { error = it }
+                    )
+                },
+                modifier = modifierField()
+            )
         }
     }
 }
+
 
 
 fun signUp(
