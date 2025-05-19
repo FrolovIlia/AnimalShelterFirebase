@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.ui.android)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.webkit)
+    implementation(libs.androidx.animation.core.lint)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -75,5 +76,6 @@ dependencies {
     implementation(libs.ui.tooling)
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.security.crypto)
+    implementation(libs.androidx.material.icons.extended)
 
 }
