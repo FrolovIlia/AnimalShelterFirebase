@@ -1,8 +1,6 @@
 package com.example.animalshelterfirebase.ui.registration.ui
 
-import android.app.DatePickerDialog
 import android.util.Patterns
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,7 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,11 +43,9 @@ fun RegisterScreen(
     onBack: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    val context = LocalContext.current
 
     var name by remember { mutableStateOf("") }
     var birthDate by remember { mutableStateOf("") }
-    var phone by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -89,7 +85,7 @@ fun RegisterScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        fun ModifierField() = Modifier.fillMaxWidth()
+        fun modifierField() = Modifier.fillMaxWidth()
 
         @Composable
         fun fieldColors() = TextFieldDefaults.colors(
@@ -107,7 +103,7 @@ fun RegisterScreen(
             value = name,
             onValueChange = { name = it },
             label = { Text("Имя") },
-            modifier = ModifierField(),
+            modifier = modifierField(),
             shape = RoundedCornerShape(10.dp),
             colors = fieldColors(),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
@@ -115,8 +111,6 @@ fun RegisterScreen(
         )
 
         Spacer(Modifier.height(8.dp))
-
-
 
         OutlinedTextField(
             value = birthDateField,
@@ -146,7 +140,7 @@ fun RegisterScreen(
             },
             label = { Text("Дата рождения (ДД.ММ.ГГГГ)") },
             isError = birthDateError,
-            modifier = ModifierField(),
+            modifier = modifierField(),
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
@@ -166,7 +160,6 @@ fun RegisterScreen(
         OutlinedTextField(
             value = phone,
             onValueChange = {
-                // Подставляем +7 только если пользователь удалил его
                 phone = if (it.isEmpty()) "+7"
                 else if (!it.startsWith("+7")) "+7" + it.filter { ch -> ch.isDigit() }
                 else it
@@ -174,7 +167,7 @@ fun RegisterScreen(
             },
             label = { Text("Телефон (+7XXXXXXXXXX)") },
             isError = phoneError,
-            modifier = ModifierField(),
+            modifier = modifierField(),
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Down) }),
@@ -193,7 +186,7 @@ fun RegisterScreen(
             },
             label = { Text("Email") },
             isError = emailError,
-            modifier = ModifierField(),
+            modifier = modifierField(),
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Down) }),
@@ -216,7 +209,7 @@ fun RegisterScreen(
                     )
                 }
             },
-            modifier = ModifierField(),
+            modifier = modifierField(),
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -260,7 +253,7 @@ fun RegisterScreen(
                     }
                 )
             },
-            modifier = ModifierField()
+            modifier = modifierField()
         )
 
         if (isLoading) {

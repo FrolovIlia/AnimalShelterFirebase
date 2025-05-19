@@ -73,14 +73,14 @@ fun ButtonWhite(
 
     val backgroundColor = if (isPressed) BackgroundGray else ButtonColorWhite
 
-    val shape = RoundedCornerShape(30.dp) // или любой другой радиус
+    val shape = RoundedCornerShape(30.dp)
 
     Button(
         onClick = onClick,
         modifier = modifier
             .height(52.dp)
-            .border(1.dp, BackgroundSecondary, shape) // теперь рамка повторяет форму
-            .clip(shape), // опционально, для предотвращения "выпадения" содержимого за края
+            .border(1.dp, BackgroundSecondary, shape)
+            .clip(shape),
         shape = shape,
         interactionSource = interactionSource,
         colors = ButtonDefaults.buttonColors(
