@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import com.example.animalshelterfirebase.data.MainScreenDataObject
-import com.example.animalshelterfirebase.ui.login.ButtonBlue
+import com.example.animalshelterfirebase.utils.ButtonBlue
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
 import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.google.firebase.auth.FirebaseAuth

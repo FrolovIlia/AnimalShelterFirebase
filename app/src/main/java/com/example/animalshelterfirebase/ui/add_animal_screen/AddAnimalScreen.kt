@@ -24,8 +24,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.ui.data.AddScreenObject
-import com.example.animalshelterfirebase.ui.login.ButtonWhite
-import com.example.animalshelterfirebase.ui.login.RoundedCornerTextField
+import com.example.animalshelterfirebase.utils.ButtonWhite
 import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore

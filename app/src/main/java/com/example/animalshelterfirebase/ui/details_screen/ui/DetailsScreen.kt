@@ -30,8 +30,8 @@ import coil.compose.AsyncImage
 import com.example.animalshelterfirebase.R
 
 import com.example.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
-import com.example.animalshelterfirebase.ui.login.ButtonBlue
-import com.example.animalshelterfirebase.ui.login.ButtonWhite
+import com.example.animalshelterfirebase.utils.ButtonBlue
+import com.example.animalshelterfirebase.utils.ButtonWhite
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
 import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 

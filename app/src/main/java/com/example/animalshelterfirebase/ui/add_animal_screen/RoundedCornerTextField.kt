@@ -1,4 +1,4 @@
-package com.example.animalshelterfirebase.ui.login
+package com.example.animalshelterfirebase.ui.add_animal_screen
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth

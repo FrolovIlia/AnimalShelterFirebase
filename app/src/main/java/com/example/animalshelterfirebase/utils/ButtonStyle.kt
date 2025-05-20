@@ -1,4 +1,4 @@
-package com.example.animalshelterfirebase.ui.login
+package com.example.animalshelterfirebase.utils
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
