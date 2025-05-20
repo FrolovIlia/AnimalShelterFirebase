@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
+import com.example.animalshelterfirebase.ui.theme.ButtonColorWhite
 
 @Composable
 fun BottomMenu(
@@ -28,7 +29,9 @@ fun BottomMenu(
 ) {
     val context = LocalContext.current
 
-    NavigationBar {
+    NavigationBar(
+        containerColor = ButtonColorWhite
+    ) {
         NavigationBarItem(
             icon = {
                 CircularIcon(

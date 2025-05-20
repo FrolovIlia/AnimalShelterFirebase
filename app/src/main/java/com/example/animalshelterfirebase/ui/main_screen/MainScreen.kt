@@ -68,6 +68,7 @@ import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.runtime.SideEffect
+import com.example.animalshelterfirebase.ui.theme.ButtonColorWhite
 
 
 @Composable
@@ -215,7 +216,7 @@ fun MainScreen(
                             },
                         shape = shape,
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected) ButtonColorBlue else MaterialTheme.colorScheme.surface
+                            containerColor = if (isSelected) ButtonColorBlue else ButtonColorWhite
                         )
                     ) {
                         Row(
