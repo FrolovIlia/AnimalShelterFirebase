@@ -36,13 +36,15 @@ import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.ui.theme.BackgroundWhite
 
+
 @Composable
 fun AnimalListItemUI(
     showEditButton: Boolean = false,
     animal: Animal,
+    isFavourite: Boolean,
     onEditClick: (Animal) -> Unit = {},
     onFavouriteClick: () -> Unit = {},
-    onAnimalClick: (Animal) ->Unit = {}
+    onAnimalClick: (Animal) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -78,7 +80,7 @@ fun AnimalListItemUI(
             ) {
                 Image(
                     painter = painterResource(
-                        if (animal.isFavourite) {
+                        if (isFavourite) {
                             R.drawable.favourite
                         } else {
                             R.drawable.favourite_border
@@ -86,6 +88,7 @@ fun AnimalListItemUI(
                     ),
                     contentDescription = "Favorite icon"
                 )
+
             }
 
             if (showEditButton) {

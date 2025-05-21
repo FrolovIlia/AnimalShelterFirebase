@@ -79,60 +79,51 @@ fun MainScreen(
     onAnimalClick: (Animal) -> Unit,
     onAdminClick: () -> Unit
 ) {
-    val animalsListState = remember { mutableStateOf(emptyList<Animal>()) }
-    val isAdminState = remember { mutableStateOf(false) }
     val db = remember { Firebase.firestore }
+    val context = LocalContext.current
+    val isGuest = navData.uid == "guest"
+
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsState()
+    val animals by viewModel.animals.collectAsState()
+    val favoriteIds by viewModel.favoriteIds.collectAsState()
+
     var isFavoritesOnly by remember { mutableStateOf(false) }
+    val isAdminState = remember { mutableStateOf(false) }
 
-    val isGuest = navData.uid == "guest"
-    val context = LocalContext.current
-
-    val categories = listOf(
-        AnimalCategories(R.drawable.ic_all_animals, "Все"),
-        AnimalCategories(R.drawable.ic_cats, "Котики"),
-        AnimalCategories(R.drawable.ic_dogs, "Собачки")
-    )
-
-    LaunchedEffect(selectedTab, selectedCategory) {
+    // Проверяем права администратора
+    LaunchedEffect(navData.uid) {
         isAdmin(navData.uid) { isAdmin ->
             isAdminState.value = isAdmin
         }
+    }
 
+    // Загрузка данных при смене вкладки или категории
+    LaunchedEffect(selectedTab, selectedCategory) {
         if (selectedTab == BottomMenuItem.Favs) {
+            isFavoritesOnly = true
             if (isGuest) {
-                Log.w("MainScreen", "Гость попытался открыть Избранное")
                 Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
-                animalsListState.value = emptyList()
+                viewModel.setAnimals(emptyList())
             } else {
-                loadFavsAnimals(db, navData.uid) { list ->
-                    animalsListState.value = list
-                }
+                viewModel.loadFavorites(db, navData.uid)
             }
-        }
-        else {
-            // Загружаем по категории
+        } else {
+            isFavoritesOnly = false
             if (isGuest) {
-                getAllAnimals(db, emptyList(), selectedCategory) { animals ->
-                    animalsListState.value = animals
-                }
+                viewModel.loadAnimals(db, "guest") // Для гостя uid не нужен, передаём "guest" для игнорирования избранного
             } else {
-                getAllFavsIds(db, navData.uid) { favs ->
-                    getAllAnimals(db, favs, selectedCategory) { animals ->
-                        animalsListState.value = animals
-                    }
-                }
+                viewModel.loadAnimals(db, navData.uid)
             }
         }
     }
 
-
+    // Устанавливаем цвет статусбара
     val systemUiController = rememberSystemUiController()
     SideEffect {
         systemUiController.setStatusBarColor(
-            color = BackgroundGray, // используй свой цвет из темы
-            darkIcons = true         // или false, если иконки должны быть белыми
+            color = BackgroundGray,
+            darkIcons = true
         )
     }
 
@@ -144,25 +135,6 @@ fun MainScreen(
                 onTabSelected = { selected ->
                     viewModel.selectTab(selected)
                     viewModel.selectCategory("Все")
-                    isFavoritesOnly = selected == BottomMenuItem.Favs
-
-                    if (selected == BottomMenuItem.Favs) {
-                        loadFavsAnimals(db, navData.uid) { list ->
-                            animalsListState.value = list
-                        }
-                    } else {
-                        if (isGuest) {
-                            getAllAnimals(db, emptyList(), "Все") { animals ->
-                                animalsListState.value = animals
-                            }
-                        } else {
-                            getAllFavsIds(db, navData.uid) { favs ->
-                                getAllAnimals(db, favs, "Все") { animals ->
-                                    animalsListState.value = animals
-                                }
-                            }
-                        }
-                    }
                 },
                 isRegistered = !isGuest
             )
@@ -174,10 +146,10 @@ fun MainScreen(
                 .background(BackgroundGray)
                 .padding(paddingValues)
         ) {
-            // Кнопка "Добавить животное" только для администраторов
+            // Кнопка добавления животного для администратора и не гостя
             if (isAdminState.value && !isGuest) {
                 Button(
-                    onClick = { onAdminClick() },
+                    onClick = onAdminClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp),
@@ -187,7 +159,13 @@ fun MainScreen(
                 }
             }
 
-            // Отображение категорий
+            // Категории животных
+            val categories = listOf(
+                AnimalCategories(R.drawable.ic_all_animals, "Все"),
+                AnimalCategories(R.drawable.ic_cats, "Котики"),
+                AnimalCategories(R.drawable.ic_dogs, "Собачки")
+            )
+
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -212,21 +190,6 @@ fun MainScreen(
                             .clip(shape)
                             .clickable {
                                 viewModel.selectCategory(category.categoryName)
-                                if (isGuest) {
-                                    getAllAnimals(
-                                        db,
-                                        emptyList(),
-                                        category.categoryName
-                                    ) { animals ->
-                                        animalsListState.value = animals
-                                    }
-                                } else {
-                                    getAllFavsIds(db, navData.uid) { favs ->
-                                        getAllAnimals(db, favs, category.categoryName) { animals ->
-                                            animalsListState.value = animals
-                                        }
-                                    }
-                                }
                             },
                         shape = shape,
                         colors = CardDefaults.cardColors(
@@ -259,25 +222,22 @@ fun MainScreen(
                 }
             }
 
-
-            // Если животных нет, показываем пустой экран
-            if (animalsListState.value.isEmpty()) {
+            // Пустой экран, если нет животных
+            if (animals.isEmpty()) {
                 EmptyStateScreen()
             } else {
-                // Отображение животных
+                // Сетка с животными
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(animalsListState.value) { animal ->
+                    items(animals) { animal ->
                         AnimalListItemUI(
-                            // Показываем кнопку редактирования только для администраторов
-                            showEditButton = isAdminState.value, // Только администратор может редактировать
-                            animal,
-                            onAnimalClick = { anim ->
-                                onAnimalClick(anim)
-                            },
-                            onEditClick = { onAnimalEditClick(it) },
+                            showEditButton = isAdminState.value,
+                            animal = animal,
+                            isFavourite = animal.isFavourite,
+                            onAnimalClick = onAnimalClick,
+                            onEditClick = onAnimalEditClick,
                             onFavouriteClick = {
                                 if (isGuest) {
                                     Toast.makeText(
@@ -287,28 +247,7 @@ fun MainScreen(
                                     ).show()
                                     return@AnimalListItemUI
                                 }
-
-                                val wasFavourite = animal.isFavourite
-                                val updatedFavourite = !wasFavourite
-
-                                onFavs(
-                                    db = db,
-                                    uid = navData.uid,
-                                    favourite = Favourite(animal.key),
-                                    isFav = updatedFavourite
-                                )
-
-                                animalsListState.value = animalsListState.value.map { current ->
-                                    if (current.key == animal.key) {
-                                        current.copy(isFavourite = updatedFavourite)
-                                    } else current
-                                }
-
-                                if (isFavoritesOnly) {
-                                    loadFavsAnimals(db, navData.uid) { updatedList ->
-                                        animalsListState.value = updatedList
-                                    }
-                                }
+                                viewModel.toggleFavorite(db, navData.uid, animal.key)
                             }
                         )
                     }
@@ -365,7 +304,7 @@ fun getAllAnimals(
             onAnimals(animalsList)
         }
         .addOnFailureListener {
-            // обработка ошибки при необходимости
+
         }
 }
 
