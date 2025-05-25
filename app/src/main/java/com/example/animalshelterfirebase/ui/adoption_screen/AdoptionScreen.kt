@@ -16,14 +16,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
 import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.example.animalshelterfirebase.utils.ButtonBlue
 
 @Composable
 fun AdoptionScreen(
-    onSubmit: (String) -> Unit,
-    onBack: () -> Unit
+    animal: Animal,
+    onBack: () -> Unit,
+    onSubmitSuccess: () -> Unit
 ) {
     var text by remember { mutableStateOf(TextFieldValue("")) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -76,7 +78,7 @@ fun AdoptionScreen(
             onValueChange = { newText ->
                 text = newText
                 error = if (newText.text.length < 10) {
-                    "Пожалуйста, опишите причину подробнее"
+                    "Пожалуйста, опишите опыт подробнее"
                 } else {
                     null
                 }
@@ -109,12 +111,12 @@ fun AdoptionScreen(
             text = "Отправить заявку",
             onClick = {
                 if (text.text.length < 10) {
-                    error = "Пожалуйста, опишите ваш опыт подробнее"
+                    error = "Пожалуйста, опишите опыт подробнее"
                 } else {
-                    onSubmit(text.text)
+                    onSubmitSuccess() // Вызываем колбек успешной отправки
                 }
             },
-            modifier = modifierField()
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

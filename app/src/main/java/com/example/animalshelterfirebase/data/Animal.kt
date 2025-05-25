@@ -8,5 +8,7 @@ data class Animal(
     val age: String = "",
     val category: String = "",
     val imageUrl: String = "",
-    val isFavourite: Boolean = false
+    val isFavourite: Boolean = false,
+    val curatorPhone: String = "",
+    val location: String = ""
 )

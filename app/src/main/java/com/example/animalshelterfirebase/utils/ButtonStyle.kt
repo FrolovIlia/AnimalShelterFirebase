@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -19,12 +18,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
-import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
-
 import com.example.animalshelterfirebase.ui.theme.BackgroundGray
+import com.example.animalshelterfirebase.ui.theme.BackgroundSecondary
 import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.example.animalshelterfirebase.ui.theme.ButtonColorWhite
-
 
 @Composable
 fun ButtonBlue(
@@ -34,14 +31,12 @@ fun ButtonBlue(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-
     val backgroundColor = if (isPressed) BackgroundGray else ButtonColorBlue
-    val shape = RoundedCornerShape(30.dp)
 
     Button(
         onClick = onClick,
         modifier = modifier.height(52.dp),
-        shape = shape,
+        shape = RoundedCornerShape(30.dp),
         interactionSource = interactionSource,
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor,
@@ -50,17 +45,14 @@ fun ButtonBlue(
     ) {
         Text(
             text = text,
-            color = Color.Black,
-            fontFamily = AnimalFont,
             style = TextStyle(
                 fontSize = 16.sp,
                 lineHeight = 36.sp
-            )
+            ),
+            fontFamily = AnimalFont
         )
     }
 }
-
-
 
 @Composable
 fun ButtonWhite(
@@ -70,9 +62,7 @@ fun ButtonWhite(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
-
     val backgroundColor = if (isPressed) BackgroundGray else ButtonColorWhite
-
     val shape = RoundedCornerShape(30.dp)
 
     Button(
@@ -90,17 +80,14 @@ fun ButtonWhite(
     ) {
         Text(
             text = text,
-            color = Color.Black,
-            fontFamily = AnimalFont,
             style = TextStyle(
                 fontSize = 16.sp,
                 lineHeight = 36.sp
-            )
+            ),
+            fontFamily = AnimalFont
         )
     }
 }
-
-
 
 @Composable
 fun ButtonTransparent(
@@ -111,28 +98,23 @@ fun ButtonTransparent(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    val backgroundColor = if (isPressed) BackgroundGray else Color.Transparent
-    val shape = RoundedCornerShape(30.dp)
-
     Button(
         onClick = onClick,
-        modifier = modifier
-            .height(52.dp),
-        shape = shape,
+        modifier = modifier.height(52.dp),
+        shape = RoundedCornerShape(30.dp),
         interactionSource = interactionSource,
         colors = ButtonDefaults.buttonColors(
-            containerColor = backgroundColor,
+            containerColor = if (isPressed) BackgroundGray else Color.Transparent,
             contentColor = Color.Black
         )
     ) {
         Text(
             text = text,
-            color = Color.Black,
-            fontFamily = AnimalFont,
             style = TextStyle(
                 fontSize = 16.sp,
                 lineHeight = 36.sp
-            )
+            ),
+            fontFamily = AnimalFont
         )
     }
 }

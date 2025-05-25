@@ -21,6 +21,8 @@ import com.example.animalshelterfirebase.ui.start_screen.ui.StartScreen
 import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.view.WindowCompat
+import com.example.animalshelterfirebase.data.Animal
+import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionNavObject
 import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionScreen
 import com.example.animalshelterfirebase.ui.authorization.LoginScreenObject
 import com.example.animalshelterfirebase.ui.authorization.createEncryptedPrefs
@@ -116,8 +118,17 @@ class MainActivity : ComponentActivity() {
                     DetailsScreen(
                         navController = navController,
                         navObject = navData,
-                        onBackClick = {
-                            navController.popBackStack()
+                        onBackClick = { navController.popBackStack() },
+                        onAdoptClick = { animal ->
+                            navController.navigate(
+                                AdoptionNavObject(
+                                    name = animal.name,
+                                    age = animal.age,
+                                    curatorPhone = animal.curatorPhone,
+                                    location = animal.location,
+                                    description = animal.description
+                                )
+                            )
                         }
                     )
                 }
@@ -136,15 +147,28 @@ class MainActivity : ComponentActivity() {
                 }
 
 
-                composable("adoption") {
+                composable<AdoptionNavObject> { navEntry ->
+                    val navData = navEntry.toRoute<AdoptionNavObject>()
                     AdoptionScreen(
+                        animal = Animal(
+                            name = navData.name,
+                            age = navData.age,
+                            curatorPhone = navData.curatorPhone,
+                            location = navData.location,
+                            description = navData.description
+                        ),
                         onBack = { navController.popBackStack() },
-                        onSubmit = { message ->
-                            // обработка заявки, например, отправка на сервер
-                            navController.popBackStack() // возврат после отправки
+                        onSubmitSuccess = {
+                            // Передаем флаг в предыдущий экран
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("showAdoptionSuccess", true)
+                            // Корректный возврат на предыдущий экран (DetailsScreen)
+                            navController.navigateUp()
                         }
                     )
                 }
+
 
 
             }

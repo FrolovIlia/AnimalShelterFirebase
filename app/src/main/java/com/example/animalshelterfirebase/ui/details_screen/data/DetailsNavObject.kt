@@ -9,7 +9,7 @@ data class DetailsNavObject(
     val age: String = "",
     val category: String = "",
     val description: String = "",
-    val volunteerPhone: String = "",
-    val location: String = ""
+    val curatorPhone: String = "уточняется",
+    val location: String = "уточняется"
 
 )

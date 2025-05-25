@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.animalshelterfirebase.R
+import com.example.animalshelterfirebase.data.Animal
 
 import com.example.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
 import com.example.animalshelterfirebase.utils.ButtonBlue
@@ -42,10 +43,9 @@ import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 fun DetailsScreen(
     navController: NavController,
     navObject: DetailsNavObject = DetailsNavObject(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onAdoptClick: (Animal) -> Unit
 ) {
-
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,6 +62,7 @@ fun DetailsScreen(
                     .fillMaxWidth()
                     .padding(8.dp)
             )
+
             Column(modifier = Modifier.fillMaxWidth()) {
                 Box(
                     modifier = Modifier
@@ -79,8 +80,7 @@ fun DetailsScreen(
 
                     IconButton(
                         onClick = onBackClick,
-                        modifier = Modifier
-                            .padding(24.dp)
+                        modifier = Modifier.padding(24.dp)
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
@@ -90,19 +90,9 @@ fun DetailsScreen(
                     }
                 }
 
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                )
+                Spacer(modifier = Modifier.height(5.dp))
 
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-
-
+                Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         text = navObject.name,
                         color = Color.Black,
@@ -116,8 +106,6 @@ fun DetailsScreen(
                             .height(28.dp)
                     ) {
                         Text(text = navObject.age)
-//                        Text(text = navObject.category)
-
                     }
 
                     Text(
@@ -126,12 +114,8 @@ fun DetailsScreen(
                         fontFamily = AnimalFont,
                         fontSize = 16.sp
                     )
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp)
-                    )
 
+                    Spacer(modifier = Modifier.height(10.dp))
 
                     Row(
                         modifier = Modifier
@@ -139,19 +123,17 @@ fun DetailsScreen(
                             .height(44.dp)
                     ) {
                         Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(44.dp)
+                            modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                modifier = Modifier.padding(bottom = 5.dp),
                                 text = "Номер куратора",
                                 color = Color.Gray,
                                 fontFamily = AnimalFont,
-                                fontSize = 13.sp
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(bottom = 5.dp)
                             )
                             Text(
-                                text = "+79301234567",
+                                text = navObject.curatorPhone,
                                 color = Color.Gray,
                                 fontFamily = AnimalFont,
                                 fontSize = 16.sp
@@ -159,19 +141,17 @@ fun DetailsScreen(
                         }
 
                         Column(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(44.dp)
+                            modifier = Modifier.weight(1f)
                         ) {
                             Text(
-                                modifier = Modifier.padding(bottom = 5.dp),
                                 text = "Расположение",
                                 color = Color.Gray,
                                 fontFamily = AnimalFont,
-                                fontSize = 13.sp
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(bottom = 5.dp)
                             )
                             Text(
-                                text = "Вольер 4",
+                                text = navObject.location,
                                 color = Color.Gray,
                                 fontFamily = AnimalFont,
                                 fontSize = 16.sp
@@ -190,16 +170,25 @@ fun DetailsScreen(
         ) {
             ButtonBlue(
                 text = "Усыновить",
-                modifier = Modifier.weight(1f)
-            ) {
-                navController.navigate("adoption")
-            }
+                modifier = Modifier.weight(1f),
+                onClick = {
+                    val animal = Animal(
+                        name = navObject.name,
+                        age = navObject.age,
+                        description = navObject.description,
+                        imageUrl = navObject.imageUrl,
+                        curatorPhone = navObject.curatorPhone,
+                        location = navObject.location
+                    )
+                    onAdoptClick(animal)
+                }
+            )
+
             ButtonWhite(
                 text = "Донат",
-                modifier = Modifier.weight(1f)
-            ) {
-
-            }
+                modifier = Modifier.weight(1f),
+                onClick = { /* Обработка доната */ }
+            )
         }
     }
 }
