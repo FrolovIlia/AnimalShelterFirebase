@@ -80,6 +80,7 @@ class MainActivity : ComponentActivity() {
                         onAnimalClick = { anim ->
                             navController.navigate(
                                 DetailsNavObject(
+                                    uid = navData.uid,
                                     imageUrl = anim.imageUrl,
                                     name = anim.name,
                                     age = anim.age,

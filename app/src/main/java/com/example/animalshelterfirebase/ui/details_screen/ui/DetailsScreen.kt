@@ -1,5 +1,6 @@
 package com.example.animalshelterfirebase.ui.details_screen.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,8 +27,10 @@ import com.example.animalshelterfirebase.utils.ButtonBlue
 import com.example.animalshelterfirebase.utils.ButtonWhite
 
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import com.example.animalshelterfirebase.utils.ButtonTransparent
+
 
 @Composable
 fun DetailsScreen(
@@ -42,6 +45,8 @@ fun DetailsScreen(
         ?.observeAsState(initial = false) ?: remember { mutableStateOf(false) }
 
     var showNotification by remember { mutableStateOf(false) }
+
+    val isGuest = navObject.uid == "guest" || navObject.uid.isEmpty()
 
     LaunchedEffect(adoptionSuccessState.value) {
         if (adoptionSuccessState.value) {
@@ -105,7 +110,7 @@ fun DetailsScreen(
                             fontSize = 36.sp
                         )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         Row(
                             modifier = Modifier
@@ -175,19 +180,25 @@ fun DetailsScreen(
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                val context = LocalContext.current
+
                 ButtonBlue(
                     text = "Усыновить",
                     modifier = Modifier.weight(1f),
                     onClick = {
-                        val animal = Animal(
-                            name = navObject.name,
-                            age = navObject.age,
-                            description = navObject.description,
-                            imageUrl = navObject.imageUrl,
-                            curatorPhone = navObject.curatorPhone,
-                            location = navObject.location
-                        )
-                        onAdoptClick(animal)
+                        if (isGuest) {
+                            Toast.makeText(context, "Авторируйтесь, чтобы подать заявку", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val animal = Animal(
+                                name = navObject.name,
+                                age = navObject.age,
+                                description = navObject.description,
+                                imageUrl = navObject.imageUrl,
+                                curatorPhone = navObject.curatorPhone,
+                                location = navObject.location
+                            )
+                            onAdoptClick(animal)
+                        }
                     }
                 )
 
