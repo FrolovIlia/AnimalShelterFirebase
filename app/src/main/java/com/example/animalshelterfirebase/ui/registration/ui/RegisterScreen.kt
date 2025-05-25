@@ -72,7 +72,10 @@ fun RegisterScreen(
                 .fillMaxWidth()
                 .height(56.dp),
         ) {
-            TextButton(onClick = onBack, modifier = Modifier.align(Alignment.CenterStart)) {
+            TextButton(
+                onClick = onBack,
+                modifier = Modifier.align(Alignment.CenterStart)
+            ) {
                 Text("Назад", fontSize = 16.sp, fontFamily = AnimalFont)
             }
             Text(
@@ -130,7 +133,11 @@ fun RegisterScreen(
 
                 val newTextFieldValue = TextFieldValue(
                     text = formatted,
-                    selection = androidx.compose.ui.text.TextRange(formatted.length.coerceAtMost(cursorPos))
+                    selection = androidx.compose.ui.text.TextRange(
+                        formatted.length.coerceAtMost(
+                            cursorPos
+                        )
+                    )
                 )
 
                 birthDateField = newTextFieldValue
@@ -169,7 +176,10 @@ fun RegisterScreen(
             isError = phoneError,
             modifier = modifierField(),
             shape = RoundedCornerShape(10.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Next
+            ),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Down) }),
             colors = fieldColors()
         )
@@ -188,7 +198,10 @@ fun RegisterScreen(
             isError = emailError,
             modifier = modifierField(),
             shape = RoundedCornerShape(10.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(androidx.compose.ui.focus.FocusDirection.Down) }),
             colors = fieldColors()
         )
@@ -276,7 +289,8 @@ fun signUp(
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
-                val user = auth.currentUser ?: return@addOnCompleteListener onSignUpFailure("Ошибка: пользователь не найден")
+                val user = auth.currentUser
+                    ?: return@addOnCompleteListener onSignUpFailure("Ошибка: пользователь не найден")
                 val userData = mapOf(
                     "name" to name,
                     "birthDate" to birthDate,
@@ -286,7 +300,14 @@ fun signUp(
                 Firebase.firestore.collection("users")
                     .document(user.uid)
                     .set(userData)
-                    .addOnSuccessListener { onSignUpSuccess(MainScreenDataObject(uid = user.uid, email = email)) }
+                    .addOnSuccessListener {
+                        onSignUpSuccess(
+                            MainScreenDataObject(
+                                uid = user.uid,
+                                email = email
+                            )
+                        )
+                    }
                     .addOnFailureListener { e -> onSignUpFailure("Ошибка при сохранении данных: ${e.message}") }
             } else {
                 onSignUpFailure(task.exception?.message ?: "Ошибка регистрации")

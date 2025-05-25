@@ -21,6 +21,7 @@ import com.example.animalshelterfirebase.ui.start_screen.ui.StartScreen
 import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.view.WindowCompat
+import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionScreen
 import com.example.animalshelterfirebase.ui.authorization.LoginScreenObject
 import com.example.animalshelterfirebase.ui.authorization.createEncryptedPrefs
 
@@ -113,6 +114,7 @@ class MainActivity : ComponentActivity() {
                 composable<DetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<DetailsNavObject>()
                     DetailsScreen(
+                        navController = navController,
                         navObject = navData,
                         onBackClick = {
                             navController.popBackStack()
@@ -132,6 +134,18 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+
+
+                composable("adoption") {
+                    AdoptionScreen(
+                        onBack = { navController.popBackStack() },
+                        onSubmit = { message ->
+                            // обработка заявки, например, отправка на сервер
+                            navController.popBackStack() // возврат после отправки
+                        }
+                    )
+                }
+
 
             }
         }
