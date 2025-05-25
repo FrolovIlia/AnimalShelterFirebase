@@ -116,7 +116,6 @@ class MainActivity : ComponentActivity() {
                 composable<DetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<DetailsNavObject>()
                     DetailsScreen(
-                        navController = navController,
                         navObject = navData,
                         onBackClick = { navController.popBackStack() },
                         onAdoptClick = { animal ->
@@ -129,7 +128,8 @@ class MainActivity : ComponentActivity() {
                                     description = animal.description
                                 )
                             )
-                        }
+                        },
+                        savedStateHandle = navEntry.savedStateHandle
                     )
                 }
 

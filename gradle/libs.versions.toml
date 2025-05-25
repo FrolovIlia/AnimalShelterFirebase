@@ -26,6 +26,7 @@ serializationKotlin = "1.7.1"
 uiTooling = "1.8.1"
 webkit = "1.13.0"
 animationCoreLint = "1.8.1"
+runtimeLivedata = "1.8.2"
 
 
 [libraries]
@@ -63,6 +64,7 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx",
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 androidx-animation-core-lint = { group = "androidx.compose.animation", name = "animation-core-lint", version.ref = "animationCoreLint" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

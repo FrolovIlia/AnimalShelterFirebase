@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.webkit)
     implementation(libs.androidx.animation.core.lint)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
