@@ -127,25 +127,31 @@ fun LoginScreen(
             ButtonBlue(
                 text = "Войти",
                 onClick = {
-                    signIn(
-                        auth = auth,
-                        email = email,
-                        password = password,
-                        onSignInSuccess = { userData ->
-                            with(prefs.edit()) {
-                                putString("email", email)
-                                putString("password", password)
-                                apply()
+                    if (email.isBlank() || password.isBlank()) {
+                        errorMessage = "Пожалуйста, заполните все поля."
+                    } else {
+                        errorMessage = null // Очистим предыдущее сообщение об ошибке
+                        signIn(
+                            auth = auth,
+                            email = email,
+                            password = password,
+                            onSignInSuccess = { userData ->
+                                with(prefs.edit()) {
+                                    putString("email", email)
+                                    putString("password", password)
+                                    apply()
+                                }
+                                onNavigateToMainScreen(userData)
+                            },
+                            onSignInFailure = { error ->
+                                errorMessage = error
                             }
-                            onNavigateToMainScreen(userData)
-                        },
-                        onSignInFailure = { error ->
-                            errorMessage = error
-                        }
-                    )
+                        )
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+
 
             errorMessage?.let {
                 Spacer(modifier = Modifier.height(8.dp))
