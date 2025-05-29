@@ -7,7 +7,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -17,15 +19,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.ui.data.AddScreenObject
-import com.example.animalshelterfirebase.utils.ButtonWhite
+import com.example.animalshelterfirebase.ui.theme.AnimalFont
 import com.example.animalshelterfirebase.ui.theme.BackgroundGray
+import com.example.animalshelterfirebase.utils.ButtonWhite
+
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -47,6 +50,10 @@ fun AddAnimalScreen(
     val description = remember { mutableStateOf(navData.description) }
     val age = remember { mutableStateOf(navData.age) }
     val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
+    val feature = remember { mutableStateOf("") }
+    val location = remember { mutableStateOf("") }
+    val curatorPhone = remember { mutableStateOf("") }
+    val curatorPhoneError = remember { mutableStateOf(false) }
 
     val firestore = Firebase.firestore
     val storage = Firebase.storage
@@ -58,34 +65,30 @@ fun AddAnimalScreen(
         selectedImageUri.value = uri
     }
 
+    val imageModel = navImageUrl.value.ifEmpty { selectedImageUri.value?.toString() }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(BackgroundGray)
+            .padding(WindowInsets.systemBars.asPaddingValues())
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 50.dp, end = 50.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .padding(horizontal = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Добавление нового животного",
                 color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif,
-                fontSize = 25.sp
+                fontFamily = AnimalFont,
+                fontSize = 24.sp,
+                modifier = Modifier
+                    .padding(top = 16.dp, bottom = 12.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Center
             )
-
-            if (isLoading.value) {
-                CircularProgressIndicator()
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            Spacer(modifier = Modifier.size(10.dp))
-
-            val imageModel = navImageUrl.value.ifEmpty { selectedImageUri.value?.toString() }
 
             if (imageModel != null) {
                 Image(
@@ -93,107 +96,151 @@ fun AddAnimalScreen(
                     contentDescription = "animal image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(300.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .size(200.dp)
+                        .clip(RoundedCornerShape(8.dp))
                 )
             }
 
-            Spacer(modifier = Modifier.size(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            RoundedCornerDropDownMenu(selectedCategory.value) { selectedItem ->
-                selectedCategory.value = selectedItem
-            }
-            Spacer(modifier = Modifier.size(10.dp))
-
-            RoundedCornerTextField(
-                text = name.value,
-                label = "Кличка"
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                name.value = it
-            }
-            Spacer(modifier = Modifier.height(10.dp))
+                RoundedCornerDropDownMenu(selectedCategory.value) { selectedItem ->
+                    selectedCategory.value = selectedItem
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
-            RoundedCornerTextField(
-                singleLine = false,
-                maxLines = 5,
-                text = description.value,
-                label = "Описание"
-            ) {
-                description.value = it
-            }
-            Spacer(modifier = Modifier.height(10.dp))
+                RoundedCornerTextField(text = name.value, label = "Кличка") {
+                    name.value = it
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
-            RoundedCornerTextField(
-                text = age.value,
-                label = "Возраст"
-            ) {
-                age.value = it
-            }
-            Spacer(modifier = Modifier.height(8.dp))
+                RoundedCornerTextField(text = feature.value, label = "Особенность (кратко)") {
+                    feature.value = it
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
-            ButtonWhite(text = "Выбрать изображение") {
-                imageLauncher.launch("image/*")
-            }
+                RoundedCornerTextField(text = age.value, label = "Возраст") {
+                    age.value = it
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            ButtonWhite(text = "Сохранить") {
-
-                if (name.value.isBlank() ||
-                    description.value.isBlank() ||
-                    age.value.isBlank() ||
-                    selectedCategory.value.isBlank() ||
-                    (selectedImageUri.value == null && navImageUrl.value.isBlank())
+                RoundedCornerTextField(
+                    singleLine = false,
+                    maxLines = 3,
+                    text = description.value,
+                    label = "Описание"
                 ) {
-                    Toast.makeText(context, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show()
-                    return@ButtonWhite
+                    description.value = it
                 }
+                Spacer(modifier = Modifier.height(8.dp))
 
-                val animal = Animal(
-                    key = navData.key,
-                    name = name.value,
-                    description = description.value,
-                    age = age.value,
-                    category = selectedCategory.value,
-                    imageUrl = ""
-                )
+                RoundedCornerTextField(text = location.value, label = "Расположение") {
+                    location.value = it
+                }
+                Spacer(modifier = Modifier.height(8.dp))
 
-                isLoading.value = true
+                RoundedCornerTextField(
+                    text = curatorPhone.value,
+                    label = "Номер куратора"
+                ) {
+                    curatorPhone.value = if (it.isEmpty()) "+7"
+                    else if (!it.startsWith("+7")) "+7" + it.filter { ch -> ch.isDigit() }
+                    else it
 
-                if (selectedImageUri.value != null) {
-                    saveAnimalImage(
-                        oldImageUrl = navData.imageUrl,
-                        uri = selectedImageUri.value!!,
-                        storage = storage,
-                        firestore = firestore,
-                        animal = animal,
-                        onSaved = {
-                            isLoading.value = false
-                            Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT)
-                                .show()
-                            onSaved()
-                        },
-                        onError = {
-                            isLoading.value = false
-                            Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
-                        }
-                    )
-                } else {
-                    saveAnimalToFireStore(
-                        firestore = firestore,
-                        animal = animal.copy(imageUrl = navImageUrl.value),
-                        onSaved = {
-                            isLoading.value = false
-                            Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT)
-                                .show()
-                            onSaved()
-                        },
-                        onError = {
-                            isLoading.value = false
-                            Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
-                        }
+                    curatorPhoneError.value = !isPhoneValid(curatorPhone.value)
+                }
+                if (curatorPhoneError.value) {
+                    Text(
+                        text = "Неверный номер (должен быть формата +7XXXXXXXXXX)",
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                 }
+                Spacer(modifier = Modifier.height(12.dp))
+
+                ButtonWhite(text = "Выбрать изображение") {
+                    imageLauncher.launch("image/*")
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                if (isLoading.value) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                ButtonWhite(text = "Сохранить") {
+                    curatorPhoneError.value = !isPhoneValid(curatorPhone.value)
+
+                    if (name.value.isBlank() ||
+                        feature.value.isBlank() ||
+                        age.value.isBlank() ||
+                        description.value.isBlank() ||
+                        location.value.isBlank() ||
+                        curatorPhone.value.isBlank() ||
+                        curatorPhoneError.value ||
+                        selectedCategory.value.isBlank() ||
+                        (selectedImageUri.value == null && navImageUrl.value.isBlank())
+                    ) {
+                        Toast.makeText(context, "Пожалуйста, заполните все поля корректно", Toast.LENGTH_SHORT).show()
+                        return@ButtonWhite
+                    }
+
+                    val animal = Animal(
+                        key = navData.key,
+                        name = name.value,
+                        description = description.value,
+                        age = age.value,
+                        category = selectedCategory.value,
+                        imageUrl = "",
+                        curatorPhone = curatorPhone.value,
+                        location = location.value,
+                        feature = feature.value
+                    )
+
+                    isLoading.value = true
+
+                    if (selectedImageUri.value != null) {
+                        saveAnimalImage(
+                            oldImageUrl = navData.imageUrl,
+                            uri = selectedImageUri.value!!,
+                            storage = storage,
+                            firestore = firestore,
+                            animal = animal,
+                            onSaved = {
+                                isLoading.value = false
+                                Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
+                                onSaved()
+                            },
+                            onError = {
+                                isLoading.value = false
+                                Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    } else {
+                        saveAnimalToFireStore(
+                            firestore = firestore,
+                            animal = animal.copy(imageUrl = navImageUrl.value),
+                            onSaved = {
+                                isLoading.value = false
+                                Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
+                                onSaved()
+                            },
+                            onError = {
+                                isLoading.value = false
+                                Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -246,4 +293,8 @@ private fun saveAnimalToFireStore(
         .addOnFailureListener {
             onError()
         }
+}
+
+private fun isPhoneValid(phone: String): Boolean {
+    return Regex("^\\+7\\d{10}$").matches(phone)
 }

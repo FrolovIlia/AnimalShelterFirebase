@@ -10,5 +10,6 @@ data class Animal(
     val imageUrl: String = "",
     val isFavourite: Boolean = false,
     val curatorPhone: String = "",
-    val location: String = ""
+    val location: String = "",
+    val feature: String = ""
 )
