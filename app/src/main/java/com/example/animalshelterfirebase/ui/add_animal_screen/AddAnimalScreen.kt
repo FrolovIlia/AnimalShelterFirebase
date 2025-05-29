@@ -65,7 +65,8 @@ fun AddAnimalScreen(
         selectedImageUri.value = uri
     }
 
-    val imageModel = navImageUrl.value.ifEmpty { selectedImageUri.value?.toString() }
+    val defaultImageUrl = "android.resource://${context.packageName}/drawable/default_animal_image"
+    val imageModel = navImageUrl.value.ifEmpty { selectedImageUri.value?.toString() ?: defaultImageUrl }
 
     Box(
         modifier = Modifier
@@ -76,7 +77,7 @@ fun AddAnimalScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 20.dp),  // Отступы для всей колонки
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -90,14 +91,17 @@ fun AddAnimalScreen(
                 textAlign = TextAlign.Center
             )
 
+            // Изображение теперь занимает всю ширину экрана с отступами по краям и скругленными углами
             if (imageModel != null) {
                 Image(
                     painter = rememberAsyncImagePainter(model = imageModel),
                     contentDescription = "animal image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(200.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .fillMaxWidth()  // Заполняет всю ширину экрана
+                        .height(200.dp)  // Высота изображения фиксированная
+                        .clip(RoundedCornerShape(8.dp))  // Скругленные углы
+                        .padding(horizontal = 20.dp)  // Отступы по бокам, как у полей ввода
                 )
             }
 
@@ -245,6 +249,8 @@ fun AddAnimalScreen(
         }
     }
 }
+
+
 
 private fun saveAnimalImage(
     oldImageUrl: String,
