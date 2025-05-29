@@ -138,6 +138,17 @@ fun AddAnimalScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             ButtonWhite(text = "Сохранить") {
+
+                if (name.value.isBlank() ||
+                    description.value.isBlank() ||
+                    age.value.isBlank() ||
+                    selectedCategory.value.isBlank() ||
+                    (selectedImageUri.value == null && navImageUrl.value.isBlank())
+                ) {
+                    Toast.makeText(context, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show()
+                    return@ButtonWhite
+                }
+
                 val animal = Animal(
                     key = navData.key,
                     name = name.value,
