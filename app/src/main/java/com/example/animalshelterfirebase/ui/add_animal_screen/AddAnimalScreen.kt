@@ -144,7 +144,7 @@ fun AddAnimalScreen(
                     description = description.value,
                     age = age.value,
                     category = selectedCategory.value,
-                    imageUrl = "" // временно, перезапишется позже
+                    imageUrl = ""
                 )
 
                 isLoading.value = true

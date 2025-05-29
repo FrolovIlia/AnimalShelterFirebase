@@ -2,6 +2,7 @@ package com.example.animalshelterfirebase.ui.add_animal_screen
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -21,13 +22,9 @@ fun RoundedCornerTextField(
     label: String,
     onValueChange: (String) -> Unit
 ) {
-
-
     TextField(
         value = text,
-        onValueChange = {
-            onValueChange(it)
-        },
+        onValueChange = { onValueChange(it) },
         shape = RoundedCornerShape(25.dp),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.White,
@@ -37,7 +34,8 @@ fun RoundedCornerTextField(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, ButtonColorBlue, RoundedCornerShape(25.dp)),
+            .height(56.dp)
+            .border(1.dp, ButtonColorBlue, RoundedCornerShape(30.dp)),
         label = {
             Text(text = label, color = Color.Gray)
         },
