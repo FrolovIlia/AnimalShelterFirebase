@@ -1,6 +1,6 @@
 package com.example.animalshelterfirebase.ui.main_screen
 
-import android.util.Log
+
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -49,15 +49,12 @@ import androidx.compose.ui.unit.dp
 import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.data.AnimalCategories
-import com.example.animalshelterfirebase.data.Favourite
 import com.example.animalshelterfirebase.data.MainScreenDataObject
 import com.example.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
 import com.example.animalshelterfirebase.ui.theme.ButtonColorBlue
 
 import com.example.animalshelterfirebase.ui.theme.TextSecondary
 import com.example.animalshelterfirebase.utils.isAdmin
-import com.google.firebase.firestore.FieldPath
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -86,7 +83,6 @@ fun MainScreen(
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsState()
     val animals by viewModel.animals.collectAsState()
-    val favoriteIds by viewModel.favoriteIds.collectAsState()
 
     var isFavoritesOnly by remember { mutableStateOf(false) }
     val isAdminState = remember { mutableStateOf(false) }
@@ -254,129 +250,5 @@ fun MainScreen(
                 }
             }
         }
-    }
-}
-
-
-// Функция для загрузки только избранных животных
-private fun loadFavsAnimals(
-    db: FirebaseFirestore,
-    uid: String,
-    onResult: (List<Animal>) -> Unit
-) {
-    if (uid.isBlank() || uid == "guest") {
-        Log.w("loadFavsAnimals", "UID недопустим для загрузки избранного: $uid")
-        onResult(emptyList())
-        return
-    }
-
-    getAllFavsIds(db, uid, onFavs = { favs ->
-        getAllFavsAnimals(favIds = favs, onComplete = onResult)
-    })
-}
-
-
-
-// Функции для получения животных и избранных животных, которые остаются такими же
-fun getAllAnimals(
-    db: FirebaseFirestore,
-    idsList: List<String>,
-    category: String,
-    onAnimals: (List<Animal>) -> Unit
-) {
-    val collection = db.collection("animals")
-
-    val query = if (category == "Все") {
-        collection // без фильтра
-    } else {
-        collection.whereEqualTo("category", category)
-    }
-
-    query.get()
-        .addOnSuccessListener { task ->
-            val animalsList = task.toObjects(Animal::class.java).map {
-                if (idsList.contains(it.key)) {
-                    it.copy(isFavourite = true)
-                } else {
-                    it
-                }
-            }
-            onAnimals(animalsList)
-        }
-        .addOnFailureListener {
-
-        }
-}
-
-fun getAllFavsAnimals(favIds: List<String>, onComplete: (List<Animal>) -> Unit) {
-    val validIds = favIds.filter { it.isNotBlank() }
-
-    if (validIds.isEmpty()) {
-        onComplete(emptyList())
-        return
-    }
-
-    Firebase.firestore.collection("animals")
-        .whereIn(FieldPath.documentId(), validIds)
-        .get()
-        .addOnSuccessListener { querySnapshot ->
-            val animals = querySnapshot.documents.mapNotNull { document ->
-                document.toObject(Animal::class.java)?.copy(key = document.id, isFavourite = true)
-            }
-            onComplete(animals)
-        }
-        .addOnFailureListener { exception ->
-            Log.e("Firestore", "Failed to get favorite animals", exception)
-            onComplete(emptyList())
-        }
-}
-
-
-
-fun getAllFavsIds(
-    db: FirebaseFirestore,
-    uid: String,
-    onFavs: (List<String>) -> Unit
-) {
-    if (uid.isBlank() || uid == "guest") {
-        Log.w("getAllFavsIds", "Попытка получить избранное для недопустимого UID: $uid")
-        onFavs(emptyList())
-        return
-    }
-
-    db.collection("users")
-        .document(uid)
-        .collection("favourites")
-        .get()
-        .addOnSuccessListener { task ->
-            val idsList = task.toObjects(Favourite::class.java)
-            val keysList = idsList.map { it.key }
-            onFavs(keysList)
-        }
-        .addOnFailureListener {
-            Log.e("getAllFavsIds", "Ошибка при получении избранных: ${it.message}", it)
-            onFavs(emptyList()) // Без падений
-        }
-}
-
-
-private fun onFavs(
-    db: FirebaseFirestore,
-    uid: String,
-    favourite: Favourite,
-    isFav: Boolean
-) {
-    if (isFav) {
-        db.collection("users")
-            .document(uid)
-            .collection("favourites")
-            .document(favourite.key)
-            .set(favourite)
-    } else {
-        db.collection("users")
-            .document(uid)
-            .collection("favourites")
-            .document(favourite.key)
-            .delete()
     }
 }
