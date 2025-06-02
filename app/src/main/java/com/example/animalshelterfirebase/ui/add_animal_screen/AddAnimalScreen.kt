@@ -189,8 +189,7 @@ fun AddAnimalScreen(
                         location.value.isBlank() ||
                         curatorPhone.value.isBlank() ||
                         curatorPhoneError.value ||
-                        selectedCategory.value.isBlank() ||
-                        (selectedImageUri.value == null && navImageUrl.value.isBlank())
+                        selectedCategory.value.isBlank()
                     ) {
                         Toast.makeText(context, "Пожалуйста, заполните все поля корректно", Toast.LENGTH_SHORT).show()
                         return@ButtonWhite
@@ -230,7 +229,7 @@ fun AddAnimalScreen(
                     } else {
                         saveAnimalToFireStore(
                             firestore = firestore,
-                            animal = animal.copy(imageUrl = navImageUrl.value),
+                            animal = animal.copy(imageUrl = imageModel),
                             onSaved = {
                                 isLoading.value = false
                                 Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
