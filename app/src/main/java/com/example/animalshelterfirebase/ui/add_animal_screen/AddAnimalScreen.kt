@@ -133,6 +133,8 @@ fun AddAnimalScreen(
                 RoundedCornerTextField(text = age.value, label = "Возраст") {
                     age.value = it
                 }
+
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 RoundedCornerTextField(
@@ -145,7 +147,8 @@ fun AddAnimalScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                RoundedCornerTextField(text = location.value, label = "Расположение") {
+                RoundedCornerTextField(text = location.value,
+                    label = "Расположение") {
                     location.value = it
                 }
                 Spacer(modifier = Modifier.height(8.dp))

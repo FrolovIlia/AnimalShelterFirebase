@@ -18,3 +18,6 @@ val TextSecondary = Color(0xFF939393)
 
 val ButtonColorBlue = Color(0xFFA3D8F4)
 val ButtonColorWhite = Color(0xFFFFFFFF)
+
+val InfoColorOrange = Color(0xFFFFEBCD)
+val InfoColorPurple = Color(0xFFE0CDFF)

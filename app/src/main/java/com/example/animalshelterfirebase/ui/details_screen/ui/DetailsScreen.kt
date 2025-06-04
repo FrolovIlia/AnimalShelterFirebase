@@ -29,7 +29,10 @@ import com.example.animalshelterfirebase.utils.ButtonWhite
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import com.example.animalshelterfirebase.ui.theme.InfoColorOrange
+import com.example.animalshelterfirebase.ui.theme.InfoColorPurple
 import com.example.animalshelterfirebase.utils.ButtonTransparent
+import com.example.animalshelterfirebase.utils.InfoTag
 
 
 @Composable
@@ -112,20 +115,17 @@ fun DetailsScreen(
 
                         Spacer(modifier = Modifier.height(8.dp))
 
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(28.dp)
+                                .wrapContentHeight(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(text = navObject.age)
-                        }
+                            InfoTag(text = navObject.age, backgroundColor = InfoColorOrange)
+                            InfoTag(text = navObject.description, backgroundColor = InfoColorPurple)
 
-                        Text(
-                            text = navObject.description,
-                            color = Color.Gray,
-                            fontFamily = AnimalFont,
-                            fontSize = 16.sp
-                        )
+                        }
 
                         Spacer(modifier = Modifier.height(10.dp))
 
