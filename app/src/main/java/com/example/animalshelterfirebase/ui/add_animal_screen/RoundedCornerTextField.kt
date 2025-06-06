@@ -34,7 +34,10 @@ fun RoundedCornerTextField(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .then(
+                if (singleLine) Modifier.height(56.dp)
+                else Modifier // не задаем фиксированную высоту, чтобы поле росло по мере ввода
+            )
             .border(1.dp, ButtonColorBlue, RoundedCornerShape(30.dp)),
         label = {
             Text(text = label, color = Color.Gray)
@@ -43,3 +46,4 @@ fun RoundedCornerTextField(
         maxLines = maxLines
     )
 }
+

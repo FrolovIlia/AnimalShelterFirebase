@@ -34,6 +34,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
+import com.example.animalshelterfirebase.utils.PhoneNumberField
 
 @Composable
 fun AddAnimalScreen(
@@ -139,7 +140,7 @@ fun AddAnimalScreen(
 
                 RoundedCornerTextField(
                     singleLine = false,
-                    maxLines = 3,
+                    maxLines = Int.MAX_VALUE,
                     text = description.value,
                     label = "Описание"
                 ) {
@@ -153,16 +154,15 @@ fun AddAnimalScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                RoundedCornerTextField(
-                    text = curatorPhone.value,
+                PhoneNumberField(
+                    value = curatorPhone.value,
+                    onValueChange = {
+                        curatorPhone.value = it
+                        curatorPhoneError.value = !isPhoneValid(it)
+                    },
+                    isError = curatorPhoneError.value,
                     label = "Номер куратора"
-                ) {
-                    curatorPhone.value = if (it.isEmpty()) "+7"
-                    else if (!it.startsWith("+7")) "+7" + it.filter { ch -> ch.isDigit() }
-                    else it
-
-                    curatorPhoneError.value = !isPhoneValid(curatorPhone.value)
-                }
+                )
                 if (curatorPhoneError.value) {
                     Text(
                         text = "Неверный номер (должен быть формата +7XXXXXXXXXX)",
@@ -171,6 +171,7 @@ fun AddAnimalScreen(
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 ButtonWhite(text = "Выбрать изображение") {
