@@ -22,6 +22,7 @@ import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.view.WindowCompat
 import com.example.animalshelterfirebase.data.Animal
+import com.example.animalshelterfirebase.data.UserObject
 import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionNavObject
 import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionScreen
 import com.example.animalshelterfirebase.ui.authorization.LoginScreenObject
@@ -122,17 +123,31 @@ class MainActivity : ComponentActivity() {
 
                 composable<DetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<DetailsNavObject>()
+
+                    val currentUser = UserObject(
+                        uid = navData.uid,
+                        name = "ИМЯ ИЗ PREFS/БД",
+                        phone = "ТЕЛЕФОН ИЗ PREFS/БД",
+                        email = navData.uid + "@shelter.com" // временно
+                    )
+
                     DetailsScreen(
                         navObject = navData,
+                        currentUser = currentUser,
                         onBackClick = { navController.popBackStack() },
-                        onAdoptClick = { animal ->
+                        onAdoptClick = { animal, user ->
                             navController.navigate(
                                 AdoptionNavObject(
                                     name = animal.name,
                                     age = animal.age,
                                     curatorPhone = animal.curatorPhone,
                                     location = animal.location,
-                                    description = animal.description
+                                    description = animal.description,
+
+                                    userUid = user.uid,
+                                    userName = user.name,
+                                    userPhone = user.phone,
+                                    userEmail = user.email
                                 )
                             )
                         },
@@ -156,25 +171,35 @@ class MainActivity : ComponentActivity() {
 
                 composable<AdoptionNavObject> { navEntry ->
                     val navData = navEntry.toRoute<AdoptionNavObject>()
+
+                    val animal = Animal(
+                        name = navData.name,
+                        age = navData.age,
+                        curatorPhone = navData.curatorPhone,
+                        location = navData.location,
+                        description = navData.description
+                    )
+
+                    val user = UserObject(
+                        uid = navData.userUid,
+                        name = navData.userName,
+                        phone = navData.userPhone,
+                        email = navData.userEmail
+                    )
+
                     AdoptionScreen(
-                        animal = Animal(
-                            name = navData.name,
-                            age = navData.age,
-                            curatorPhone = navData.curatorPhone,
-                            location = navData.location,
-                            description = navData.description
-                        ),
+                        animal = animal,
+                        user = user,
                         onBack = { navController.popBackStack() },
                         onSubmitSuccess = {
-                            // Передаем флаг в предыдущий экран
                             navController.previousBackStackEntry
                                 ?.savedStateHandle
                                 ?.set("showAdoptionSuccess", true)
-                            // Корректный возврат на предыдущий экран (DetailsScreen)
                             navController.navigateUp()
                         }
                     )
                 }
+
 
 
 

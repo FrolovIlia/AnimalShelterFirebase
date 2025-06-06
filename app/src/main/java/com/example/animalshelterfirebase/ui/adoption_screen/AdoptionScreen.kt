@@ -17,6 +17,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.animalshelterfirebase.data.Animal
+import com.example.animalshelterfirebase.data.UserObject
 import com.example.animalshelterfirebase.ui.theme.AnimalFont
 import com.example.animalshelterfirebase.ui.theme.BackgroundGray
 import com.example.animalshelterfirebase.utils.ButtonBlue
@@ -24,6 +25,7 @@ import com.example.animalshelterfirebase.utils.ButtonBlue
 @Composable
 fun AdoptionScreen(
     animal: Animal,
+    user: UserObject,
     onBack: () -> Unit,
     onSubmitSuccess: () -> Unit
 ) {
@@ -113,7 +115,31 @@ fun AdoptionScreen(
                 if (text.text.length < 10) {
                     error = "Пожалуйста, опишите опыт подробнее"
                 } else {
-                    onSubmitSuccess() // Вызываем колбек успешной отправки
+                    // 📦 Формирование текста заявки
+                    val smsMessage = """
+                    📢 Заявка на усыновление
+                    
+                    👤 Пользователь:
+                    Имя: ${user.name}
+                    Телефон: ${user.phone}
+                    Email: ${user.email}
+                    
+                    🐾 Животное:
+                    Имя: ${animal.name}
+                    Возраст: ${animal.age}
+                    Особенности: ${animal.feature}
+                    Расположение: ${animal.location}
+                    
+                    📝 Опыт:
+                    ${text.text}
+                """.trimIndent()
+
+                    // Здесь можно:
+                    // - отправить SMS через Intent
+                    // - передать это сообщение на сервер или в базу
+                    println(smsMessage) // или использовать Log.d()
+
+                    onSubmitSuccess()
                 }
             },
             modifier = Modifier.fillMaxWidth()

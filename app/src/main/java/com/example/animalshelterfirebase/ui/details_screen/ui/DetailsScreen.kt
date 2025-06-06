@@ -31,17 +31,23 @@ import com.example.animalshelterfirebase.utils.ButtonWhite
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import com.example.animalshelterfirebase.data.UserObject
 import com.example.animalshelterfirebase.ui.theme.InfoColorOrange
 import com.example.animalshelterfirebase.ui.theme.InfoColorPurple
 import com.example.animalshelterfirebase.utils.ButtonTransparent
 import com.example.animalshelterfirebase.utils.InfoTag
 
+import androidx.lifecycle.viewmodel.compose.viewModel // если без Hilt
+import androidx.navigation.NavController
+import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionViewModel
+
 
 @Composable
 fun DetailsScreen(
-    navObject: DetailsNavObject = DetailsNavObject(),
+    navObject: DetailsNavObject,
+    currentUser: UserObject,
     onBackClick: () -> Unit,
-    onAdoptClick: (Animal) -> Unit,
+    onAdoptClick: (Animal, UserObject) -> Unit,
     savedStateHandle: SavedStateHandle? = null
 ) {
     val adoptionSuccessState = savedStateHandle
@@ -68,7 +74,7 @@ fun DetailsScreen(
                 .background(BackgroundGray)
                 .systemBarsPadding()
         ) {
-            // Фиксированное изображение
+            // Изображение животного
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,7 +83,7 @@ fun DetailsScreen(
             ) {
                 AsyncImage(
                     model = navObject.imageUrl,
-                    contentDescription = "",
+                    contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(30.dp)),
@@ -90,13 +96,12 @@ fun DetailsScreen(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_back),
-                        contentDescription = "Back",
+                        contentDescription = "Назад",
                         tint = Color.Unspecified
                     )
                 }
             }
 
-            // Прокручиваемая часть (вся инфа)
             Column(
                 modifier = Modifier
                     .weight(1f)
@@ -148,9 +153,7 @@ fun DetailsScreen(
                             text = navObject.curatorPhone,
                             color = Color.Gray,
                             fontFamily = AnimalFont,
-                            fontSize = 16.sp,
-                            maxLines = 4,
-                            softWrap = true
+                            fontSize = 16.sp
                         )
                     }
 
@@ -171,10 +174,10 @@ fun DetailsScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp)) // Чтобы не налезало на кнопки
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Фиксированные кнопки снизу
+            // Кнопки
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -188,20 +191,22 @@ fun DetailsScreen(
                         if (isGuest) {
                             Toast.makeText(
                                 context,
-                                "Авторируйтесь, чтобы подать заявку",
+                                "Авторизуйтесь, чтобы подать заявку",
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
                             val animal = Animal(
                                 name = navObject.name,
                                 age = navObject.age,
-                                description = navObject.description,
-                                imageUrl = navObject.imageUrl,
                                 curatorPhone = navObject.curatorPhone,
                                 location = navObject.location,
-                                feature = navObject.feature
+                                description = navObject.description,
+                                imageUrl = navObject.imageUrl,
+                                category = navObject.category,
+                                feature = navObject.feature,
+                                key = ""
                             )
-                            onAdoptClick(animal)
+                            onAdoptClick(animal, currentUser)
                         }
                     }
                 )
@@ -254,7 +259,7 @@ fun DetailsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        "В течение 3 дней мы рассмотрим \nеё и перезвоним вам.",
+                        "В течение 3 дней мы рассмотрим\nеё и перезвоним вам.",
                         fontSize = 14.sp,
                         fontFamily = AnimalFont,
                         style = MaterialTheme.typography.titleSmall
@@ -272,4 +277,5 @@ fun DetailsScreen(
         }
     }
 }
+
 
