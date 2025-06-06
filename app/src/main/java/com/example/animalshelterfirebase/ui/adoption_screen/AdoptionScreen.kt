@@ -1,5 +1,7 @@
 package com.example.animalshelterfirebase.ui.adoption_screen
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -32,6 +35,9 @@ fun AdoptionScreen(
     var text by remember { mutableStateOf(TextFieldValue("")) }
     var error by remember { mutableStateOf<String?>(null) }
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+
+    val curatorPhoneNumber = if (animal.curatorPhone.isNullOrBlank()) "+79303537553" else animal.curatorPhone!!
 
     Column(
         modifier = Modifier
@@ -86,10 +92,12 @@ fun AdoptionScreen(
                 }
             },
             label = { Text("Расскажите о вашем опыте") },
-            placeholder = { Text(
-                "Опишите ваш опыт с животными, " +
-                        "наличие других питомцев и условия проживания"
-            )},
+            placeholder = {
+                Text(
+                    "Опишите ваш опыт с животными, " +
+                            "наличие других питомцев и условия проживания"
+                )
+            },
             isError = error != null,
             minLines = 6,
             modifier = modifierField(),
@@ -115,29 +123,29 @@ fun AdoptionScreen(
                 if (text.text.length < 10) {
                     error = "Пожалуйста, опишите опыт подробнее"
                 } else {
-                    // 📦 Формирование текста заявки
                     val smsMessage = """
-                    📢 Заявка на усыновление
-                    
-                    👤 Пользователь:
-                    Имя: ${user.name}
-                    Телефон: ${user.phone}
-                    Email: ${user.email}
-                    
-                    🐾 Животное:
-                    Имя: ${animal.name}
-                    Возраст: ${animal.age}
-                    Особенности: ${animal.feature}
-                    Расположение: ${animal.location}
-                    
-                    📝 Опыт:
-                    ${text.text}
-                """.trimIndent()
+                        📢 Заявка на усыновление
 
-                    // Здесь можно:
-                    // - отправить SMS через Intent
-                    // - передать это сообщение на сервер или в базу
-                    println(smsMessage) // или использовать Log.d()
+                        👤 Пользователь:
+                        Имя: ${user.name}
+                        Телефон: ${user.phone}
+                        Email: ${user.email}
+
+                        🐾 Животное:
+                        Имя: ${animal.name}
+                        Возраст: ${animal.age}
+                        Особенности: ${animal.feature}
+                        Расположение: ${animal.location}
+
+                        📝 Опыт и условия проживания:
+                        ${text.text.trim()}
+                    """.trimIndent()
+
+                    val smsUri = Uri.parse("smsto:$curatorPhoneNumber")
+                    val intent = Intent(Intent.ACTION_SENDTO, smsUri).apply {
+                        putExtra("sms_body", smsMessage)
+                    }
+                    context.startActivity(intent)
 
                     onSubmitSuccess()
                 }
