@@ -47,12 +47,12 @@ fun AddAnimalScreen(
     val navImageUrl = remember { mutableStateOf(navData.imageUrl) }
 
     val name = remember { mutableStateOf(navData.name) }
-    val description = remember { mutableStateOf(navData.description) }
+    val description = remember { mutableStateOf(navData.descriptionShort) }
     val age = remember { mutableStateOf(navData.age) }
     val selectedImageUri = remember { mutableStateOf<Uri?>(null) }
-    val feature = remember { mutableStateOf("") }
-    val location = remember { mutableStateOf("") }
-    val curatorPhone = remember { mutableStateOf("") }
+    val feature = remember { mutableStateOf(navData.feature) }
+    val location = remember { mutableStateOf(navData.location) }
+    val curatorPhone = remember { mutableStateOf(navData.curatorPhone) }
     val curatorPhoneError = remember { mutableStateOf(false) }
 
     val firestore = Firebase.firestore
@@ -217,7 +217,7 @@ fun AddAnimalScreen(
                         val animal = Animal(
                             key = navData.key,
                             name = name.value,
-                            description = description.value,
+                            descriptionShort = description.value,
                             age = age.value,
                             category = selectedCategory.value,
                             imageUrl = "", // Пустая строка для пустого изображения

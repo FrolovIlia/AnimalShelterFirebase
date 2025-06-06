@@ -135,7 +135,7 @@ fun AnimalListItemUI(
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
-                text = animal.description,
+                text = animal.descriptionShort,
                 color = Color.Gray,
                 fontSize = 14.sp,
                 maxLines = 2,

@@ -85,7 +85,7 @@ class MainActivity : ComponentActivity() {
                                     name = anim.name,
                                     age = anim.age,
                                     category = anim.category,
-                                    description = anim.description
+                                    description = anim.descriptionShort
                                 )
                             )
                         },
@@ -94,10 +94,13 @@ class MainActivity : ComponentActivity() {
                                 AddScreenObject(
                                     key = animal.key,
                                     name = animal.name,
-                                    description = animal.description,
+                                    descriptionShort = animal.descriptionShort,
                                     age = animal.age,
                                     category = animal.category,
-                                    imageUrl = animal.imageUrl
+                                    imageUrl = animal.imageUrl,
+                                    feature = animal.feature,
+                                    location = animal.location,
+                                    curatorPhone = animal.curatorPhone
                                 )
                             )
                         }
@@ -126,7 +129,7 @@ class MainActivity : ComponentActivity() {
                                     age = animal.age,
                                     curatorPhone = animal.curatorPhone,
                                     location = animal.location,
-                                    description = animal.description
+                                    description = animal.descriptionShort
                                 )
                             )
                         },
@@ -156,7 +159,7 @@ class MainActivity : ComponentActivity() {
                             age = navData.age,
                             curatorPhone = navData.curatorPhone,
                             location = navData.location,
-                            description = navData.description
+                            descriptionShort = navData.description
                         ),
                         onBack = { navController.popBackStack() },
                         onSubmitSuccess = {

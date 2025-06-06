@@ -6,8 +6,12 @@ import kotlinx.serialization.Serializable
 data class AddScreenObject(
     val key: String = "",
     val name: String = "",
-    val description: String = "",
+    val descriptionShort: String = "",
+    val descriptionFull: String = "",
     val age: String = "",
     val category: String = "",
-    val imageUrl: String = ""
+    val imageUrl: String = "",
+    val feature: String = "",
+    val location: String = "",
+    val curatorPhone: String = ""
 )

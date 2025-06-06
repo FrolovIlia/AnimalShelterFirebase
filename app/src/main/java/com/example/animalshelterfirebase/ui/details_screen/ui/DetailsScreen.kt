@@ -192,7 +192,7 @@ fun DetailsScreen(
                             val animal = Animal(
                                 name = navObject.name,
                                 age = navObject.age,
-                                description = navObject.description,
+                                descriptionShort = navObject.description,
                                 imageUrl = navObject.imageUrl,
                                 curatorPhone = navObject.curatorPhone,
                                 location = navObject.location
