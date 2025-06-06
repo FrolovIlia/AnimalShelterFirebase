@@ -11,6 +11,6 @@ data class DetailsNavObject(
     val category: String = "",
     val description: String = "",
     val curatorPhone: String = "уточняется",
-    val location: String = "уточняется"
-
+    val location: String = "уточняется",
+    val feature: String = ""
 )

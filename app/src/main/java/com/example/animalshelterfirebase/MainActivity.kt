@@ -85,7 +85,10 @@ class MainActivity : ComponentActivity() {
                                     name = anim.name,
                                     age = anim.age,
                                     category = anim.category,
-                                    description = anim.descriptionShort
+                                    description = anim.description,
+                                    feature = anim.feature,
+                                    location = anim.location,
+                                    curatorPhone = anim.curatorPhone
                                 )
                             )
                         },
@@ -94,7 +97,7 @@ class MainActivity : ComponentActivity() {
                                 AddScreenObject(
                                     key = animal.key,
                                     name = animal.name,
-                                    descriptionShort = animal.descriptionShort,
+                                    descriptionShort = animal.description,
                                     age = animal.age,
                                     category = animal.category,
                                     imageUrl = animal.imageUrl,
@@ -129,7 +132,7 @@ class MainActivity : ComponentActivity() {
                                     age = animal.age,
                                     curatorPhone = animal.curatorPhone,
                                     location = animal.location,
-                                    description = animal.descriptionShort
+                                    description = animal.description
                                 )
                             )
                         },
@@ -159,7 +162,7 @@ class MainActivity : ComponentActivity() {
                             age = navData.age,
                             curatorPhone = navData.curatorPhone,
                             location = navData.location,
-                            descriptionShort = navData.description
+                            description = navData.description
                         ),
                         onBack = { navController.popBackStack() },
                         onSubmitSuccess = {

@@ -217,7 +217,7 @@ fun AddAnimalScreen(
                         val animal = Animal(
                             key = navData.key,
                             name = name.value,
-                            descriptionShort = description.value,
+                            description = description.value,
                             age = age.value,
                             category = selectedCategory.value,
                             imageUrl = "", // Пустая строка для пустого изображения

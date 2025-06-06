@@ -123,7 +123,7 @@ fun DetailsScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             InfoTag(text = navObject.age, backgroundColor = InfoColorOrange)
-                            InfoTag(text = navObject.description, backgroundColor = InfoColorPurple)
+                            InfoTag(text = navObject.feature, backgroundColor = InfoColorPurple)
 
                         }
 
@@ -192,10 +192,11 @@ fun DetailsScreen(
                             val animal = Animal(
                                 name = navObject.name,
                                 age = navObject.age,
-                                descriptionShort = navObject.description,
+                                description = navObject.description,
                                 imageUrl = navObject.imageUrl,
                                 curatorPhone = navObject.curatorPhone,
-                                location = navObject.location
+                                location = navObject.location,
+                                feature = navObject.feature
                             )
                             onAdoptClick(animal)
                         }
