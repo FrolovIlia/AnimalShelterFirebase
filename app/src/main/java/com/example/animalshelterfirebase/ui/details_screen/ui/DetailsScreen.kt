@@ -1,51 +1,35 @@
 package com.example.animalshelterfirebase.ui.details_screen.ui
 
 import android.widget.Toast
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.*
 import androidx.lifecycle.SavedStateHandle
 import coil.compose.AsyncImage
 import com.example.animalshelterfirebase.R
 import com.example.animalshelterfirebase.data.Animal
-import com.example.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
-import com.example.animalshelterfirebase.ui.theme.AnimalFont
-import com.example.animalshelterfirebase.ui.theme.BackgroundGray
-import com.example.animalshelterfirebase.utils.ButtonBlue
-import com.example.animalshelterfirebase.utils.ButtonWhite
-
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import com.example.animalshelterfirebase.data.UserObject
-import com.example.animalshelterfirebase.ui.theme.InfoColorOrange
-import com.example.animalshelterfirebase.ui.theme.InfoColorPurple
-import com.example.animalshelterfirebase.utils.ButtonTransparent
-import com.example.animalshelterfirebase.utils.InfoTag
-
-import androidx.lifecycle.viewmodel.compose.viewModel // если без Hilt
-import androidx.navigation.NavController
-import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionViewModel
-
+import com.example.animalshelterfirebase.ui.authorization.UserViewModel
+import com.example.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
+import com.example.animalshelterfirebase.ui.theme.*
+import com.example.animalshelterfirebase.utils.*
+import androidx.compose.runtime.livedata.observeAsState
 
 @Composable
 fun DetailsScreen(
     navObject: DetailsNavObject,
     currentUser: UserObject,
+    userViewModel: UserViewModel,
     onBackClick: () -> Unit,
     onAdoptClick: (Animal, UserObject) -> Unit,
     savedStateHandle: SavedStateHandle? = null
@@ -55,6 +39,16 @@ fun DetailsScreen(
         ?.observeAsState(initial = false) ?: remember { mutableStateOf(false) }
 
     var showNotification by remember { mutableStateOf(false) }
+
+    LaunchedEffect(navObject.uid) {
+        if (navObject.uid != "guest") {
+            userViewModel.loadUser(navObject.uid)
+        }
+    }
+
+    val userState by userViewModel.currentUser.collectAsState()
+    val context = LocalContext.current
+    val scrollState = rememberScrollState()
     val isGuest = navObject.uid == "guest" || navObject.uid.isEmpty()
 
     LaunchedEffect(adoptionSuccessState.value) {
@@ -64,9 +58,6 @@ fun DetailsScreen(
         }
     }
 
-    val scrollState = rememberScrollState()
-    val context = LocalContext.current
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -74,7 +65,6 @@ fun DetailsScreen(
                 .background(BackgroundGray)
                 .systemBarsPadding()
         ) {
-            // Изображение животного
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -177,7 +167,6 @@ fun DetailsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
-            // Кнопки
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -189,11 +178,7 @@ fun DetailsScreen(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         if (isGuest) {
-                            Toast.makeText(
-                                context,
-                                "Авторизуйтесь, чтобы подать заявку",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Авторизуйтесь, чтобы подать заявку", Toast.LENGTH_SHORT).show()
                         } else {
                             val animal = Animal(
                                 name = navObject.name,
@@ -219,7 +204,6 @@ fun DetailsScreen(
             }
         }
 
-        // Уведомление
         if (showNotification) {
             Box(
                 modifier = Modifier
@@ -277,5 +261,3 @@ fun DetailsScreen(
         }
     }
 }
-
-

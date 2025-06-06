@@ -123,23 +123,23 @@ fun AdoptionScreen(
                 if (text.text.length < 10) {
                     error = "Пожалуйста, опишите опыт подробнее"
                 } else {
-                    val smsMessage = """
-                        📢 Заявка на усыновление
-
-                        👤 Пользователь:
-                        Имя: ${user.name}
-                        Телефон: ${user.phone}
-                        Email: ${user.email}
-
-                        🐾 Животное:
-                        Имя: ${animal.name}
-                        Возраст: ${animal.age}
-                        Особенности: ${animal.feature}
-                        Расположение: ${animal.location}
-
-                        📝 Опыт и условия проживания:
-                        ${text.text.trim()}
-                    """.trimIndent()
+                    val smsMessage = listOf(
+                        "📢 Заявка на усыновление",
+                        "",
+                        "👤 Пользователь:",
+                        "Имя: ${user.name ?: "не указано"}",
+                        "Телефон: ${user.phone ?: "не указано"}",
+                        "Email: ${user.email ?: "не указано"}",
+                        "",
+                        "🐾 Животное:",
+                        "Имя: ${animal.name}",
+                        "Возраст: ${animal.age}",
+                        "Особенности: ${animal.feature ?: "не указано"}",
+                        "Расположение: ${animal.location}",
+                        "",
+                        "📝 Опыт:",
+                        text.text.trim()
+                    ).joinToString("\n")
 
                     val smsUri = Uri.parse("smsto:$curatorPhoneNumber")
                     val intent = Intent(Intent.ACTION_SENDTO, smsUri).apply {

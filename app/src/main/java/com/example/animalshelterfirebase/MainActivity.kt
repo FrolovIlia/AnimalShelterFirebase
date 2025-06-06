@@ -21,12 +21,16 @@ import com.example.animalshelterfirebase.ui.start_screen.ui.StartScreen
 import com.example.animalshelterfirebase.ui.start_screen.data.StartScreenObject
 import com.google.firebase.auth.FirebaseAuth
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.animalshelterfirebase.data.Animal
 import com.example.animalshelterfirebase.data.UserObject
 import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionNavObject
 import com.example.animalshelterfirebase.ui.adoption_screen.AdoptionScreen
 import com.example.animalshelterfirebase.ui.authorization.LoginScreenObject
+import com.example.animalshelterfirebase.ui.authorization.UserViewModel
 import com.example.animalshelterfirebase.ui.authorization.createEncryptedPrefs
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +40,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             val encryptedPrefs = createEncryptedPrefs(this)
+            val userViewModel = viewModel<UserViewModel>()
 
             NavHost(
                 navController = navController,
@@ -76,6 +81,7 @@ class MainActivity : ComponentActivity() {
 
                 composable<MainScreenDataObject> { navEntry ->
                     val navData = navEntry.toRoute<MainScreenDataObject>()
+                    userViewModel.loadUser(navData.uid)
                     MainScreen(
                         navData,
                         onAnimalClick = { anim ->
@@ -124,16 +130,18 @@ class MainActivity : ComponentActivity() {
                 composable<DetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<DetailsNavObject>()
 
-                    val currentUser = UserObject(
-                        uid = navData.uid,
-                        name = "ИМЯ ИЗ PREFS/БД",
-                        phone = "ТЕЛЕФОН ИЗ PREFS/БД",
-                        email = navData.uid + "@shelter.com" // временно
+                    val user = userViewModel.currentUser.value
+                    val currentUser = user ?: UserObject( // если пользователь не загружен
+                        uid = "guest",
+                        name = "Гость",
+                        phone = "",
+                        email = ""
                     )
 
                     DetailsScreen(
                         navObject = navData,
                         currentUser = currentUser,
+                        userViewModel = userViewModel,
                         onBackClick = { navController.popBackStack() },
                         onAdoptClick = { animal, user ->
                             navController.navigate(
@@ -154,6 +162,7 @@ class MainActivity : ComponentActivity() {
                         savedStateHandle = navEntry.savedStateHandle
                     )
                 }
+
 
 
                 composable<RegisterScreenObject> {
