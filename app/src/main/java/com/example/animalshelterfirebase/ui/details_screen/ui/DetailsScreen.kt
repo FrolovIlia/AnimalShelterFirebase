@@ -5,7 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -42,13 +44,11 @@ fun DetailsScreen(
     onAdoptClick: (Animal) -> Unit,
     savedStateHandle: SavedStateHandle? = null
 ) {
-    // Подписка на событие успеха усыновления
     val adoptionSuccessState = savedStateHandle
         ?.getLiveData<Boolean>("showAdoptionSuccess")
         ?.observeAsState(initial = false) ?: remember { mutableStateOf(false) }
 
     var showNotification by remember { mutableStateOf(false) }
-
     val isGuest = navObject.uid == "guest" || navObject.uid.isEmpty()
 
     LaunchedEffect(adoptionSuccessState.value) {
@@ -58,136 +58,139 @@ fun DetailsScreen(
         }
     }
 
+    val scrollState = rememberScrollState()
+    val context = LocalContext.current
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(BackgroundGray)
-                .systemBarsPadding(),
-            verticalArrangement = Arrangement.SpaceBetween
+                .systemBarsPadding()
         ) {
-            Column(
+            // Фиксированное изображение
+            Box(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .height(360.dp)
                     .padding(16.dp)
             ) {
-                Spacer(
+                AsyncImage(
+                    model = navObject.imageUrl,
+                    contentDescription = "",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(30.dp)),
+                    contentScale = ContentScale.Crop
                 )
 
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(360.dp)
-                    ) {
-                        AsyncImage(
-                            model = navObject.imageUrl,
-                            contentDescription = "",
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(30.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-
-                        IconButton(
-                            onClick = onBackClick,
-                            modifier = Modifier.padding(24.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_back),
-                                contentDescription = "Back",
-                                tint = Color.Unspecified
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(5.dp))
-
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = navObject.name,
-                            color = Color.Black,
-                            fontFamily = AnimalFont,
-                            fontSize = 36.sp
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentHeight(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            InfoTag(text = navObject.age, backgroundColor = InfoColorOrange)
-                            InfoTag(text = navObject.feature, backgroundColor = InfoColorPurple)
-
-                        }
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(44.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    text = "Номер куратора",
-                                    color = Color.Gray,
-                                    fontFamily = AnimalFont,
-                                    fontSize = 13.sp,
-                                    modifier = Modifier.padding(bottom = 5.dp)
-                                )
-                                Text(
-                                    text = navObject.curatorPhone,
-                                    color = Color.Gray,
-                                    fontFamily = AnimalFont,
-                                    fontSize = 16.sp
-                                )
-                            }
-
-                            Column(
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    text = "Расположение",
-                                    color = Color.Gray,
-                                    fontFamily = AnimalFont,
-                                    fontSize = 13.sp,
-                                    modifier = Modifier.padding(bottom = 5.dp)
-                                )
-                                Text(
-                                    text = navObject.location,
-                                    color = Color.Gray,
-                                    fontFamily = AnimalFont,
-                                    fontSize = 16.sp
-                                )
-                            }
-                        }
-                    }
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_back),
+                        contentDescription = "Back",
+                        tint = Color.Unspecified
+                    )
                 }
             }
 
+            // Прокручиваемая часть (вся инфа)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Text(
+                    text = navObject.name,
+                    color = Color.Black,
+                    fontFamily = AnimalFont,
+                    fontSize = 36.sp
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    InfoTag(text = navObject.age, backgroundColor = InfoColorOrange)
+                    InfoTag(text = navObject.feature, backgroundColor = InfoColorPurple)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = navObject.description,
+                    color = Color.Gray,
+                    fontFamily = AnimalFont,
+                    fontSize = 16.sp
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(44.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Номер куратора",
+                            color = Color.Gray,
+                            fontFamily = AnimalFont,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(bottom = 5.dp)
+                        )
+                        Text(
+                            text = navObject.curatorPhone,
+                            color = Color.Gray,
+                            fontFamily = AnimalFont,
+                            fontSize = 16.sp,
+                            maxLines = 4,
+                            softWrap = true
+                        )
+                    }
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Расположение",
+                            color = Color.Gray,
+                            fontFamily = AnimalFont,
+                            fontSize = 13.sp,
+                            modifier = Modifier.padding(bottom = 5.dp)
+                        )
+                        Text(
+                            text = navObject.location,
+                            color = Color.Gray,
+                            fontFamily = AnimalFont,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp)) // Чтобы не налезало на кнопки
+            }
+
+            // Фиксированные кнопки снизу
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                val context = LocalContext.current
-
                 ButtonBlue(
                     text = "Усыновить",
                     modifier = Modifier.weight(1f),
                     onClick = {
                         if (isGuest) {
-                            Toast.makeText(context, "Авторируйтесь, чтобы подать заявку", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Авторируйтесь, чтобы подать заявку",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         } else {
                             val animal = Animal(
                                 name = navObject.name,
@@ -206,12 +209,12 @@ fun DetailsScreen(
                 ButtonWhite(
                     text = "Донат",
                     modifier = Modifier.weight(1f),
-                    onClick = { /* Обработка доната */ }
+                    onClick = { /* обработка доната */ }
                 )
             }
         }
 
-        // Уведомление об успешном усыновлении
+        // Уведомление
         if (showNotification) {
             Box(
                 modifier = Modifier
@@ -240,9 +243,6 @@ fun DetailsScreen(
                             .align(Alignment.CenterHorizontally)
                     )
 
-//                    Text("Заявка отправлена!",
-//                        style = MaterialTheme.typography.titleLarge)
-
                     Text(
                         "Заявка отправлена!",
                         fontSize = 20.sp,
@@ -252,26 +252,24 @@ fun DetailsScreen(
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
-//
+
                     Text(
-                        "В течение 3 дней мы рассмотрим \n её и перезвоним вам.",
+                        "В течение 3 дней мы рассмотрим \nеё и перезвоним вам.",
                         fontSize = 14.sp,
                         fontFamily = AnimalFont,
                         style = MaterialTheme.typography.titleSmall
                     )
 
-
                     Spacer(modifier = Modifier.height(8.dp))
-//
 
                     ButtonTransparent(
                         text = "Закрыть",
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { showNotification = false }
                     )
-
                 }
             }
         }
     }
 }
+
