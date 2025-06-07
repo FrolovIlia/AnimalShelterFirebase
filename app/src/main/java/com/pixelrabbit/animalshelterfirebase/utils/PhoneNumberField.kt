@@ -7,52 +7,52 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
-import androidx.compose.ui.text.input.KeyboardType
 
 @Composable
 fun PhoneNumberField(
     value: String,
     onValueChange: (String) -> Unit,
     isError: Boolean,
-    label: String = "Номер куратора",  // добавлен параметр label с дефолтным значением
+    label: String = "Номер куратора",
     modifier: Modifier = Modifier
 ) {
-    val isFocused = remember { mutableStateOf(false) }
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
+    }
 
     TextField(
-        value = value,
-        onValueChange = { input ->
-            // Удаляем всё, кроме цифр
+        value = textFieldValue,
+        onValueChange = { newValue ->
+            val input = newValue.text
             val digitsOnly = input.filter { it.isDigit() }
 
-            // Если ввод начался без +7, добавляем
-            val newValue = when {
+            val newText = when {
                 input.startsWith("+7") -> "+7" + digitsOnly.drop(1).take(10)
                 input.startsWith("7") -> "+7" + digitsOnly.drop(1).take(10)
+                input.startsWith("8") -> "+7" + digitsOnly.drop(1).take(10)
                 else -> "+7" + digitsOnly.take(10)
             }
 
-            // Не навязываем +7 если пользователь полностью всё удалил
-            if (input.isEmpty()) {
-                onValueChange("")
-            } else {
-                onValueChange(newValue)
-            }
+            val cursorPosition = newText.length.coerceAtMost(12)  // курсор в конце
+            textFieldValue = TextFieldValue(text = newText, selection = TextRange(cursorPosition))
+            onValueChange(newText)
         },
         modifier = modifier
             .fillMaxWidth()
             .onFocusChanged { focusState ->
-                isFocused.value = focusState.isFocused
                 if (focusState.isFocused && value.isEmpty()) {
-                    onValueChange("+7")
+                    val initial = "+7"
+                    textFieldValue = TextFieldValue(text = initial, selection = TextRange(initial.length))
+                    onValueChange(initial)
                 }
             }
             .border(1.dp, if (isError) Color.Red else ButtonColorBlue, RoundedCornerShape(30.dp)),
