@@ -71,14 +71,27 @@ fun DetailsScreen(
                     .height(360.dp)
                     .padding(16.dp)
             ) {
-                AsyncImage(
-                    model = navObject.imageUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(30.dp)),
-                    contentScale = ContentScale.Crop
-                )
+                if (navObject.imageUrl.isNullOrBlank()) {
+                    Image(
+                        painter = painterResource(id = R.drawable.default_animal_image),
+                        contentDescription = "Placeholder image",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(30.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    AsyncImage(
+                        model = navObject.imageUrl,
+                        contentDescription = navObject.name,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(30.dp)),
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = R.drawable.default_animal_image),
+                        placeholder = painterResource(id = R.drawable.default_animal_image)
+                    )
+                }
 
                 IconButton(
                     onClick = onBackClick,
@@ -91,6 +104,7 @@ fun DetailsScreen(
                     )
                 }
             }
+
 
             Column(
                 modifier = Modifier

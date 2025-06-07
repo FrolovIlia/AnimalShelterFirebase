@@ -61,14 +61,27 @@ fun AnimalListItemUI(
                 .fillMaxWidth()
                 .height(130.dp)
         ) {
-            AsyncImage(
-                model = animal.imageUrl,
-                contentDescription = "",
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(15.dp)),
-                contentScale = ContentScale.Crop
-            )
+            if (animal.imageUrl.isNullOrBlank()) {
+                Image(
+                    painter = painterResource(id = R.drawable.default_animal_image), // заглушка
+                    contentDescription = "Placeholder image",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(15.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                AsyncImage(
+                    model = animal.imageUrl,
+                    contentDescription = animal.name,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(15.dp)),
+                    contentScale = ContentScale.Crop,
+                    error = painterResource(id = R.drawable.default_animal_image), // если загрузка не удалась
+                    placeholder = painterResource(id = R.drawable.default_animal_image) // placeholder во время загрузки
+                )
+            }
 
             IconButton(
                 onClick = onFavouriteClick,
