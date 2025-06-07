@@ -72,21 +72,21 @@ fun BottomMenu(
             )
         )
 
-        NavigationBarItem(
-            icon = {
-                CircularIcon(
-                    resId = R.drawable.profile_menu,
-                    backgroundColor = Color.Transparent,
-                    iconTint = Color.Gray
-                )
-            },
-            selected = selectedTab == BottomMenuItem.Settings,
-            onClick = { onTabSelected(BottomMenuItem.Settings) },
-            alwaysShowLabel = false,
-            colors = NavigationBarItemDefaults.colors(
-                indicatorColor = Color.Transparent
-            )
-        )
+//        NavigationBarItem(
+//            icon = {
+//                CircularIcon(
+//                    resId = R.drawable.profile_menu,
+//                    backgroundColor = Color.Transparent,
+//                    iconTint = Color.Gray
+//                )
+//            },
+//            selected = selectedTab == BottomMenuItem.Settings,
+//            onClick = { onTabSelected(BottomMenuItem.Settings) },
+//            alwaysShowLabel = false,
+//            colors = NavigationBarItemDefaults.colors(
+//                indicatorColor = Color.Transparent
+//            )
+//        )
     }
 
 }
