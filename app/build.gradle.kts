@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.animalshelterfirebase"
+    namespace = "com.pixelrabbit.animalshelterfirebase"
     compileSdk = 35
 
     defaultConfig {
