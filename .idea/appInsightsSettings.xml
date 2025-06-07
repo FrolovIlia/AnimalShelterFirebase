@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.animalshelterfirebase" />
-                  <option name="mobileSdkAppId" value="1:384838715080:android:f23bc807a0ef7399e8c7fd" />
-                  <option name="projectId" value="animal-shelter-2a6cc" />
-                  <option name="projectNumber" value="384838715080" />
+                  <option name="appId" value="PLACEHOLDER" />
+                  <option name="mobileSdkAppId" value="" />
+                  <option name="projectId" value="" />
+                  <option name="projectNumber" value="" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

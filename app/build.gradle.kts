@@ -11,7 +11,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.animalshelterfirebase"
+        applicationId = "com.pixelrabbit.animalshelterfirebase"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
