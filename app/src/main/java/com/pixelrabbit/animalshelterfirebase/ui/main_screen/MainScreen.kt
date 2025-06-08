@@ -99,7 +99,9 @@ fun MainScreen(
         isAdmin(navData.uid) { isAdmin ->
             isAdminState.value = isAdmin
         }
-        viewModel.loadUserName(db, navData.uid)
+        if (!isGuest) {
+            viewModel.loadUserName(db, navData.uid)
+        }
     }
 
     // Загрузка данных при смене вкладки или категории
@@ -154,23 +156,23 @@ fun MainScreen(
                 )
         ) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
-            ) {
-                Text(
-                    text = "Привет,",
-                    fontSize = 16.sp,
-                    fontFamily = AnimalFont,
-                )
-                Text(
-                    // Используем userName из ViewModel.
-                    // Если оно пустое (еще не загружено или в БД нет имени), покажем "Гость".
-                    text = userName.ifEmpty { "..." },
-                    fontSize = 24.sp,
-                    fontFamily = AnimalFont,
-                )
+            if (!isGuest) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                ) {
+                    Text(
+                        text = "Привет,",
+                        fontSize = 16.sp,
+                        fontFamily = AnimalFont,
+                    )
+                    Text(
+                        text = userName.ifEmpty { "..." },
+                        fontSize = 24.sp,
+                        fontFamily = AnimalFont,
+                    )
+                }
             }
 
             // Кнопка добавления животного для администратора и не гостя
