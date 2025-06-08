@@ -1,6 +1,7 @@
 package com.pixelrabbit.animalshelterfirebase.ui.main_screen
 
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -81,6 +82,8 @@ fun MainScreen(
     val db = remember { Firebase.firestore }
     val context = LocalContext.current
     val isGuest = navData.uid == "guest"
+
+    Log.d("MainScreen", "Current navData.uid: ${navData.uid}")
 
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsState()
