@@ -65,6 +65,8 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.unit.sp
+import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
 
 
@@ -87,11 +89,14 @@ fun MainScreen(
     var isFavoritesOnly by remember { mutableStateOf(false) }
     val isAdminState = remember { mutableStateOf(false) }
 
+    val userName by viewModel.userName.collectAsState()
+
     // Проверяем права администратора
     LaunchedEffect(navData.uid) {
         isAdmin(navData.uid) { isAdmin ->
             isAdminState.value = isAdmin
         }
+        viewModel.loadUserName(db, navData.uid)
     }
 
     // Загрузка данных при смене вкладки или категории
@@ -140,8 +145,31 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(BackgroundGray)
-                .padding(paddingValues)
+                .padding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding()
+                )
         ) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+            ) {
+                Text(
+                    text = "Привет,",
+                    fontSize = 16.sp,
+                    fontFamily = AnimalFont,
+                )
+                Text(
+                    // Используем userName из ViewModel.
+                    // Если оно пустое (еще не загружено или в БД нет имени), покажем "Гость".
+                    text = userName.ifEmpty { "..." },
+                    fontSize = 24.sp,
+                    fontFamily = AnimalFont,
+                )
+            }
+
             // Кнопка добавления животного для администратора и не гостя
             if (isAdminState.value && !isGuest) {
                 Button(

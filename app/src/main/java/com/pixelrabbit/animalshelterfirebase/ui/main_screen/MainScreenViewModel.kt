@@ -26,6 +26,10 @@ class MainScreenViewModel : ViewModel() {
     private val _selectedTab = MutableStateFlow<BottomMenuItem>(BottomMenuItem.Home)
     val selectedTab: StateFlow<BottomMenuItem> = _selectedTab
 
+    private val _userName = MutableStateFlow("")
+    val userName: StateFlow<String> = _userName
+
+
     fun selectCategory(category: String) {
         _selectedCategory.value = category
     }
@@ -203,4 +207,27 @@ class MainScreenViewModel : ViewModel() {
                 onComplete(emptyList())
             }
     }
+
+
+    fun loadUserName(db: FirebaseFirestore, uid: String) {
+        if (uid == "guest" || uid.isBlank()) {
+            _userName.value = "Гость"
+            return
+        }
+
+        db.collection("users")
+            .document(uid)
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                // Предполагается, что поле с именем пользователя называется "name"
+                val name = documentSnapshot.getString("name")
+                _userName.value = name ?: "" // Устанавливаем имя, или пустую строку если null
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainScreenViewModel", "Failed to load user name for uid: $uid", e)
+                _userName.value = "" // Ошибка загрузки, устанавливаем пустую строку
+            }
+    }
+
+
 }
