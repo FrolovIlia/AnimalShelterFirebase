@@ -69,6 +69,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.unit.sp
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
+import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 
 
 @Composable
@@ -93,6 +94,7 @@ fun MainScreen(
     val isAdminState = remember { mutableStateOf(false) }
 
     val userName by viewModel.userName.collectAsState()
+    var query by remember { mutableStateOf("") }
 
     // Проверяем права администратора
     LaunchedEffect(navData.uid) {
@@ -109,7 +111,11 @@ fun MainScreen(
         if (selectedTab == BottomMenuItem.Favs) {
             isFavoritesOnly = true
             if (isGuest) {
-                Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Только для зарегистрированных пользователей",
+                    Toast.LENGTH_SHORT
+                ).show()
                 viewModel.setAnimals(emptyList())
             } else {
                 viewModel.loadFavorites(db, navData.uid)
@@ -117,10 +123,22 @@ fun MainScreen(
         } else {
             isFavoritesOnly = false
             if (isGuest) {
-                viewModel.loadAnimals(db, "guest") // Для гостя uid не нужен, передаём "guest" для игнорирования избранного
+                viewModel.loadAnimals(db, "guest")
             } else {
                 viewModel.loadAnimals(db, navData.uid)
             }
+        }
+    }
+
+    // Оптимизированная фильтрация с remember
+    val filteredAnimals = remember(query, animals) {
+        val queryLower = query.lowercase()
+        animals.filter { animal ->
+            animal.name.lowercase().contains(queryLower) ||
+                    animal.description.lowercase().contains(queryLower) ||
+                    animal.location.lowercase().contains(queryLower) ||
+                    animal.feature.lowercase().contains(queryLower) ||
+                    animal.category.lowercase().contains(queryLower)
         }
     }
 
@@ -175,7 +193,6 @@ fun MainScreen(
                 }
             }
 
-            // Кнопка добавления животного для администратора и не гостя
             if (isAdminState.value && !isGuest) {
                 Button(
                     onClick = onAdminClick,
@@ -188,11 +205,19 @@ fun MainScreen(
                 }
             }
 
-            // Категории животных
             val categories = listOf(
                 AnimalCategories(R.drawable.ic_all_animals, "Все"),
                 AnimalCategories(R.drawable.ic_cats, "Котики"),
                 AnimalCategories(R.drawable.ic_dogs, "Собачки")
+            )
+
+            SearchField(
+                query = query,
+                onQueryChange = { query = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = "Поиск по животным"
             )
 
             LazyRow(
@@ -251,16 +276,14 @@ fun MainScreen(
                 }
             }
 
-            // Пустой экран, если нет животных
-            if (animals.isEmpty()) {
+            if (filteredAnimals.isEmpty()) {
                 EmptyStateScreen()
             } else {
-                // Сетка с животными
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(animals) { animal ->
+                    items(filteredAnimals) { animal ->
                         AnimalListItemUI(
                             showEditButton = isAdminState.value,
                             animal = animal,
@@ -285,3 +308,4 @@ fun MainScreen(
         }
     }
 }
+

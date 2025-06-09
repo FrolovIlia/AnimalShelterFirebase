@@ -79,5 +79,17 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.material.icons.extended)
 
+// Compose Material3 (гарантирует доступ к TextField, Text, LocalTextStyle и т.д.)
+    implementation("androidx.compose.material3:material3:1.2.1")
+
+// Compose UI (включает text input types и другие компоненты UI)
+    implementation("androidx.compose.ui:ui:1.6.0")
+
+// Compose tooling (для превью и тестов, уже есть у тебя)
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+
+// Material Icons (уже есть — отлично)
+    implementation("androidx.compose.material:material-icons-extended:1.6.0")
 
 }
