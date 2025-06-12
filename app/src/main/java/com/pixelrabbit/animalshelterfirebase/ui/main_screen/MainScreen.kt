@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -69,6 +70,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.unit.sp
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
+import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 
 
@@ -175,35 +177,40 @@ fun MainScreen(
         ) {
 
             if (!isGuest) {
-                Column(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start // по умолчанию слева
                 ) {
-                    Text(
-                        text = "Привет,",
-                        fontSize = 16.sp,
-                        fontFamily = AnimalFont,
-                    )
-                    Text(
-                        text = userName.ifEmpty { "..." },
-                        fontSize = 24.sp,
-                        fontFamily = AnimalFont,
-                    )
+                    Column {
+                        Text(
+                            text = "Привет,",
+                            fontSize = 16.sp,
+                            fontFamily = AnimalFont,
+                        )
+                        Text(
+                            text = userName.ifEmpty { "..." },
+                            fontSize = 24.sp,
+                            fontFamily = AnimalFont,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp)) // отступ между приветствием и кнопкой
+
+                    if (isAdminState.value && !isGuest) {
+                        Button(
+                            onClick = onAdminClick,
+                            modifier = Modifier.width(130.dp),
+                            colors = ButtonDefaults.buttonColors(ButtonColorBlue)
+                        ) {
+                            Text(text = "Добавить\nживотное")
+                        }
+                    }
                 }
             }
 
-            if (isAdminState.value && !isGuest) {
-                Button(
-                    onClick = onAdminClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
-                    colors = ButtonDefaults.buttonColors(ButtonColorBlue)
-                ) {
-                    Text(text = "Добавить животное")
-                }
-            }
 
             val categories = listOf(
                 AnimalCategories(R.drawable.ic_all_animals, "Все"),
@@ -216,7 +223,7 @@ fun MainScreen(
                 onQueryChange = { query = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 0.dp),
                 placeholder = "Поиск по животным"
             )
 
