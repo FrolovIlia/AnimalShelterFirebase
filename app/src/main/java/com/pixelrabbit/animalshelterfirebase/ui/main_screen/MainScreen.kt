@@ -70,7 +70,6 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.unit.sp
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
-import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 
 
@@ -182,34 +181,54 @@ fun MainScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start // по умолчанию слева
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column {
-                        Text(
-                            text = "Привет,",
-                            fontSize = 16.sp,
-                            fontFamily = AnimalFont,
-                        )
-                        Text(
-                            text = userName.ifEmpty { "..." },
-                            fontSize = 24.sp,
-                            fontFamily = AnimalFont,
-                        )
-                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "Привет,",
+                                fontSize = 16.sp,
+                                fontFamily = AnimalFont,
+                            )
+                            Text(
+                                text = userName.ifEmpty { "..." },
+                                fontSize = 24.sp,
+                                fontFamily = AnimalFont,
+                            )
+                        }
 
-                    Spacer(modifier = Modifier.width(8.dp)) // отступ между приветствием и кнопкой
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                    if (isAdminState.value && !isGuest) {
-                        Button(
-                            onClick = onAdminClick,
-                            modifier = Modifier.width(130.dp),
-                            colors = ButtonDefaults.buttonColors(ButtonColorBlue)
-                        ) {
-                            Text(text = "Добавить\nживотное")
+                        if (isAdminState.value) {
+                            Button(
+                                onClick = onAdminClick,
+                                modifier = Modifier.width(130.dp),
+                                colors = ButtonDefaults.buttonColors(ButtonColorBlue)
+                            ) {
+                                Text(text = "Добавить\nживотное")
+                            }
                         }
                     }
+
+                    // Иконка уведомлений справа
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_notifications),
+                        contentDescription = "Уведомления",
+                        modifier = Modifier
+                            .width(28.dp)
+                            .height(28.dp)
+                            .clickable {
+                                Toast
+                                    .makeText(context, "Уведомлений сейчас нет", Toast.LENGTH_SHORT)
+                                    .show()
+                                // TODO: Навигация к уведомлениям
+                            }
+                    )
                 }
             }
+
 
 
             val categories = listOf(
