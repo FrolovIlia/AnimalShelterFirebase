@@ -295,7 +295,8 @@ fun signUp(
                     "name" to name,
                     "birthDate" to birthDate,
                     "phone" to phone,
-                    "email" to email
+                    "email" to email,
+                    "isAdmin" to false
                 )
                 Firebase.firestore.collection("users")
                     .document(user.uid)
