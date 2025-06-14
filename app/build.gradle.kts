@@ -92,4 +92,7 @@ dependencies {
 // Material Icons (уже есть — отлично)
     implementation("androidx.compose.material:material-icons-extended:1.6.0")
 
+//Для уведомлений
+    implementation(libs.firebase.messaging.ktx)
+
 }

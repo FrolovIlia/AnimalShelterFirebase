@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -212,20 +214,21 @@ fun MainScreen(
                         }
                     }
 
-                    // Иконка уведомлений справа
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_notifications),
-                        contentDescription = "Уведомления",
-                        modifier = Modifier
-                            .width(28.dp)
-                            .height(28.dp)
-                            .clickable {
-                                Toast
-                                    .makeText(context, "Уведомлений сейчас нет", Toast.LENGTH_SHORT)
-                                    .show()
-                                // TODO: Навигация к уведомлениям
-                            }
-                    )
+//                    val context = LocalContext.current
+//
+//                    Image(
+//                        painter = painterResource(id = R.drawable.ic_notifications),
+//                        contentDescription = "Уведомления",
+//                        modifier = Modifier
+//                            .width(28.dp)
+//                            .height(28.dp)
+//                            .clickable {
+//                                Log.d("MainScreen", "Notification icon clicked")
+//                                Toast
+//                                    .makeText(context, "Уведомлений сейчас нет", Toast.LENGTH_SHORT)
+//                                    .show()
+//                            }
+//                    )
                 }
             }
 
