@@ -23,7 +23,7 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.pixelrabbit.animalshelterfirebase" />
-                  <option name="mobileSdkAppId" value="1:384838715080:android:f23bc807a0ef7399e8c7fd" />
+                  <option name="mobileSdkAppId" value="1:384838715080:android:90831fed4a0e0f35e8c7fd" />
                   <option name="projectId" value="animal-shelter-2a6cc" />
                   <option name="projectNumber" value="384838715080" />
                 </ConnectionSetting>

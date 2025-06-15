@@ -30,11 +30,66 @@ import com.pixelrabbit.animalshelterfirebase.ui.authorization.LoginScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.createEncryptedPrefs
 
-
+import android.util.Log
+import com.google.firebase.messaging.FirebaseMessaging
+import android.widget.Toast // <-- ВАЖНО: Убедитесь, что этот импорт присутствует!
 
 class MainActivity : ComponentActivity() {
+    private val TAG = "FCM_DEBUG" // TAG определен здесь, чтобы был доступен во всем классе
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // --- НАЧАЛО: Блок настройки FCM. ЗАМЕНИТЬ ЭТОТ БЛОК ПОЛНОСТЬЮ! ---
+        Log.d(TAG, "MainActivity onCreate called. Starting FCM setup.")
+
+        // Для Android 13+ запросите разрешение на уведомления (если не сделано в другом месте)
+        // Если у вас есть функция askNotificationPermission(), ее можно раскомментировать
+        // askNotificationPermission()
+        // Log.d(TAG, "askNotificationPermission called (if implemented).")
+
+
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
+            if (!tokenTask.isSuccessful) {
+                Log.e(TAG, "Fetching FCM registration token failed", tokenTask.exception)
+                return@addOnCompleteListener
+            }
+
+            // Получить FCM registration token
+            val token = tokenTask.result
+            Log.d(TAG, "FCM Token obtained: $token")
+
+            // --- Блок отписки, а затем подписки на тему "new_animals" ---
+            Log.d(TAG, "Attempting to unsubscribe from topic 'new_animals' before re-subscribing.")
+            FirebaseMessaging.getInstance().unsubscribeFromTopic("new_animals")
+                .addOnCompleteListener { unsubscribeTask ->
+                    if (unsubscribeTask.isSuccessful) {
+                        Log.d(TAG, "Successfully unsubscribed from new_animals topic (if previously subscribed).")
+                    } else {
+                        Log.e(TAG, "Failed to unsubscribe from new_animals topic: ${unsubscribeTask.exception?.message}", unsubscribeTask.exception)
+                    }
+
+                    // Теперь, после попытки отписки, выполним подписку
+                    FirebaseMessaging.getInstance().subscribeToTopic("new_animals")
+                        .addOnCompleteListener { subscribeTask ->
+                            var msg = "Subscribed to new_animals topic"
+                            if (!subscribeTask.isSuccessful) {
+                                // Если подписка НЕ успешна
+                                msg = "FCM Topic Subscription FAILED: ${subscribeTask.exception?.message}"
+                                Log.e(TAG, msg, subscribeTask.exception)
+                                // Выводим более заметный Toast для ошибки
+                                Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
+                            } else {
+                                // Если подписка успешна
+                                Log.d(TAG, msg)
+                                Toast.makeText(baseContext, "FCM Topic Subscribed: new_animals", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                }
+        }
+        Log.d(TAG, "FirebaseMessaging.getInstance().token initiated.")
+        // --- КОНЕЦ: Блок настройки FCM. ---
+
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
@@ -192,7 +247,7 @@ class MainActivity : ComponentActivity() {
                     val user = UserObject(
                         uid = navData.userUid,
                         name = navData.userName,
-                        phone = navData.userPhone,
+                        phone = navData.userPhone, // <-- ИСПРАВЛЕНИЕ: Использовать navData.userPhone
                         email = navData.userEmail
                     )
 
@@ -208,10 +263,6 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
-
-
-
-
             }
         }
     }
