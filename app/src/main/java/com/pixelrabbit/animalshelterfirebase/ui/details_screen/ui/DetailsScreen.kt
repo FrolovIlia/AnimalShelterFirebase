@@ -24,6 +24,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.details_screen.data.DetailsNavOb
 import com.pixelrabbit.animalshelterfirebase.ui.theme.*
 import com.pixelrabbit.animalshelterfirebase.utils.*
 import androidx.compose.runtime.livedata.observeAsState
+import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.data.DonationNavObject
 
 @Composable
 fun DetailsScreen(
@@ -32,7 +33,8 @@ fun DetailsScreen(
     userViewModel: UserViewModel,
     onBackClick: () -> Unit,
     onAdoptClick: (Animal, UserObject) -> Unit,
-    savedStateHandle: SavedStateHandle? = null
+    savedStateHandle: SavedStateHandle? = null,
+    onDonateClick: (DonationNavObject) -> Unit
 ) {
     val adoptionSuccessState = savedStateHandle
         ?.getLiveData<Boolean>("showAdoptionSuccess")
@@ -213,7 +215,25 @@ fun DetailsScreen(
                 ButtonWhite(
                     text = "Донат",
                     modifier = Modifier.weight(1f),
-                    onClick = { /* обработка доната */ }
+                    onClick = {
+                        onDonateClick(DonationNavObject(donation = "Наш приют существует исключительно благодаря вашей поддержке.\n" +
+                                "    Каждый день мы заботимся о десятках животных, нуждающихся в еде, уходе, медицинской помощи и тепле.\n" +
+                                "\n" +
+                                "    Даже небольшое пожертвование помогает нам покупать корм, оплачивать ветеринарные услуги и поддерживать чистоту в вольерах.\n" +
+                                "\n" +
+                                "    Мы верим, что добрые дела объединяют людей, и благодарим каждого, кто помогает нам создавать безопасное место для бездомных животных.\n" +
+                                "\n" +
+                                "    Если у вас нет возможности помочь финансово — вы можете стать волонтёром, рассказать о нас друзьям или просто поделиться ссылкой в соцсетях. Каждое действие имеет значение!\n" +
+                                "\n" +
+                                "    Спасибо, что вы с нами ❤\n" +
+                                "\n" +
+                                "    Наши реквизиты:\n" +
+                                "    \uD83D\uDCCD Сбербанк: 5469 3800 5678 1234\n" +
+                                "    \uD83D\uDCCD Тинькофф: 5536 9140 1234 5678\n" +
+                                "    \uD83D\uDCCD PayPal: animalhelp@example.com\n" +
+                                "\n" +
+                                "    Поддержите хвостатых — они нуждаются в нас!"))
+                    }
                 )
             }
         }

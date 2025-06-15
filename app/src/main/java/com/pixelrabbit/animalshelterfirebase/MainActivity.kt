@@ -30,9 +30,13 @@ import com.pixelrabbit.animalshelterfirebase.ui.authorization.LoginScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.createEncryptedPrefs
 
+import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.data.DonationNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.ui.DonationScreen
+
+
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
-import android.widget.Toast // <-- ВАЖНО: Убедитесь, что этот импорт присутствует!
+import android.widget.Toast
 
 class MainActivity : ComponentActivity() {
     private val TAG = "FCM_DEBUG" // TAG определен здесь, чтобы был доступен во всем классе
@@ -64,9 +68,16 @@ class MainActivity : ComponentActivity() {
             FirebaseMessaging.getInstance().unsubscribeFromTopic("new_animals")
                 .addOnCompleteListener { unsubscribeTask ->
                     if (unsubscribeTask.isSuccessful) {
-                        Log.d(TAG, "Successfully unsubscribed from new_animals topic (if previously subscribed).")
+                        Log.d(
+                            TAG,
+                            "Successfully unsubscribed from new_animals topic (if previously subscribed)."
+                        )
                     } else {
-                        Log.e(TAG, "Failed to unsubscribe from new_animals topic: ${unsubscribeTask.exception?.message}", unsubscribeTask.exception)
+                        Log.e(
+                            TAG,
+                            "Failed to unsubscribe from new_animals topic: ${unsubscribeTask.exception?.message}",
+                            unsubscribeTask.exception
+                        )
                     }
 
                     // Теперь, после попытки отписки, выполним подписку
@@ -75,14 +86,19 @@ class MainActivity : ComponentActivity() {
                             var msg = "Subscribed to new_animals topic"
                             if (!subscribeTask.isSuccessful) {
                                 // Если подписка НЕ успешна
-                                msg = "FCM Topic Subscription FAILED: ${subscribeTask.exception?.message}"
+                                msg =
+                                    "FCM Topic Subscription FAILED: ${subscribeTask.exception?.message}"
                                 Log.e(TAG, msg, subscribeTask.exception)
                                 // Выводим более заметный Toast для ошибки
-                                Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
+//                                Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
                             } else {
                                 // Если подписка успешна
-                                Log.d(TAG, msg)
-                                Toast.makeText(baseContext, "FCM Topic Subscribed: new_animals", Toast.LENGTH_SHORT).show()
+//                                Log.d(TAG, msg)
+//                                Toast.makeText(
+//                                    baseContext,
+//                                    "FCM Topic Subscribed: new_animals",
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
                             }
                         }
                 }
@@ -214,7 +230,19 @@ class MainActivity : ComponentActivity() {
                                 )
                             )
                         },
+                        onDonateClick = { donationNavObject ->
+                            navController.navigate(donationNavObject)
+                        },
                         savedStateHandle = navEntry.savedStateHandle
+                    )
+                }
+
+
+                composable<DonationNavObject> { navEntry ->
+                    val navData = navEntry.toRoute<DonationNavObject>()
+                    DonationScreen(
+                        navObject = navData,
+                        onBack = { navController.popBackStack() }
                     )
                 }
 
