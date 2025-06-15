@@ -38,6 +38,11 @@ import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
 import android.widget.Toast
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
+
 class MainActivity : ComponentActivity() {
     private val TAG = "FCM_DEBUG" // TAG определен здесь, чтобы был доступен во всем классе
 
@@ -231,17 +236,23 @@ class MainActivity : ComponentActivity() {
                             )
                         },
                         onDonateClick = { donationNavObject ->
-                            navController.navigate(donationNavObject)
+                            navController.navigate(donationNavObject.toRoute())
                         },
                         savedStateHandle = navEntry.savedStateHandle
                     )
                 }
 
 
-                composable<DonationNavObject> { navEntry ->
-                    val navData = navEntry.toRoute<DonationNavObject>()
+                composable(
+                    route = DonationNavObject.routeWithArgs,
+                    arguments = listOf(navArgument("donation") {
+                        type = NavType.StringType
+                        defaultValue = ""
+                    })
+                ) { navBackStackEntry ->
+                    val shelterViewModel: ShelterViewModel = viewModel()
                     DonationScreen(
-                        navObject = navData,
+                        viewModel = shelterViewModel,
                         onBack = { navController.popBackStack() }
                     )
                 }
@@ -275,7 +286,7 @@ class MainActivity : ComponentActivity() {
                     val user = UserObject(
                         uid = navData.userUid,
                         name = navData.userName,
-                        phone = navData.userPhone, // <-- ИСПРАВЛЕНИЕ: Использовать navData.userPhone
+                        phone = navData.userPhone,
                         email = navData.userEmail
                     )
 

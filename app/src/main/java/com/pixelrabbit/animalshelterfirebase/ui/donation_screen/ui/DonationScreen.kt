@@ -9,18 +9,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.data.DonationNavObject
+import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
+import androidx.compose.material3.Divider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DonationScreen(
-    navObject: DonationNavObject,
+    viewModel: ShelterViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onBack: () -> Unit = {}
 ) {
+
+
     Scaffold(
         modifier = Modifier
             .statusBarsPadding()
@@ -59,7 +62,7 @@ fun DonationScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = navObject.donation,
+                    text = viewModel.shelterData.value?.donation ?: "Загрузка...",
                     color = Color.Gray,
                     fontFamily = AnimalFont,
                     fontSize = 16.sp
@@ -78,7 +81,7 @@ private fun AdBlock() {
             .padding(16.dp)
     ) {
 
-        HorizontalDivider(thickness = 2.dp, color = Color.LightGray)
+        Divider(thickness = 2.dp, color = Color.LightGray)
 
         Text(
             "Просмотр рекламы",
@@ -104,24 +107,4 @@ private fun AdBlock() {
             Text("Здесь будет реклама", color = Color.DarkGray)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DonationScreenPreview() {
-    val fakeNavObject = DonationNavObject(
-        donation = "Наш приют существует исключительно благодаря вашей поддержке.\n\n" +
-                "Каждый день мы заботимся о десятках животных, нуждающихся в еде, уходе, медицинской помощи и тепле.\n\n" +
-                "Даже небольшое пожертвование помогает нам покупать корм, оплачивать ветеринарные услуги и поддерживать чистоту в вольерах.\n\n" +
-                "Мы верим, что добрые дела объединяют людей, и благодарим каждого, кто помогает нам создавать безопасное место для бездомных животных.\n\n" +
-                "Если у вас нет возможности помочь финансово — вы можете стать волонтёром, рассказать о нас друзьям или просто поделиться ссылкой в соцсетях. Каждое действие имеет значение!\n\n" +
-                "Спасибо, что вы с нами ❤\uFE0F\n\n" +
-                "Наши реквизиты:\n" +
-                "📍 Сбербанк: 5469 3800 5678 1234\n" +
-                "📍 Тинькофф: 5536 9140 1234 5678\n" +
-                "📍 PayPal: animalhelp@example.com\n\n" +
-                "Поддержите хвостатых — они нуждаются в нас!"
-    )
-
-    DonationScreen(navObject = fakeNavObject)
 }

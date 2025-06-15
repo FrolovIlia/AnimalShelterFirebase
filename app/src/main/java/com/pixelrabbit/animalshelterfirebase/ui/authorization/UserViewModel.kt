@@ -8,6 +8,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class UserViewModel : ViewModel() {
 
@@ -16,20 +17,22 @@ class UserViewModel : ViewModel() {
 
     fun loadUser(uid: String) {
         viewModelScope.launch {
-            Firebase.firestore.collection("users")
-                .document(uid)
-                .get()
-                .addOnSuccessListener { document ->
-                    if (document != null && document.exists()) {
-                        val user = document.toObject(UserObject::class.java)?.copy(uid = uid)
-                        _currentUser.value = user
-                    } else {
-                        _currentUser.value = null
-                    }
-                }
-                .addOnFailureListener {
+            try {
+                val document = Firebase.firestore
+                    .collection("users")
+                    .document(uid)
+                    .get()
+                    .await() // suspend-функция
+
+                if (document.exists()) {
+                    val user = document.toObject(UserObject::class.java)?.copy(uid = uid)
+                    _currentUser.value = user
+                } else {
                     _currentUser.value = null
                 }
+            } catch (e: Exception) {
+                _currentUser.value = null
+            }
         }
     }
 

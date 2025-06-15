@@ -96,4 +96,6 @@ dependencies {
 //Для уведомлений
     implementation(libs.firebase.messaging.ktx)
 
+    implementation(libs.kotlinx.coroutines.play.services)
+
 }
