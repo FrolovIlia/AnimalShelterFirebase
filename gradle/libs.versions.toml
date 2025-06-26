@@ -16,6 +16,7 @@ gmsVersion = "4.4.2"
 boomVersion = "33.13.0"
 firebaseStorageKtx = "21.0.1"
 materialIconsExtended = "1.7.8"
+mobileads = "7.14.0"
 runtimeAndroid = "1.8.1"
 runtimeLivedataVersion = "1.5.0"
 securityCrypto = "1.1.0-alpha07"
@@ -67,6 +68,7 @@ androidx-runtime-android = { group = "androidx.compose.runtime", name = "runtime
 androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "uiAndroid" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+mobileads = { module = "com.yandex.android:mobileads", version.ref = "mobileads" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiTooling" }
 androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 androidx-animation-core-lint = { group = "androidx.compose.animation", name = "animation-core-lint", version.ref = "animationCoreLint" }

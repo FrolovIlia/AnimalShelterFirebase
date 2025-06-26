@@ -98,4 +98,6 @@ dependencies {
 
     implementation(libs.kotlinx.coroutines.play.services)
 
+    implementation(libs.mobileads)
+
 }

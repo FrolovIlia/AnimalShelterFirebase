@@ -36,20 +36,27 @@ import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.ui.DonationScree
 
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
-import android.widget.Toast
 
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
+import com.yandex.mobile.ads.common.MobileAds
+import com.yandex.mobile.ads.common.InitializationListener
+
 
 class MainActivity : ComponentActivity() {
     private val TAG = "FCM_DEBUG" // TAG определен здесь, чтобы был доступен во всем классе
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MobileAds.initialize(this, initializationListener = object : InitializationListener {
+            override fun onInitializationCompleted() {
+                // Можно ничего не делать, просто пустая реализация
+            }
+        })
+        Log.d("YandexAds", "SDK initialized")
 
-        // --- НАЧАЛО: Блок настройки FCM. ЗАМЕНИТЬ ЭТОТ БЛОК ПОЛНОСТЬЮ! ---
+        // --- НАЧАЛО: Блок настройки FCM ---
         Log.d(TAG, "MainActivity onCreate called. Starting FCM setup.")
 
         // Для Android 13+ запросите разрешение на уведомления (если не сделано в другом месте)

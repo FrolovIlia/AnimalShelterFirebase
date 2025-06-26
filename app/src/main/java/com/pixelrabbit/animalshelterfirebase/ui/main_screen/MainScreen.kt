@@ -214,21 +214,21 @@ fun MainScreen(
                         }
                     }
 
-//                    val context = LocalContext.current
-//
-//                    Image(
-//                        painter = painterResource(id = R.drawable.ic_notifications),
-//                        contentDescription = "Уведомления",
-//                        modifier = Modifier
-//                            .width(28.dp)
-//                            .height(28.dp)
-//                            .clickable {
-//                                Log.d("MainScreen", "Notification icon clicked")
-//                                Toast
-//                                    .makeText(context, "Уведомлений сейчас нет", Toast.LENGTH_SHORT)
-//                                    .show()
-//                            }
-//                    )
+                    val context = LocalContext.current
+
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_ad_play),
+                        contentDescription = "Реклама",
+                        modifier = Modifier
+                            .width(40.dp)
+                            .height(40.dp)
+                            .clickable {
+                                Log.d("MainScreen", "Notification icon clicked")
+                                Toast
+                                    .makeText(context, "Здесь позднее будет реклама", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+                    )
                 }
             }
 
