@@ -38,6 +38,10 @@
             </intent-filter>
         </service>
 
+        <meta-data
+            android:name="com.yandex.mobileads.APP_ID"
+            android:value="R-M-XXXXXX-Y" /> <!-- 🔁 Вставь свой App ID -->
+
     </application>
 
 </manifest>

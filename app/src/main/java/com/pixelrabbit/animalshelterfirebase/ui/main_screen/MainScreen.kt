@@ -9,7 +9,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -73,6 +71,14 @@ import androidx.compose.ui.unit.sp
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
+import androidx.compose.foundation.layout.size
+
+import com.yandex.mobile.ads.common.AdRequestConfiguration
+import com.yandex.mobile.ads.interstitial.InterstitialAd
+
+import com.yandex.mobile.ads.common.AdRequestError
+import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
+import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
 
 
 @Composable
@@ -98,6 +104,49 @@ fun MainScreen(
 
     val userName by viewModel.userName.collectAsState()
     var query by remember { mutableStateOf("") }
+
+
+// Инициализация межстраничной рекламы Яндекс
+    val interstitialAd = remember { mutableStateOf<InterstitialAd?>(null) }
+    val activity = remember(context) {
+        generateSequence(context) { ctx ->
+            when (ctx) {
+                is android.app.Activity -> null
+                is android.content.ContextWrapper -> ctx.baseContext
+                else -> null
+            }
+        }.firstOrNull { it is android.app.Activity } as? android.app.Activity
+    }
+
+    LaunchedEffect(Unit) {
+        activity?.let {
+            val adLoader = InterstitialAdLoader(it)
+
+            adLoader.setAdLoadListener(object : InterstitialAdLoadListener {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    interstitialAd.value = ad
+//                    Toast.makeText(it, "Реклама загружена", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onAdFailedToLoad(error: AdRequestError) {
+                    interstitialAd.value = null
+//                    Toast.makeText(
+//                        it,
+//                        "Реклама ещё не загружена",
+////                        "Ошибка загрузки рекламы: ${error.description}",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+                }
+            })
+
+            val adRequestConfiguration =
+                AdRequestConfiguration.Builder("R-M-XXXXXX-Y") // ✅ замените на свой ID
+                    .build()
+
+            adLoader.loadAd(adRequestConfiguration)
+        }
+    }
+
 
     // Проверяем права администратора
     LaunchedEffect(navData.uid) {
@@ -214,24 +263,27 @@ fun MainScreen(
                         }
                     }
 
-                    val context = LocalContext.current
-
                     Image(
                         painter = painterResource(id = R.drawable.ic_ad_play),
                         contentDescription = "Реклама",
                         modifier = Modifier
-                            .width(40.dp)
-                            .height(40.dp)
+                            .size(40.dp) // Короче, чем width + height
                             .clickable {
-                                Log.d("MainScreen", "Notification icon clicked")
-                                Toast
-                                    .makeText(context, "Здесь позднее будет реклама", Toast.LENGTH_SHORT)
-                                    .show()
+                                val ad = interstitialAd.value
+                                if (ad != null && activity != null) {
+                                    ad.show(activity)
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Реклама ещё не загрузилась",
+//                                        "Реклама не готова или Activity не доступна",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
                     )
                 }
             }
-
 
 
             val categories = listOf(
