@@ -8,5 +8,7 @@ data class UserObject(
     val phone: String = "",
     val email: String = "",
     @get:PropertyName("isAdmin")
-    val isAdmin: Boolean = false
+    val isAdmin: Boolean = false,
+    @get:PropertyName("isOwner")
+    val isOwner: Boolean = false
 )
