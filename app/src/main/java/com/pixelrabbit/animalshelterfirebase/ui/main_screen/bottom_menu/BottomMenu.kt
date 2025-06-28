@@ -69,7 +69,11 @@ fun BottomMenu(
                     navController.navigate("edit_profile")
                 } else {
                     // Показать уведомление для незарегистрированных пользователей
-                    Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Только для зарегистрированных пользователей",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             },
             alwaysShowLabel = false,
@@ -91,14 +95,15 @@ fun BottomMenu(
                 if (isRegistered) {
                     navController.navigate(
                         EditProfileNavObject(
-                            uid = currentUser.uid,
-                            name = currentUser.name,
-                            email = currentUser.email,
-                            phone = currentUser.phone
+                            uid = currentUser.uid
                         )
                     )
                 } else {
-                    Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        "Только для зарегистрированных пользователей",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             },
             alwaysShowLabel = false,
@@ -106,11 +111,8 @@ fun BottomMenu(
                 indicatorColor = Color.Transparent
             )
         )
-
     }
-
 }
-
 
 
 @Composable

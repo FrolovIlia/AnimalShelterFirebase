@@ -3,12 +3,15 @@ package com.pixelrabbit.animalshelterfirebase.ui.authorization
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pixelrabbit.animalshelterfirebase.data.UserObject
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
+import com.google.firebase.firestore.Source
 
 class UserViewModel : ViewModel() {
 
@@ -21,18 +24,25 @@ class UserViewModel : ViewModel() {
                 val document = Firebase.firestore
                     .collection("users")
                     .document(uid)
-                    .get()
-                    .await() // suspend-функция
+                    .get(Source.SERVER)
+                    .await()
 
-                if (document.exists()) {
-                    val user = document.toObject(UserObject::class.java)?.copy(uid = uid)
-                    _currentUser.value = user
-                } else {
-                    _currentUser.value = null
-                }
+                val user = document.toObject(UserObject::class.java)?.copy(uid = uid)
+                _currentUser.value = user
             } catch (e: Exception) {
                 _currentUser.value = null
             }
+        }
+    }
+
+    // Обновляет текущего пользователя — перезагружает данные из Firestore по uid текущего Firebase пользователя
+    fun refreshUser() {
+        val uid = Firebase.auth.currentUser?.uid
+        if (uid != null) {
+            loadUser(uid)
+        } else {
+            // Если пользователь не авторизован, очищаем состояние
+            clearUser()
         }
     }
 

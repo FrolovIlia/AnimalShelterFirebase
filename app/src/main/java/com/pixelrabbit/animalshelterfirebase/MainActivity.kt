@@ -225,17 +225,8 @@ class MainActivity : ComponentActivity() {
                 composable<DetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<DetailsNavObject>()
 
-                    val user = userViewModel.currentUser.value
-                    val currentUser = user ?: UserObject( // если пользователь не загружен
-                        uid = "guest",
-                        name = "Гость",
-                        phone = "",
-                        email = ""
-                    )
-
                     DetailsScreen(
                         navObject = navData,
-                        currentUser = currentUser,
                         userViewModel = userViewModel,
                         onBackClick = { navController.popBackStack() },
                         onAdoptClick = { animal, user ->
@@ -259,6 +250,7 @@ class MainActivity : ComponentActivity() {
                         },
                         savedStateHandle = navEntry.savedStateHandle
                     )
+
                 }
 
 
@@ -279,18 +271,15 @@ class MainActivity : ComponentActivity() {
                 composable<EditProfileNavObject> { navEntry ->
                     val navData = navEntry.toRoute<EditProfileNavObject>()
 
-                    val user = UserObject(
-                        uid = navData.uid,
-                        name = navData.name,
-                        email = navData.email,
-                        phone = navData.phone
-                    )
+                    // Загружаем пользователя, если нужно
+                    userViewModel.loadUser(navData.uid)
 
                     EditProfileScreen(
-                        user = user,
+                        userViewModel = userViewModel,
                         onBack = { navController.popBackStack() }
                     )
                 }
+
 
                 composable<RegisterScreenObject> {
                     RegisterScreen(

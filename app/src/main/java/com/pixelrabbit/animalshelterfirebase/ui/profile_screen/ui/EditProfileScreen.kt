@@ -7,7 +7,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -18,17 +17,14 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.pixelrabbit.animalshelterfirebase.data.UserObject
+import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.registration.ui.isPhoneValid
 import com.pixelrabbit.animalshelterfirebase.ui.registration.ui.isValidDate
 import com.pixelrabbit.animalshelterfirebase.ui.registration.ui.isValidEmail
@@ -36,26 +32,43 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 @Composable
 fun EditProfileScreen(
-    user: UserObject,
+    userViewModel: UserViewModel,
     onProfileUpdated: () -> Unit = {},
     onBack: () -> Unit
 ) {
     val db = Firebase.firestore
+    val auth = Firebase.auth
     val focusManager = LocalFocusManager.current
 
-    var name by remember { mutableStateOf(user.name) }
+    val user by userViewModel.currentUser.collectAsState()
+    val currentUserUid = Firebase.auth.currentUser?.uid
+
+    LaunchedEffect(currentUserUid) {
+        if (currentUserUid != null) {
+            userViewModel.loadUser(currentUserUid)
+        }
+    }
+
+    if (user == null) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    var name by remember { mutableStateOf(user?.name ?: "") }
     var birthDateField by remember {
         mutableStateOf(
-            TextFieldValue(
-                user.birthDate ?: "",
-                selection = TextRange((user.birthDate ?: "").length)
-            )
+            TextFieldValue(user?.birthDate ?: "", TextRange((user?.birthDate ?: "").length))
         )
     }
-    var phone by remember { mutableStateOf(if (user.phone.isBlank()) "+7" else user.phone) }
-    var email by remember { mutableStateOf(user.email) }
+    var phone by remember { mutableStateOf(if (user?.phone.isNullOrBlank()) "+7" else user!!.phone) }
+    var email by remember { mutableStateOf(user?.email ?: "") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -65,8 +78,11 @@ fun EditProfileScreen(
     var birthDateError by remember { mutableStateOf(false) }
     var phoneError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     fun fieldModifier() = Modifier.fillMaxWidth()
+
+
 
     @Composable
     fun fieldColors() = TextFieldDefaults.colors(
@@ -90,7 +106,7 @@ fun EditProfileScreen(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .height(56.dp)
         ) {
             TextButton(
                 onClick = onBack,
@@ -204,7 +220,7 @@ fun EditProfileScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Пароль (необязательно)") },
+            label = { Text("Новый пароль (необязательно)") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             trailingIcon = {
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -221,6 +237,14 @@ fun EditProfileScreen(
             colors = fieldColors()
         )
 
+        if (password.isNotBlank()) {
+            Text(
+                "Если долго не входили, возможно потребуется повторная авторизация для смены пароля.",
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 12.sp
+            )
+        }
+
         error?.let {
             Spacer(Modifier.height(8.dp))
             Text(it, color = MaterialTheme.colorScheme.error)
@@ -233,6 +257,7 @@ fun EditProfileScreen(
             onClick = {
                 focusManager.clearFocus()
                 error = null
+
                 val birthDate = birthDateField.text
 
                 emailError = !isValidEmail(email)
@@ -245,25 +270,68 @@ fun EditProfileScreen(
                 }
 
                 isLoading = true
-                val updatedData = mutableMapOf<String, Any>(
-                    "name" to name,
-                    "birthDate" to birthDate,
-                    "phone" to phone,
-                    "email" to email
-                )
 
-                // Если введён пароль, обновим через FirebaseAuth (нужно будет реализовать)
-                val docRef = db.collection("users").document(user.uid)
-                docRef.update(updatedData)
-                    .addOnSuccessListener {
-                        isLoading = false
-                        onProfileUpdated()
-                        onBack()
-                    }
-                    .addOnFailureListener {
-                        isLoading = false
-                        error = "Ошибка обновления: ${it.message}"
-                    }
+                val currentUser = auth.currentUser
+                if (currentUser == null) {
+                    error = "Пользователь не авторизован"
+                    isLoading = false
+                    return@ButtonBlue
+                }
+
+                fun updateFirestoreAndPassword() {
+                    val updatedData = mutableMapOf<String, Any>(
+                        "name" to name,
+                        "birthDate" to birthDate,
+                        "phone" to phone,
+                        "email" to email
+                    )
+
+                    db.collection("users").document(user!!.uid)
+                        .update(updatedData)
+                        .addOnSuccessListener {
+                            if (password.isNotBlank()) {
+                                currentUser.updatePassword(password)
+                                    .addOnSuccessListener {
+                                        isLoading = false
+                                        userViewModel.refreshUser()
+                                        Toast.makeText(context, "Данные успешно обновлены", Toast.LENGTH_SHORT).show()
+                                        onProfileUpdated()
+                                        onBack()
+                                    }
+                                    .addOnFailureListener { e ->
+                                        isLoading = false
+                                        error = "Ошибка при обновлении пароля: ${e.message}"
+                                    }
+                            } else {
+                                isLoading = false
+                                userViewModel.refreshUser()
+                                Toast.makeText(context, "Данные успешно обновлены", Toast.LENGTH_SHORT).show()
+                                onProfileUpdated()
+                                onBack()
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            isLoading = false
+                            error = "Ошибка обновления: ${e.message}"
+                        }
+                }
+
+                if (email != user!!.email) {
+                    currentUser.updateEmail(email)
+                        .addOnSuccessListener {
+                            updateFirestoreAndPassword()
+                        }
+                        .addOnFailureListener { e ->
+                            isLoading = false
+                            error = if (e is FirebaseAuthRecentLoginRequiredException) {
+                                "Для обновления email требуется повторная авторизация. Пожалуйста, войдите заново."
+                            } else {
+                                "Ошибка обновления email: ${e.message}"
+                            }
+                        }
+                } else {
+                    updateFirestoreAndPassword()
+                }
             },
             modifier = fieldModifier()
         )
@@ -274,4 +342,3 @@ fun EditProfileScreen(
         }
     }
 }
-
