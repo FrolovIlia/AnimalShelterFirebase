@@ -1,5 +1,6 @@
 package com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.*
@@ -32,9 +34,6 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
 
-import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
-
 @Composable
 fun EditProfileScreen(
     userViewModel: UserViewModel,
@@ -44,21 +43,15 @@ fun EditProfileScreen(
     val db = Firebase.firestore
     val auth = Firebase.auth
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     val user by userViewModel.currentUser.collectAsState()
-    val currentUserUid = Firebase.auth.currentUser?.uid
+    val currentUserUid = auth.currentUser?.uid
 
     LaunchedEffect(currentUserUid) {
         if (currentUserUid != null) {
             userViewModel.loadUser(currentUserUid)
         }
-    }
-
-    if (user == null) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-        return
     }
 
     var name by remember { mutableStateOf(user?.name ?: "") }
@@ -78,11 +71,10 @@ fun EditProfileScreen(
     var birthDateError by remember { mutableStateOf(false) }
     var phoneError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+
+    val errorMessage by userViewModel.userLoadError.collectAsState()
 
     fun fieldModifier() = Modifier.fillMaxWidth()
-
-
 
     @Composable
     fun fieldColors() = TextFieldDefaults.colors(
@@ -122,8 +114,19 @@ fun EditProfileScreen(
             )
         }
 
+        errorMessage?.let {
+            Spacer(Modifier.height(12.dp))
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+
         Spacer(Modifier.height(24.dp))
 
+        // Имя
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
@@ -137,6 +140,7 @@ fun EditProfileScreen(
 
         Spacer(Modifier.height(8.dp))
 
+        // Дата рождения
         OutlinedTextField(
             value = birthDateField,
             onValueChange = { input ->
@@ -173,6 +177,7 @@ fun EditProfileScreen(
 
         Spacer(Modifier.height(8.dp))
 
+        // Телефон
         OutlinedTextField(
             value = phone,
             onValueChange = {
@@ -196,6 +201,7 @@ fun EditProfileScreen(
 
         Spacer(Modifier.height(8.dp))
 
+        // Email
         OutlinedTextField(
             value = email,
             onValueChange = {
@@ -217,6 +223,7 @@ fun EditProfileScreen(
 
         Spacer(Modifier.height(8.dp))
 
+        // Пароль
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -239,9 +246,9 @@ fun EditProfileScreen(
 
         if (password.isNotBlank()) {
             Text(
-                "Если долго не входили, возможно потребуется повторная авторизация для смены пароля.",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 12.sp
+                "Если долго не входили, может потребоваться повторная авторизация для смены пароля.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.primary
             )
         }
 
@@ -279,7 +286,7 @@ fun EditProfileScreen(
                 }
 
                 fun updateFirestoreAndPassword() {
-                    val updatedData = mutableMapOf<String, Any>(
+                    val updatedData = mapOf(
                         "name" to name,
                         "birthDate" to birthDate,
                         "phone" to phone,
@@ -318,9 +325,7 @@ fun EditProfileScreen(
 
                 if (email != user!!.email) {
                     currentUser.updateEmail(email)
-                        .addOnSuccessListener {
-                            updateFirestoreAndPassword()
-                        }
+                        .addOnSuccessListener { updateFirestoreAndPassword() }
                         .addOnFailureListener { e ->
                             isLoading = false
                             error = if (e is FirebaseAuthRecentLoginRequiredException) {
