@@ -19,7 +19,7 @@ sealed class BottomMenuItem(
         iconId = R.drawable.favourite_menu
     )
 
-    object Settings : BottomMenuItem(
+    object Profile : BottomMenuItem(
         route = "",
         title = "",
         iconId = R.drawable.profile_menu

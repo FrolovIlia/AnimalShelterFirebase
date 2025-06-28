@@ -40,6 +40,8 @@ import com.google.firebase.messaging.FirebaseMessaging
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
 import com.yandex.mobile.ads.common.MobileAds
 import com.yandex.mobile.ads.common.InitializationListener
 
@@ -164,9 +166,19 @@ class MainActivity : ComponentActivity() {
 
                 composable<MainScreenDataObject> { navEntry ->
                     val navData = navEntry.toRoute<MainScreenDataObject>()
+
+                    val currentUser = userViewModel.currentUser.value ?: UserObject(
+                        uid = "guest",
+                        name = "Гость",
+                        phone = "",
+                        email = ""
+                    )
+
                     userViewModel.loadUser(navData.uid)
                     MainScreen(
                         navData,
+                        navController = navController,
+                        currentUser = currentUser,
                         onAnimalClick = { anim ->
                             navController.navigate(
                                 DetailsNavObject(
@@ -264,7 +276,21 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                composable<EditProfileNavObject> { navEntry ->
+                    val navData = navEntry.toRoute<EditProfileNavObject>()
 
+                    val user = UserObject(
+                        uid = navData.uid,
+                        name = navData.name,
+                        email = navData.email,
+                        phone = navData.phone
+                    )
+
+                    EditProfileScreen(
+                        user = user,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
 
                 composable<RegisterScreenObject> {
                     RegisterScreen(

@@ -72,6 +72,8 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 import androidx.compose.foundation.layout.size
+import androidx.navigation.NavController
+import com.pixelrabbit.animalshelterfirebase.data.UserObject
 
 import com.yandex.mobile.ads.common.AdRequestConfiguration
 import com.yandex.mobile.ads.interstitial.InterstitialAd
@@ -84,6 +86,8 @@ import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
 @Composable
 fun MainScreen(
     navData: MainScreenDataObject,
+    navController: NavController,
+    currentUser: UserObject,
     viewModel: MainScreenViewModel = viewModel(),
     onAnimalEditClick: (Animal) -> Unit,
     onAnimalClick: (Animal) -> Unit,
@@ -212,7 +216,9 @@ fun MainScreen(
                     viewModel.selectTab(selected)
                     viewModel.selectCategory("Все")
                 },
-                isRegistered = !isGuest
+                isRegistered = !isGuest,
+                navController = navController,
+                currentUser = currentUser
             )
         }
     ) { paddingValues ->

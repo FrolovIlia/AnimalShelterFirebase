@@ -17,7 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.pixelrabbit.animalshelterfirebase.R
+import com.pixelrabbit.animalshelterfirebase.data.UserObject
+import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
 
@@ -25,7 +28,9 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
 fun BottomMenu(
     selectedTab: BottomMenuItem,
     onTabSelected: (BottomMenuItem) -> Unit,
-    isRegistered: Boolean
+    isRegistered: Boolean,
+    navController: NavController,
+    currentUser: UserObject
 ) {
     val context = LocalContext.current
 
@@ -60,7 +65,8 @@ fun BottomMenu(
             onClick = {
                 if (isRegistered) {
                     // Переход на экран избранных для зарегистрированного пользователя
-                    onTabSelected(BottomMenuItem.Favs)
+                    onTabSelected(BottomMenuItem.Profile)
+                    navController.navigate("edit_profile")
                 } else {
                     // Показать уведомление для незарегистрированных пользователей
                     Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
@@ -72,21 +78,35 @@ fun BottomMenu(
             )
         )
 
-//        NavigationBarItem(
-//            icon = {
-//                CircularIcon(
-//                    resId = R.drawable.profile_menu,
-//                    backgroundColor = Color.Transparent,
-//                    iconTint = Color.Gray
-//                )
-//            },
-//            selected = selectedTab == BottomMenuItem.Settings,
-//            onClick = { onTabSelected(BottomMenuItem.Settings) },
-//            alwaysShowLabel = false,
-//            colors = NavigationBarItemDefaults.colors(
-//                indicatorColor = Color.Transparent
-//            )
-//        )
+        NavigationBarItem(
+            icon = {
+                CircularIcon(
+                    resId = R.drawable.profile_menu,
+                    backgroundColor = if (selectedTab == BottomMenuItem.Profile) ButtonColorBlue else Color.Transparent,
+                    iconTint = Color.Gray
+                )
+            },
+            selected = selectedTab == BottomMenuItem.Profile,
+            onClick = {
+                if (isRegistered) {
+                    navController.navigate(
+                        EditProfileNavObject(
+                            uid = currentUser.uid,
+                            name = currentUser.name,
+                            email = currentUser.email,
+                            phone = currentUser.phone
+                        )
+                    )
+                } else {
+                    Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
+                }
+            },
+            alwaysShowLabel = false,
+            colors = NavigationBarItemDefaults.colors(
+                indicatorColor = Color.Transparent
+            )
+        )
+
     }
 
 }
