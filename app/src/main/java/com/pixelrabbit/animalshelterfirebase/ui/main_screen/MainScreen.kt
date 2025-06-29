@@ -186,17 +186,23 @@ fun MainScreen(
         }
     }
 
-    // Оптимизированная фильтрация с remember
-    val filteredAnimals = remember(query, animals) {
+    val filteredAnimals = remember(query, animals, selectedCategory, isFavoritesOnly) {
         val queryLower = query.lowercase()
+
         animals.filter { animal ->
-            animal.name.lowercase().contains(queryLower) ||
+            val matchesQuery = animal.name.lowercase().contains(queryLower) ||
                     animal.description.lowercase().contains(queryLower) ||
                     animal.location.lowercase().contains(queryLower) ||
                     animal.feature.lowercase().contains(queryLower) ||
                     animal.category.lowercase().contains(queryLower)
+
+            val matchesCategory = selectedCategory == "Все" || animal.category == selectedCategory
+            val matchesFavs = !isFavoritesOnly || animal.isFavourite
+
+            matchesQuery && matchesCategory && matchesFavs
         }
     }
+
 
     // Устанавливаем цвет статусбара
     val systemUiController = rememberSystemUiController()
