@@ -65,8 +65,7 @@ fun BottomMenu(
             onClick = {
                 if (isRegistered) {
                     // Переход на экран избранных для зарегистрированного пользователя
-                    onTabSelected(BottomMenuItem.Profile)
-                    navController.navigate("edit_profile")
+                    onTabSelected(BottomMenuItem.Favs)
                 } else {
                     // Показать уведомление для незарегистрированных пользователей
                     Toast.makeText(
