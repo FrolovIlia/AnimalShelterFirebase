@@ -114,15 +114,15 @@ fun EditProfileScreen(
             )
         }
 
-        errorMessage?.let {
-            Spacer(Modifier.height(12.dp))
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
-        }
+//        errorMessage?.let {
+//            Spacer(Modifier.height(12.dp))
+//            Text(
+//                text = it,
+//                color = MaterialTheme.colorScheme.error,
+//                style = MaterialTheme.typography.bodyMedium,
+//                modifier = Modifier.align(Alignment.CenterHorizontally)
+//            )
+//        }
 
         Spacer(Modifier.height(24.dp))
 
