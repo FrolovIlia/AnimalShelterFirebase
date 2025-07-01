@@ -166,9 +166,29 @@ fun AddAnimalScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                ButtonWhite(text = "Выбрать изображение") {
-                    imageLauncher.launch("image/*")
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .align(Alignment.CenterHorizontally)
+                ){
+                    ButtonWhite(text = "+ Файл") {
+                        imageLauncher.launch("image/*")
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ButtonWhite(text = "\uD83D\uDCF7 Снимок") {
+                        imageLauncher.launch("image/*")
+                    }
+
                 }
+
+
+
+//                ButtonWhite(text = "Выбрать изображение") {
+//                    imageLauncher.launch("image/*")
+//                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -184,8 +204,8 @@ fun AddAnimalScreen(
                         .align(Alignment.CenterHorizontally)
                 ) {
                     ButtonWhite(
-                        text = if (isEditMode) "Сохранить" else "Добавить",
-                        modifier = Modifier.width(140.dp)
+                        text = if (isEditMode) "Сохранить данные" else "Добавить данные",
+//                        modifier = Modifier.width(140.dp)
                     ) {
                         // Проверка валидации
                         curatorPhoneError = !isPhoneValid(curatorPhone)
