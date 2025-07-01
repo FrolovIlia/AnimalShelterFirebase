@@ -1,8 +1,10 @@
 package com.pixelrabbit.animalshelterfirebase.ui.add_animal_screen
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -19,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
@@ -33,6 +36,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.AnimalImage
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonWhite
 import com.pixelrabbit.animalshelterfirebase.utils.PhoneNumberField
+import java.io.File
 
 @Composable
 fun AddAnimalScreen(
@@ -60,13 +64,40 @@ fun AddAnimalScreen(
 
     val isEditMode = navData.key.isNotBlank()
 
-    // Image picker launcher
+    // Image picker launcher (для выбора из файлов)
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
             selectedImageUri = uri
-            navImageUrl = "" // сбросим url, чтобы показывать выбранную картинку
+            navImageUrl = "" // сброс url, чтобы показывать выбранную картинку
+        }
+    }
+
+    val photoFile = remember { mutableStateOf<File?>(null) }
+    val photoUri = remember { mutableStateOf<Uri?>(null) }
+
+    // Камера
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            Toast.makeText(context, "Фото сохранено", Toast.LENGTH_SHORT).show()
+            selectedImageUri = photoUri.value
+            navImageUrl = "" // сброс url, чтобы показывать новое фото
+        } else {
+            Toast.makeText(context, "Ошибка при съёмке", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Запрос разрешения на камеру
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            launchCamera(context, photoFile, photoUri, cameraLauncher)
+        } else {
+            Toast.makeText(context, "Разрешение камеры не предоставлено", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -99,7 +130,6 @@ fun AddAnimalScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .padding(horizontal = 0.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -171,24 +201,26 @@ fun AddAnimalScreen(
                     modifier = Modifier
                         .wrapContentWidth()
                         .align(Alignment.CenterHorizontally)
-                ){
+                ) {
                     ButtonWhite(text = "+ Файл") {
                         imageLauncher.launch("image/*")
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
-                    ButtonWhite(text = "\uD83D\uDCF7 Снимок") {
-                        imageLauncher.launch("image/*")
+                    ButtonWhite(text = "+ Снимок") {
+                        // Проверяем разрешение камеры
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                                context,
+                                android.Manifest.permission.CAMERA
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        ) {
+                            launchCamera(context, photoFile, photoUri, cameraLauncher)
+                        } else {
+                            permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                        }
                     }
-
                 }
-
-
-
-//                ButtonWhite(text = "Выбрать изображение") {
-//                    imageLauncher.launch("image/*")
-//                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -205,7 +237,6 @@ fun AddAnimalScreen(
                 ) {
                     ButtonWhite(
                         text = if (isEditMode) "Сохранить данные" else "Добавить данные",
-//                        modifier = Modifier.width(140.dp)
                     ) {
                         // Проверка валидации
                         curatorPhoneError = !isPhoneValid(curatorPhone)
@@ -214,7 +245,11 @@ fun AddAnimalScreen(
                             description.isBlank() || location.isBlank() || curatorPhone.isBlank() ||
                             curatorPhoneError || selectedCategory.isBlank()
                         ) {
-                            Toast.makeText(context, "Пожалуйста, заполните все поля корректно", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                "Пожалуйста, заполните все поля корректно",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             return@ButtonWhite
                         }
 
@@ -241,12 +276,17 @@ fun AddAnimalScreen(
                                 animal = animal,
                                 onSaved = {
                                     isLoading = false
-                                    Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Изменения сохранены",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                     onSaved()
                                 },
                                 onError = {
                                     isLoading = false
-                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                             )
                         } else {
@@ -256,12 +296,17 @@ fun AddAnimalScreen(
                                 animal = animal.copy(imageUrl = navImageUrl),
                                 onSaved = {
                                     isLoading = false
-                                    Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Изменения сохранены",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                     onSaved()
                                 },
                                 onError = {
                                     isLoading = false
-                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                             )
                         }
@@ -280,12 +325,20 @@ fun AddAnimalScreen(
                                         .delete()
                                         .addOnSuccessListener {
                                             isLoading = false
-                                            Toast.makeText(context, "Животное удалено", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                context,
+                                                "Животное удалено",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                             onSaved()
                                         }
                                         .addOnFailureListener {
                                             isLoading = false
-                                            Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                context,
+                                                "Ошибка удаления",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                 }
                             } else {
@@ -294,12 +347,20 @@ fun AddAnimalScreen(
                                     .delete()
                                     .addOnSuccessListener {
                                         isLoading = false
-                                        Toast.makeText(context, "Животное удалено", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Животное удалено",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         onSaved()
                                     }
                                     .addOnFailureListener {
                                         isLoading = false
-                                        Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Ошибка удаления",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                             }
                         }
@@ -310,6 +371,7 @@ fun AddAnimalScreen(
         }
     }
 }
+
 
 // Сохраняет изображение в Firebase Storage, затем сохраняет данные животного
 private fun saveAnimalImage(
@@ -369,4 +431,33 @@ private fun saveAnimalToFireStore(
 // Валидация телефона +7XXXXXXXXXX
 private fun isPhoneValid(phone: String): Boolean {
     return Regex("^\\+7\\d{10}$").matches(phone)
+}
+
+
+fun createImageFile(context: Context): File {
+    val fileName = "IMG_${System.currentTimeMillis()}.jpg"
+    val storageDir = context.cacheDir
+    return File.createTempFile(fileName, ".jpg", storageDir)
+}
+
+
+fun launchCamera(
+    context: Context,
+    imageFile: MutableState<File?>,
+    photoUri: MutableState<Uri?>,
+    cameraLauncher: ActivityResultLauncher<Uri>
+) {
+    val file = File(context.cacheDir, "temp_photo.jpg").apply {
+        createNewFile()
+    }
+    imageFile.value = file
+
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        file
+    )
+    photoUri.value = uri
+
+    cameraLauncher.launch(uri)
 }

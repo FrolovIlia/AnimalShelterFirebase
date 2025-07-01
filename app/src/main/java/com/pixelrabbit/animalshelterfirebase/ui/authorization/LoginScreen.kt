@@ -192,11 +192,27 @@ fun signIn(
 fun createEncryptedPrefs(context: Context): SharedPreferences {
     val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
 
-    return EncryptedSharedPreferences.create(
-        "secure_prefs",
-        masterKeyAlias,
-        context,
-        EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-        EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-    )
+    return try {
+        EncryptedSharedPreferences.create(
+            "secure_prefs",
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    } catch (e: Exception) {
+        // Ошибка дешифровки или ключа (например, AEADBadTagException)
+        // Удаляем старые данные, чтобы восстановить работоспособность
+        context.deleteSharedPreferences("secure_prefs")
+
+        // Пробуем создать заново
+        EncryptedSharedPreferences.create(
+            "secure_prefs",
+            masterKeyAlias,
+            context,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
+    }
 }
+
