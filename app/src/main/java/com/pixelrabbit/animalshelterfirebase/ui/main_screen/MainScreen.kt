@@ -144,7 +144,7 @@ fun MainScreen(
             })
 
             val adRequestConfiguration =
-                AdRequestConfiguration.Builder("R-M-XXXXXX-Y") // ✅ замените на свой ID
+                AdRequestConfiguration.Builder("R-M-16111641-1") // ✅ замените на свой ID
                     .build()
 
             adLoader.loadAd(adRequestConfiguration)
@@ -279,21 +279,22 @@ fun MainScreen(
                         painter = painterResource(id = R.drawable.ic_ad_play),
                         contentDescription = "Реклама",
                         modifier = Modifier
-                            .size(40.dp) // Короче, чем width + height
+                            .size(40.dp)
                             .clickable {
                                 val ad = interstitialAd.value
                                 if (ad != null && activity != null) {
                                     ad.show(activity)
+                                    Toast.makeText(context, "Спасибо за просмотр!", Toast.LENGTH_SHORT).show()
                                 } else {
                                     Toast.makeText(
                                         context,
                                         "Реклама ещё не загрузилась",
-//                                        "Реклама не готова или Activity не доступна",
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
                             }
                     )
+
                 }
             }
 

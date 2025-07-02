@@ -53,7 +53,7 @@
 
         <meta-data
             android:name="com.yandex.mobileads.APP_ID"
-            android:value="R-M-XXXXXX-Y" /> <!-- 🔁 Вставь свой App ID -->
+            android:value="16111641" /> <!-- 🔁 Вставь свой App ID -->
 
     </application>
 </manifest>
