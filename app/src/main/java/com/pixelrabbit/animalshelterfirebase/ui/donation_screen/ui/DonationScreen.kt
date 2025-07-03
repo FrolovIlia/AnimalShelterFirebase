@@ -24,6 +24,12 @@ import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import androidx.compose.ui.text.withStyle
 
+import androidx.compose.ui.viewinterop.AndroidView
+import com.yandex.mobile.ads.common.AdRequest
+import com.yandex.mobile.ads.banner.BannerAdSize
+import com.yandex.mobile.ads.banner.BannerAdView
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DonationScreen(
@@ -142,14 +148,18 @@ private fun AdBlock() {
             fontSize = 16.sp
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Box(
+
+        AndroidView(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Здесь будет реклама", color = Color.DarkGray)
-        }
+                .height(250.dp),
+            factory = { context ->
+                BannerAdView(context).apply {
+                    setAdUnitId("R-M-16111641-2") // ⚠️ Заменить на свой ID из кабинета Яндекс
+                    setAdSize(BannerAdSize.fixedSize(context, 320, 250))
+                    loadAd(AdRequest.Builder().build())
+                }
+            }
+        )
     }
 }
