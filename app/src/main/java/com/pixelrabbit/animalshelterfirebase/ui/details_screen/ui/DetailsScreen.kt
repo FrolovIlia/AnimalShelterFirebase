@@ -166,21 +166,21 @@ fun DetailsScreen(
                             )
                         }
 
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Расположение",
-                                color = Color.Gray,
-                                fontFamily = AnimalFont,
-                                fontSize = 13.sp,
-                                modifier = Modifier.padding(bottom = 5.dp)
-                            )
-                            Text(
-                                text = navObject.location,
-                                color = Color.Gray,
-                                fontFamily = AnimalFont,
-                                fontSize = 16.sp
-                            )
-                        }
+//                        Column(modifier = Modifier.weight(1f)) {
+//                            Text(
+//                                text = "Расположение",
+//                                color = Color.Gray,
+//                                fontFamily = AnimalFont,
+//                                fontSize = 13.sp,
+//                                modifier = Modifier.padding(bottom = 5.dp)
+//                            )
+//                            Text(
+//                                text = navObject.location,
+//                                color = Color.Gray,
+//                                fontFamily = AnimalFont,
+//                                fontSize = 16.sp
+//                            )
+//                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
