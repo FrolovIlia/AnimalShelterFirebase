@@ -9,12 +9,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 
 
 @Composable
 fun TasksScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    task: Task,
+    onSubmitSuccess: () -> Boolean
 ) {
 
     Column(

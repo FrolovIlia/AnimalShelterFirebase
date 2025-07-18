@@ -39,9 +39,12 @@ import com.google.firebase.messaging.FirebaseMessaging
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
+import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TasksScreen
 import com.yandex.mobile.ads.common.MobileAds
 import com.yandex.mobile.ads.common.InitializationListener
 
@@ -324,6 +327,37 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+
+                composable<TaskNavObject> { navEntry ->
+                    val navData = navEntry.toRoute<TaskNavObject>()
+
+                    val task = Task(
+                        imageUrl = navData.imageUrl,
+                        shortDescription = navData.shortDescription,
+                        fullDescription = navData.fullDescription,
+                        curatorName = navData.curatorName,
+                        curatorPhone = navData.curatorPhone,
+                        location = navData.location,
+                        urgency = navData.urgency,
+                        category = navData.category,
+                    )
+
+
+                    TasksScreen(
+                        task = task,
+                        onBack = { navController.popBackStack() },
+                        onSubmitSuccess = {
+                            navController.previousBackStackEntry
+                                ?.savedStateHandle
+                                ?.set("showAdoptionSuccess", true)
+                            navController.navigateUp()
+                        }
+                    )
+                }
+
+
+
+
             }
         }
     }
