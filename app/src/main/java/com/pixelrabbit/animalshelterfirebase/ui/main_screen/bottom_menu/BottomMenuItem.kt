@@ -19,6 +19,12 @@ sealed class BottomMenuItem(
         iconId = R.drawable.favourite_menu
     )
 
+    object Tasks : BottomMenuItem(
+        route = "",
+        title = "",
+        iconId = R.drawable.task_menu
+    )
+
     object Profile : BottomMenuItem(
         route = "",
         title = "",

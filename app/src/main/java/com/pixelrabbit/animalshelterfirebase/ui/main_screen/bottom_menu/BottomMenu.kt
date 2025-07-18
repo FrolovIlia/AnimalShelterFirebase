@@ -53,6 +53,7 @@ fun BottomMenu(
             )
         )
 
+
         NavigationBarItem(
             icon = {
                 CircularIcon(
@@ -80,6 +81,25 @@ fun BottomMenu(
                 indicatorColor = Color.Transparent
             )
         )
+
+        NavigationBarItem(
+            icon = {
+                CircularIcon(
+                    resId = R.drawable.task_menu,
+                    backgroundColor = if (selectedTab == BottomMenuItem.Tasks) ButtonColorBlue else Color.Transparent,
+                    iconTint = Color.Gray
+                )
+            },
+            selected = selectedTab == BottomMenuItem.Tasks,
+            onClick = {
+                onTabSelected(BottomMenuItem.Tasks)
+            },
+            alwaysShowLabel = false,
+            colors = NavigationBarItemDefaults.colors(
+                indicatorColor = Color.Transparent
+            )
+        )
+
 
         NavigationBarItem(
             icon = {
