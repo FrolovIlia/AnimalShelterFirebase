@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
-import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
+
 
 
 @Composable
@@ -56,8 +56,8 @@ fun TasksScreen(
                 ) {
                     Text("Добавить\nзадачу", fontSize = 16.sp, fontFamily = AnimalFont)
                 }
-
             }
+
         }
 
 

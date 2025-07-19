@@ -35,9 +35,16 @@ import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.ui.DonationScree
 
 
 import android.util.Log
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.google.firebase.messaging.FirebaseMessaging
 
 import androidx.navigation.NavType
@@ -48,6 +55,8 @@ import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObj
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
+import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
+import com.pixelrabbit.animalshelterfirebase.utils.isAdmin
 import com.yandex.mobile.ads.common.MobileAds
 import com.yandex.mobile.ads.common.InitializationListener
 
@@ -334,13 +343,12 @@ class MainActivity : ComponentActivity() {
                 composable<TaskNavObject> { navEntry ->
                     val navData = navEntry.toRoute<TaskNavObject>()
 
-                    val isAdminState = remember { mutableStateOf(false) }
+                    val tasksViewModel: TasksViewModel = viewModel()
+                    val isAdmin by tasksViewModel.isAdmin.collectAsState()
 
-                    // Проверка на администратора
+                    // Запускаем проверку при первом запуске или изменении uid
                     LaunchedEffect(navData.uid) {
-                        com.pixelrabbit.animalshelterfirebase.utils.isAdmin(navData.uid) { result ->
-                            isAdminState.value = result
-                        }
+                        tasksViewModel.checkAdminStatus(navData.uid)
                     }
 
                     val task = Task(
@@ -363,13 +371,12 @@ class MainActivity : ComponentActivity() {
                                 ?.set("showAdoptionSuccess", true)
                             navController.navigateUp()
                         },
-                        isAdmin = isAdminState.value,
+                        isAdmin = isAdmin,
                         onAddTaskClick = {
-                            // Пока просто логика заглушка, позже можно заменить на навигацию
+                            // TODO: Навигация на экран добавления задачи
                         }
                     )
                 }
-
 
 
 
