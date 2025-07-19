@@ -21,7 +21,7 @@ import androidx.navigation.NavController
 import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.UserObject
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
-import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
 
@@ -94,7 +94,9 @@ fun BottomMenu(
             selected = selectedTab == BottomMenuItem.Tasks,
             onClick = {
                 navController.navigate(
-                    TaskNavObject()
+                    TaskNavObject(
+                        uid = currentUser.uid
+                    )
                 )
             },
             alwaysShowLabel = false,

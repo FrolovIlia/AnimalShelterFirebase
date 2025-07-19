@@ -1,9 +1,10 @@
-package com.pixelrabbit.animalshelterfirebase.ui.task_details_screen
+package com.pixelrabbit.animalshelterfirebase.ui.tasks_screen
 
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class TaskNavObject(
+    val uid: String,
     val imageUrl: String = "",
     val shortDescription: String = "",
     val fullDescription: String = "",

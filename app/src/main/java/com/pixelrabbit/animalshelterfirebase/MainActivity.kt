@@ -35,6 +35,9 @@ import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.ui.DonationScree
 
 
 import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import com.google.firebase.messaging.FirebaseMessaging
 
 import androidx.navigation.NavType
@@ -43,8 +46,8 @@ import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
-import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskNavObject
-import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TasksScreen
+import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TaskNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
 import com.yandex.mobile.ads.common.MobileAds
 import com.yandex.mobile.ads.common.InitializationListener
 
@@ -331,6 +334,15 @@ class MainActivity : ComponentActivity() {
                 composable<TaskNavObject> { navEntry ->
                     val navData = navEntry.toRoute<TaskNavObject>()
 
+                    val isAdminState = remember { mutableStateOf(false) }
+
+                    // Проверка на администратора
+                    LaunchedEffect(navData.uid) {
+                        com.pixelrabbit.animalshelterfirebase.utils.isAdmin(navData.uid) { result ->
+                            isAdminState.value = result
+                        }
+                    }
+
                     val task = Task(
                         imageUrl = navData.imageUrl,
                         shortDescription = navData.shortDescription,
@@ -342,7 +354,6 @@ class MainActivity : ComponentActivity() {
                         category = navData.category,
                     )
 
-
                     TasksScreen(
                         task = task,
                         onBack = { navController.popBackStack() },
@@ -351,6 +362,10 @@ class MainActivity : ComponentActivity() {
                                 ?.savedStateHandle
                                 ?.set("showAdoptionSuccess", true)
                             navController.navigateUp()
+                        },
+                        isAdmin = isAdminState.value,
+                        onAddTaskClick = {
+                            // Пока просто логика заглушка, позже можно заменить на навигацию
                         }
                     )
                 }
