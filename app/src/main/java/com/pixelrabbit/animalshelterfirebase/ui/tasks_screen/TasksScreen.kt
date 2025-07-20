@@ -1,65 +1,71 @@
 package com.pixelrabbit.animalshelterfirebase.ui.tasks_screen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.pixelrabbit.animalshelterfirebase.data.Task
-import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
+import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksScreen(
-    onBack: () -> Unit,
     task: Task,
-    onSubmitSuccess: () -> Boolean,
-    isAdmin: Boolean,
-    onAddTaskClick: () -> Unit
+    onSubmitSuccess: () -> Unit,
+    onAddTaskClick: () -> Unit,
+    viewModel: MainScreenViewModel,
+    navData: TaskNavObject,
+    navController: NavController
 ) {
+    val db = remember { Firebase.firestore }
+    val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-        ) {
-            TextButton(
-                onClick = onBack,
-                modifier = Modifier.align(Alignment.CenterStart)
-            ) {
-                Text("Назад", fontSize = 16.sp, fontFamily = AnimalFont)
-            }
+    val isAdmin by viewModel.isAdmin.collectAsState()
 
-            Text(
-                "Список дел",
-                fontSize = 20.sp,
-                fontFamily = AnimalFont,
-                modifier = Modifier.align(Alignment.Center)
+    LaunchedEffect(navData.uid) {
+        viewModel.checkIfUserIsAdmin(navData.uid)
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text("Задачи") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                    }
+                }
             )
+        }
+    ) { paddingValues ->
 
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
             if (isAdmin) {
-                TextButton(
+                Button(
                     onClick = onAddTaskClick,
-                    modifier = Modifier.align(Alignment.CenterEnd)
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 ) {
-                    Text("Добавить\nзадачу", fontSize = 16.sp, fontFamily = AnimalFont)
+                    Text("Добавить задачу")
                 }
             }
 
+            Text(
+                text = "Ваши задачи появятся здесь...",
+                modifier = Modifier.padding(16.dp)
+            )
         }
-
-
     }
 }

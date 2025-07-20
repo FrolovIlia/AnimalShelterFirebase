@@ -51,6 +51,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TaskNavObject
@@ -141,6 +142,7 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val encryptedPrefs = createEncryptedPrefs(this)
             val userViewModel = viewModel<UserViewModel>()
+            val mainScreenViewModel: MainScreenViewModel = viewModel()
 
             NavHost(
                 navController = navController,
@@ -194,6 +196,7 @@ class MainActivity : ComponentActivity() {
                         navData,
                         navController = navController,
                         currentUser = currentUser,
+                        viewModel = mainScreenViewModel,
                         onAnimalClick = { anim ->
                             navController.navigate(
                                 DetailsNavObject(
@@ -342,13 +345,9 @@ class MainActivity : ComponentActivity() {
 
                 composable<TaskNavObject> { navEntry ->
                     val navData = navEntry.toRoute<TaskNavObject>()
-
-                    val tasksViewModel: TasksViewModel = viewModel()
-                    val isAdmin by tasksViewModel.isAdmin.collectAsState()
-
-                    // Запускаем проверку при первом запуске или изменении uid
+                    // Проверка прав администратора при входе в экран
                     LaunchedEffect(navData.uid) {
-                        tasksViewModel.checkAdminStatus(navData.uid)
+                        mainScreenViewModel.checkIfUserIsAdmin(navData.uid)
                     }
 
                     val task = Task(
@@ -364,19 +363,21 @@ class MainActivity : ComponentActivity() {
 
                     TasksScreen(
                         task = task,
-                        onBack = { navController.popBackStack() },
                         onSubmitSuccess = {
                             navController.previousBackStackEntry
                                 ?.savedStateHandle
                                 ?.set("showAdoptionSuccess", true)
                             navController.navigateUp()
                         },
-                        isAdmin = isAdmin,
                         onAddTaskClick = {
                             // TODO: Навигация на экран добавления задачи
-                        }
+                        },
+                        viewModel = mainScreenViewModel,
+                        navData = navData,
+                        navController = navController
                     )
                 }
+
 
 
 

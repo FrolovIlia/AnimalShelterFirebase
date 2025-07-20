@@ -29,6 +29,8 @@ class MainScreenViewModel : ViewModel() {
     private val _userName = MutableStateFlow("")
     val userName: StateFlow<String> = _userName
 
+    private val _isAdmin = MutableStateFlow(false)
+    val isAdmin: StateFlow<Boolean> = _isAdmin
 
     fun selectCategory(category: String) {
         _selectedCategory.value = category
@@ -42,19 +44,13 @@ class MainScreenViewModel : ViewModel() {
         _animals.value = list
     }
 
-    /**
-     * Загружает животных из Firestore с учетом категории и избранных.
-     * Если uid == "guest", то игнорирует избранное.
-     */
     fun loadAnimals(db: FirebaseFirestore, uid: String) {
         viewModelScope.launch {
             if (uid == "guest") {
-                // Гость — загружаем всех животных в выбранной категории без избранных
                 getAnimals(db, emptyList(), _selectedCategory.value) { list ->
                     _animals.value = list
                 }
             } else {
-                // Зарегистрированный пользователь — загружаем избранные id и затем животных с учетом категории и избранных
                 getAllFavsIds(db, uid) { favs ->
                     _favoriteIds.value = favs
                     getAnimals(db, favs, _selectedCategory.value) { list ->
@@ -65,9 +61,6 @@ class MainScreenViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Загружает только избранных животных (для вкладки "Избранное")
-     */
     fun loadFavorites(db: FirebaseFirestore, uid: String) {
         if (uid == "guest") {
             _animals.value = emptyList()
@@ -83,22 +76,16 @@ class MainScreenViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Переключает избранное (добавить или удалить) и обновляет локальный список животных.
-     */
     fun toggleFavorite(db: FirebaseFirestore, uid: String, animalKey: String) {
         val currentAnimals = _animals.value.toMutableList()
         val animalIndex = currentAnimals.indexOfFirst { it.key == animalKey }
         if (animalIndex == -1) return
 
         val animal = currentAnimals[animalIndex]
-        val isCurrentlyFav = animal.isFavourite
-        val newFavState = !isCurrentlyFav
-
+        val newFavState = !animal.isFavourite
         val favourite = Favourite(animalKey)
 
         if (newFavState) {
-            // Добавляем в избранное
             db.collection("users")
                 .document(uid)
                 .collection("favourites")
@@ -111,7 +98,6 @@ class MainScreenViewModel : ViewModel() {
                     Log.e("MainScreenViewModel", "Failed to add favorite: $animalKey", it)
                 }
         } else {
-            // Удаляем из избранного
             db.collection("users")
                 .document(uid)
                 .collection("favourites")
@@ -125,12 +111,9 @@ class MainScreenViewModel : ViewModel() {
                 }
         }
 
-        // Обновляем локальный список животных
         currentAnimals[animalIndex] = animal.copy(isFavourite = newFavState)
         _animals.value = currentAnimals
     }
-
-    // --- Вспомогательные функции для работы с Firestore ---
 
     private fun getAnimals(
         db: FirebaseFirestore,
@@ -208,7 +191,6 @@ class MainScreenViewModel : ViewModel() {
             }
     }
 
-
     fun loadUserName(db: FirebaseFirestore, uid: String) {
         if (uid == "guest" || uid.isBlank()) {
             _userName.value = "Гость"
@@ -219,15 +201,42 @@ class MainScreenViewModel : ViewModel() {
             .document(uid)
             .get()
             .addOnSuccessListener { documentSnapshot ->
-                // Предполагается, что поле с именем пользователя называется "name"
                 val name = documentSnapshot.getString("name")
-                _userName.value = name ?: "" // Устанавливаем имя, или пустую строку если null
+                _userName.value = name ?: ""
             }
             .addOnFailureListener { e ->
                 Log.e("MainScreenViewModel", "Failed to load user name for uid: $uid", e)
-                _userName.value = "" // Ошибка загрузки, устанавливаем пустую строку
+                _userName.value = ""
             }
     }
 
+    /**
+     * Проверка admin-статуса пользователя.
+     * Проверяет поле "isAdmin" в документе пользователя в коллекции "users".
+     */
+    fun checkIfUserIsAdmin(uid: String) {
+        if (uid.isBlank() || uid == "guest") {
+            _isAdmin.value = false
+            return
+        }
 
+        FirebaseFirestore.getInstance()
+            .collection("users") // проверяем именно коллекцию "users"
+            .document(uid)
+            .get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    val adminStatus = doc.getBoolean("isAdmin") == true
+                    _isAdmin.value = adminStatus
+                    Log.d("MainScreenViewModel", "Admin status for $uid: $adminStatus")
+                } else {
+                    Log.d("MainScreenViewModel", "User document $uid not found.")
+                    _isAdmin.value = false
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainScreenViewModel", "Error checking admin status for UID: $uid", e)
+                _isAdmin.value = false
+            }
+    }
 }
