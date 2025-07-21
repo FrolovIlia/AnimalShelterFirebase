@@ -33,18 +33,9 @@ import com.pixelrabbit.animalshelterfirebase.ui.authorization.createEncryptedPre
 import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.data.DonationNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.ui.DonationScreen
 
-
 import android.util.Log
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+
 import com.google.firebase.messaging.FirebaseMessaging
 
 import androidx.navigation.NavType
@@ -56,8 +47,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObj
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
-import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
-import com.pixelrabbit.animalshelterfirebase.utils.isAdmin
+
 import com.yandex.mobile.ads.common.MobileAds
 import com.yandex.mobile.ads.common.InitializationListener
 
