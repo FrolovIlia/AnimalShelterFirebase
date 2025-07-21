@@ -17,19 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
-import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.Animal
+import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerDropDownMenu  // <- Импорт из ui.common
+import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerTextField
 import com.pixelrabbit.animalshelterfirebase.ui.data.AddScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
@@ -47,7 +46,8 @@ fun AddAnimalScreen(
     val firestore = Firebase.firestore
     val storage = Firebase.storage
 
-    // UI state holders
+    val categories = listOf("Собачки", "Котики", "Остальные")
+
     var selectedCategory by remember { mutableStateOf(navData.category) }
     var navImageUrl by remember { mutableStateOf(navData.imageUrl) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -64,33 +64,30 @@ fun AddAnimalScreen(
 
     val isEditMode = navData.key.isNotBlank()
 
-    // Image picker launcher (для выбора из файлов)
     val imageLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
         if (uri != null) {
             selectedImageUri = uri
-            navImageUrl = "" // сброс url, чтобы показывать выбранную картинку
+            navImageUrl = ""
         }
     }
 
     val photoFile = remember { mutableStateOf<File?>(null) }
     val photoUri = remember { mutableStateOf<Uri?>(null) }
 
-    // Камера
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
             Toast.makeText(context, "Фото сохранено", Toast.LENGTH_SHORT).show()
             selectedImageUri = photoUri.value
-            navImageUrl = "" // сброс url, чтобы показывать новое фото
+            navImageUrl = ""
         } else {
             Toast.makeText(context, "Ошибка при съёмке", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Запрос разрешения на камеру
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -140,25 +137,22 @@ fun AddAnimalScreen(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Dropdown для категории
-                RoundedCornerDropDownMenu(selectedCategory) { selectedItem ->
+                RoundedCornerDropDownMenu(
+                    defValue = selectedCategory,
+                    options = categories,
+                    placeholder = "Выберите категорию"
+                ) { selectedItem ->
                     selectedCategory = selectedItem
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                RoundedCornerTextField(text = name, label = "Кличка") {
-                    name = it
-                }
+                RoundedCornerTextField(text = name, label = "Кличка") { name = it }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                RoundedCornerTextField(text = feature, label = "Особенность (кратко)") {
-                    feature = it
-                }
+                RoundedCornerTextField(text = feature, label = "Особенность (кратко)") { feature = it }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                RoundedCornerTextField(text = age, label = "Возраст") {
-                    age = it
-                }
+                RoundedCornerTextField(text = age, label = "Возраст") { age = it }
                 Spacer(modifier = Modifier.height(8.dp))
 
                 RoundedCornerTextField(
@@ -166,14 +160,10 @@ fun AddAnimalScreen(
                     label = "Описание",
                     singleLine = false,
                     maxLines = Int.MAX_VALUE
-                ) {
-                    description = it
-                }
+                ) { description = it }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                RoundedCornerTextField(text = location, label = "Расположение") {
-                    location = it
-                }
+                RoundedCornerTextField(text = location, label = "Расположение") { location = it }
                 Spacer(modifier = Modifier.height(8.dp))
 
                 PhoneNumberField(
@@ -209,7 +199,6 @@ fun AddAnimalScreen(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     ButtonWhite(text = "+ Снимок") {
-                        // Проверяем разрешение камеры
                         if (androidx.core.content.ContextCompat.checkSelfPermission(
                                 context,
                                 android.Manifest.permission.CAMERA
@@ -238,7 +227,6 @@ fun AddAnimalScreen(
                     ButtonWhite(
                         text = if (isEditMode) "Сохранить данные" else "Добавить данные",
                     ) {
-                        // Проверка валидации
                         curatorPhoneError = !isPhoneValid(curatorPhone)
                         if (
                             name.isBlank() || feature.isBlank() || age.isBlank() ||
@@ -261,7 +249,7 @@ fun AddAnimalScreen(
                             description = description,
                             age = age,
                             category = selectedCategory,
-                            imageUrl = "", // будет установлен ниже после загрузки
+                            imageUrl = "",
                             curatorPhone = curatorPhone,
                             location = location,
                             feature = feature
@@ -290,7 +278,6 @@ fun AddAnimalScreen(
                                 }
                             )
                         } else {
-                            // Если новая картинка не выбрана, сохраняем с текущим url
                             saveAnimalToFireStore(
                                 firestore = firestore,
                                 animal = animal.copy(imageUrl = navImageUrl),
@@ -316,7 +303,6 @@ fun AddAnimalScreen(
                         ButtonWhite(text = "Удалить", modifier = Modifier.width(140.dp)) {
                             isLoading = true
 
-                            // Удаляем изображение если есть и оно из Firebase Storage
                             if (navImageUrl.isNotEmpty() && navImageUrl.startsWith("https://firebasestorage.googleapis.com/")) {
                                 val imageRef = storage.getReferenceFromUrl(navImageUrl)
                                 imageRef.delete().addOnCompleteListener {

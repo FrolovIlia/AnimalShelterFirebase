@@ -1,4 +1,4 @@
-package com.pixelrabbit.animalshelterfirebase.ui.add_animal_screen
+package com.pixelrabbit.animalshelterfirebase.ui.common
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
