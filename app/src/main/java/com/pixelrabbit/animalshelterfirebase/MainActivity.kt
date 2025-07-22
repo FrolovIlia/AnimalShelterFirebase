@@ -42,6 +42,8 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskScreen
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
@@ -360,7 +362,7 @@ class MainActivity : ComponentActivity() {
                             navController.navigateUp()
                         },
                         onAddTaskClick = {
-                            // TODO: Навигация на экран добавления задачи
+                            navController.navigate(AddTaskNavObject)
                         },
                         viewModel = mainScreenViewModel,
                         navData = navData,
@@ -368,7 +370,13 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-
+                composable<AddTaskNavObject> {
+                    AddTaskScreen(
+                        onSaved = {
+                            navController.popBackStack() // возвращаемся после сохранения
+                        }
+                    )
+                }
 
 
             }
