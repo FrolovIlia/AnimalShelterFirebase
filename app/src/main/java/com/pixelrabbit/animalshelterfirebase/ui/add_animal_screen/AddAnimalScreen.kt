@@ -27,7 +27,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
 import com.pixelrabbit.animalshelterfirebase.data.Animal
-import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerDropDownMenu  // <- Импорт из ui.common
+import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerDropDownMenu
 import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerTextField
 import com.pixelrabbit.animalshelterfirebase.ui.data.AddScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
@@ -149,7 +149,9 @@ fun AddAnimalScreen(
                 RoundedCornerTextField(text = name, label = "Кличка") { name = it }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                RoundedCornerTextField(text = feature, label = "Особенность (кратко)") { feature = it }
+                RoundedCornerTextField(text = feature, label = "Особенность (кратко)") {
+                    feature = it
+                }
                 Spacer(modifier = Modifier.height(8.dp))
 
                 RoundedCornerTextField(text = age, label = "Возраст") { age = it }
@@ -417,13 +419,6 @@ private fun saveAnimalToFireStore(
 // Валидация телефона +7XXXXXXXXXX
 private fun isPhoneValid(phone: String): Boolean {
     return Regex("^\\+7\\d{10}$").matches(phone)
-}
-
-
-fun createImageFile(context: Context): File {
-    val fileName = "IMG_${System.currentTimeMillis()}.jpg"
-    val storageDir = context.cacheDir
-    return File.createTempFile(fileName, ".jpg", storageDir)
 }
 
 

@@ -1,8 +1,10 @@
 package com.pixelrabbit.animalshelterfirebase.ui.add_task_screen
 
+import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -18,17 +20,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerDropDownMenu
+import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerTextField
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.AnimalImage
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonWhite
 import com.pixelrabbit.animalshelterfirebase.utils.PhoneNumberField
-import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerTextField
+import java.io.File
 
 @Composable
 fun AddTaskScreen(
@@ -52,6 +56,7 @@ fun AddTaskScreen(
     var isLoading by remember { mutableStateOf(false) }
 
     val taskCategoryOptions = listOf("С животными", "По хозяйству", "Орг. вопросы")
+    val urgencyOptions = listOf("Низкая", "Средняя", "Высокая", "Критическая")
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -59,6 +64,31 @@ fun AddTaskScreen(
         uri?.let {
             imageUri = it
             imageUrl = ""
+        }
+    }
+
+    val photoFile = remember { mutableStateOf<File?>(null) }
+    val photoUri = remember { mutableStateOf<Uri?>(null) }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) {
+            Toast.makeText(context, "Фото добавлено", Toast.LENGTH_SHORT).show()
+            imageUri = photoUri.value
+            imageUrl = ""
+        } else {
+            Toast.makeText(context, "Не удалось сделать снимок", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            launchCamera(context, photoFile, photoUri, cameraLauncher)
+        } else {
+            Toast.makeText(context, "Камера недоступна", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -107,9 +137,12 @@ fun AddTaskScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                RoundedCornerTextField(text = urgency, label = "Срочность") {
-                    urgency = it
-                }
+                RoundedCornerDropDownMenu(
+                    defValue = urgency,
+                    options = urgencyOptions,
+                    placeholder = "Срочность"
+                ) { urgency = it }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 RoundedCornerTextField(text = shortDescription, label = "Краткое описание") {
@@ -156,8 +189,25 @@ fun AddTaskScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                ButtonWhite(text = "+ Файл") {
-                    imagePickerLauncher.launch("image/*")
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    ButtonWhite(text = "+ Файл") {
+                        imagePickerLauncher.launch("image/*")
+                    }
+
+                    ButtonWhite(text = "+ Снимок") {
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                                context,
+                                android.Manifest.permission.CAMERA
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                        ) {
+                            launchCamera(context, photoFile, photoUri, cameraLauncher)
+                        } else {
+                            permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -253,4 +303,25 @@ private fun saveTask(
 
 private fun isPhoneValid(phone: String): Boolean {
     return Regex("^\\+7\\d{10}$").matches(phone)
+}
+
+fun launchCamera(
+    context: Context,
+    imageFile: MutableState<File?>,
+    photoUri: MutableState<Uri?>,
+    cameraLauncher: ActivityResultLauncher<Uri>
+) {
+    val file = File(context.cacheDir, "temp_task_photo.jpg").apply {
+        createNewFile()
+    }
+    imageFile.value = file
+
+    val uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        file
+    )
+    photoUri.value = uri
+
+    cameraLauncher.launch(uri)
 }
