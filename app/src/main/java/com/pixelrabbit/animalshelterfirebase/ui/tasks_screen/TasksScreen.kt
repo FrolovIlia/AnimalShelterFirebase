@@ -1,18 +1,21 @@
 package com.pixelrabbit.animalshelterfirebase.ui.tasks_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
+import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,47 +28,74 @@ fun TasksScreen(
     navData: TaskNavObject,
     navController: NavController
 ) {
-    val db = remember { Firebase.firestore }
-    val context = LocalContext.current
-
     val isAdmin by viewModel.isAdmin.collectAsState()
 
-    LaunchedEffect(navData.uid) {
-        viewModel.checkIfUserIsAdmin(navData.uid)
+    val systemUiController = rememberSystemUiController()
+    SideEffect {
+        systemUiController.setStatusBarColor(color = BackgroundGray, darkIcons = true)
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = { Text("Задачи") },
-                navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundGray)
+    ) {
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            if (isAdmin) {
-                Button(
-                    onClick = onAddTaskClick,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Text("Добавить задачу")
-                }
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            containerColor = BackgroundGray,
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = "Задачи",
+                                fontSize = 20.sp,
+                                fontFamily = AnimalFont,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    },
+                    navigationIcon = {
+                        TextButton(onClick = { navController.navigateUp() }) {
+                            Text(
+                                text = "Назад",
+                                fontSize = 16.sp,
+                                fontFamily = AnimalFont
+                            )
+                        }
+                    },
+                    actions = {
+                        if (isAdmin) {
+                            TextButton(onClick = onAddTaskClick) {
+                                Text(
+                                    text = "Добавить\nзадачу",
+                                    fontSize = 16.sp,
+                                    fontFamily = AnimalFont
+                                )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.width(80.dp))
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = BackgroundGray
+                    )
+                )
             }
+        ) { paddingValues ->
 
-            Text(
-                text = "Ваши задачи появятся здесь...",
-                modifier = Modifier.padding(16.dp)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    text = "Ваши задачи появятся здесь...",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }
