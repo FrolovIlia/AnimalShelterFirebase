@@ -9,7 +9,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.material3.Divider
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,12 +23,11 @@ import androidx.compose.ui.unit.sp
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import androidx.compose.ui.text.withStyle
-
 import androidx.compose.ui.viewinterop.AndroidView
 import com.yandex.mobile.ads.common.AdRequest
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
-
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,6 +125,25 @@ fun DonationScreen(
 
 @Composable
 private fun AdBlock() {
+    val context = LocalContext.current
+
+    // Запоминаем BannerAdView для сохранения состояния
+    val bannerAdView = remember {
+        BannerAdView(context).apply {
+            setAdUnitId("R-M-16111641-2") // Замените на свой ID
+            setAdSize(BannerAdSize.fixedSize(context, 320, 250))
+            loadAd(AdRequest.Builder().build())
+        }
+    }
+
+
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(31000)
+            bannerAdView.loadAd(AdRequest.Builder().build())
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -153,13 +171,7 @@ private fun AdBlock() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp),
-            factory = { context ->
-                BannerAdView(context).apply {
-                    setAdUnitId("R-M-16111641-2") // ⚠️ Заменить на свой ID из кабинета Яндекс
-                    setAdSize(BannerAdSize.fixedSize(context, 320, 250))
-                    loadAd(AdRequest.Builder().build())
-                }
-            }
+            factory = { bannerAdView }
         )
     }
 }
