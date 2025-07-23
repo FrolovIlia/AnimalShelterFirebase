@@ -140,7 +140,7 @@ fun MainScreen(
     LaunchedEffect(navData.uid) {
         viewModel.checkIfUserIsAdmin(navData.uid)
         if (!isGuest) {
-            viewModel.loadUserName(db, navData.uid)
+            viewModel.loadUserName(navData.uid)
         }
     }
 
@@ -156,11 +156,11 @@ fun MainScreen(
                 ).show()
                 viewModel.setAnimals(emptyList())
             } else {
-                viewModel.loadFavorites(db, navData.uid)
+                viewModel.loadFavorites(navData.uid)
             }
         } else {
             isFavoritesOnly = false
-            viewModel.loadAnimals(db, navData.uid)
+            viewModel.loadAnimals(navData.uid)
         }
     }
 
@@ -363,7 +363,7 @@ fun MainScreen(
                                     ).show()
                                     return@AnimalListItemUI
                                 }
-                                viewModel.toggleFavorite(db, navData.uid, animal.key)
+                                viewModel.toggleFavorite(navData.uid, animal.key)
                             }
                         )
                     }
