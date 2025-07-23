@@ -2,7 +2,10 @@ package com.pixelrabbit.animalshelterfirebase.ui.main_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.pixelrabbit.animalshelterfirebase.data.Animal
+import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
 import com.pixelrabbit.animalshelterfirebase.data.repository.AnimalRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +33,9 @@ class MainScreenViewModel(
 
     private val _isAdmin = MutableStateFlow(false)
     val isAdmin: StateFlow<Boolean> = _isAdmin
+
+    private val _tasks = MutableStateFlow<List<Task>>(emptyList())
+    val tasks: StateFlow<List<Task>> = _tasks
 
     fun selectCategory(category: String) {
         _selectedCategory.value = category
@@ -101,5 +107,22 @@ class MainScreenViewModel(
             _isAdmin.value = it
         }
     }
+
+    fun loadTasks() {
+        Firebase.firestore.collection("tasks")
+            .get()
+            .addOnSuccessListener { result ->
+                val loadedTasks = result.mapNotNull { doc ->
+                    val task = doc.toObject(Task::class.java)
+                    task.copy(key = doc.id) // ← сохраняем Firestore ID
+                }
+                _tasks.value = loadedTasks
+            }
+            .addOnFailureListener {
+                _tasks.value = emptyList()
+            }
+    }
+
+
 }
 

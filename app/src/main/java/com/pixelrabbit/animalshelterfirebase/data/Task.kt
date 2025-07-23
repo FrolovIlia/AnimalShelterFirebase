@@ -9,7 +9,8 @@ data class Task(
     val curatorPhone: String = "",
     val location: String = "",
     val urgency: String = "",
-    val category: String = ""
+    val category: String = "",
+    val key: String = ""
 )
 
 
