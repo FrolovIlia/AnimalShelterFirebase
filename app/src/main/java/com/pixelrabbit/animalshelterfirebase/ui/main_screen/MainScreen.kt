@@ -105,7 +105,37 @@ fun MainScreen(
 
     var isFavoritesOnly by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+// Инициализация межстраничной рекламы Яндекс
+    val interstitialAd = remember { mutableStateOf<InterstitialAd?>(null) }
+    val activity = remember(context) {
+        generateSequence(context) { ctx ->
+            when (ctx) {
+                is android.app.Activity -> null
+                is android.content.ContextWrapper -> ctx.baseContext
+                else -> null
+            }
+        }.firstOrNull { it is android.app.Activity } as? android.app.Activity
+    }
 
+    LaunchedEffect(Unit) {
+        activity?.let {
+            val adLoader = InterstitialAdLoader(it)
+
+            adLoader.setAdLoadListener(object : InterstitialAdLoadListener {
+                override fun onAdLoaded(ad: InterstitialAd) {
+                    interstitialAd.value = ad
+                }
+
+                override fun onAdFailedToLoad(error: AdRequestError) {
+                    interstitialAd.value = null
+                }
+            })
+
+            val adRequestConfiguration =
+                AdRequestConfiguration.Builder("R-M-16111641-1").build() // замените на ваш ID
+            adLoader.loadAd(adRequestConfiguration)
+        }
+    }
     // Загрузка userName и isAdmin
     LaunchedEffect(navData.uid) {
         viewModel.checkIfUserIsAdmin(navData.uid)
@@ -119,7 +149,11 @@ fun MainScreen(
         if (selectedTab == BottomMenuItem.Favs) {
             isFavoritesOnly = true
             if (isGuest) {
-                Toast.makeText(context, "Только для зарегистрированных пользователей", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Только для зарегистрированных пользователей",
+                    Toast.LENGTH_SHORT
+                ).show()
                 viewModel.setAnimals(emptyList())
             } else {
                 viewModel.loadFavorites(db, navData.uid)
@@ -180,24 +214,61 @@ fun MainScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Column {
-                            Text("Привет,", fontSize = 16.sp, fontFamily = AnimalFont)
-                            Text(userName.ifEmpty { "..." }, fontSize = 24.sp, fontFamily = AnimalFont)
-                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column {
+                                Text("Привет,", fontSize = 16.sp, fontFamily = AnimalFont)
+                                Text(
+                                    userName.ifEmpty { "..." },
+                                    fontSize = 24.sp,
+                                    fontFamily = AnimalFont
+                                )
+                            }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
 
-                        if (isAdmin) {
-                            Button(
-                                onClick = onAdminClick,
-                                modifier = Modifier.width(130.dp),
-                                colors = ButtonDefaults.buttonColors(ButtonColorBlue)
-                            ) {
-                                Text(text = "Добавить\nживотное")
+                            if (isAdmin) {
+                                Button(
+                                    onClick = onAdminClick,
+                                    modifier = Modifier.width(130.dp),
+                                    colors = ButtonDefaults.buttonColors(ButtonColorBlue)
+                                ) {
+                                    Text(text = "Добавить\nживотное")
+                                }
                             }
                         }
+
+                        // 🔁 Вот тут реклама
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_ad_play),
+                            contentDescription = "Реклама",
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clickable {
+                                    val ad = interstitialAd.value
+                                    if (ad != null && activity != null) {
+                                        ad.show(activity)
+                                        Toast.makeText(
+                                            context,
+                                            "Спасибо за просмотр!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    } else {
+                                        Toast.makeText(
+                                            context,
+                                            "Реклама ещё не загрузилась",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                        )
                     }
                 }
             }
@@ -232,7 +303,13 @@ fun MainScreen(
                     Card(
                         modifier = Modifier
                             .height(52.dp)
-                            .then(if (!isSelected) Modifier.border(1.dp, BackgroundSecondary, shape) else Modifier)
+                            .then(
+                                if (!isSelected) Modifier.border(
+                                    1.dp,
+                                    BackgroundSecondary,
+                                    shape
+                                ) else Modifier
+                            )
                             .clip(shape)
                             .clickable { viewModel.selectCategory(category.categoryName) },
                         shape = shape,
