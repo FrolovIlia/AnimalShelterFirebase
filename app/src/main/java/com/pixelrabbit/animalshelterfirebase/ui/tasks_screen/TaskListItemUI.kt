@@ -43,7 +43,6 @@ fun TaskListItemUI(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
             .clip(RoundedCornerShape(15.dp))
             .background(BackgroundWhite)
             .clickable { onTaskClick(task) }
@@ -95,32 +94,35 @@ fun TaskListItemUI(
         Spacer(modifier = Modifier.height(10.dp))
 
         Column(modifier = Modifier.padding(8.dp)) {
+//            Text(
+//                text = task.shortDescription,
+//                color = Color.Black,
+//                fontWeight = FontWeight.Bold,
+//                fontSize = 20.sp,
+//                maxLines = 1,
+//                overflow = TextOverflow.Ellipsis
+//            )
+//
+//            Spacer(modifier = Modifier.height(4.dp))
+
             Text(
                 text = task.shortDescription,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = task.fullDescription,
-                color = Color.Gray,
-                fontSize = 14.sp,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
+//
+//            Spacer(modifier = Modifier.height(4.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
+//            Text(
+//                text = "Куратор: ${task.curatorName} | Тел: ${task.curatorPhone}",
+//                color = Color.LightGray,
+//                fontSize = 12.sp
+//            )
 
-            Text(
-                text = "Куратор: ${task.curatorName} | Тел: ${task.curatorPhone}",
-                color = Color.LightGray,
-                fontSize = 12.sp
-            )
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }

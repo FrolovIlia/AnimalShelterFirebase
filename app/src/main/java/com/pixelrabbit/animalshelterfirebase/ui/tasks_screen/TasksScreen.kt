@@ -1,6 +1,5 @@
 package com.pixelrabbit.animalshelterfirebase.ui.tasks_screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -98,7 +97,6 @@ fun TasksScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
 
             SearchField(
@@ -120,8 +118,10 @@ fun TasksScreen(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(bottom = 24.dp)
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(
+                        horizontal = 8.dp,
+                        vertical = 12.dp)
                 ) {
                     items(filteredTasks) { taskItem ->
                         TaskListItemUI(
