@@ -18,12 +18,13 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.viewinterop.AndroidView
+import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.yandex.mobile.ads.common.AdRequest
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
@@ -40,7 +41,8 @@ fun DonationScreen(
     Scaffold(
         modifier = Modifier
             .statusBarsPadding()
-            .navigationBarsPadding(),
+            .navigationBarsPadding()
+            .background(BackgroundGray),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -58,7 +60,10 @@ fun DonationScreen(
                             fontFamily = AnimalFont
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = BackgroundGray
+                )
             )
         },
         bottomBar = {
@@ -68,18 +73,23 @@ fun DonationScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(BackgroundGray)
                     .padding(paddingValues)
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Основной текст из БД
+                // Основной текст из БД с нормализацией переносов строк
+                val rawText = viewModel.shelterData.value?.donation ?: "Загрузка..."
+                val cleanedText = rawText.replace("\n\n", "\n")
+
                 Text(
-                    text = viewModel.shelterData.value?.donation ?: "Загрузка...",
+                    text = cleanedText,
                     color = Color.Gray,
                     fontFamily = AnimalFont,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -127,7 +137,6 @@ fun DonationScreen(
 private fun AdBlock() {
     val context = LocalContext.current
 
-    // Запоминаем BannerAdView для сохранения состояния
     val bannerAdView = remember {
         BannerAdView(context).apply {
             setAdUnitId("R-M-16111641-2") // Замените на свой ID
@@ -135,7 +144,6 @@ private fun AdBlock() {
             loadAd(AdRequest.Builder().build())
         }
     }
-
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -147,7 +155,7 @@ private fun AdBlock() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
+            .background(BackgroundGray)
             .padding(16.dp)
     ) {
         Divider(thickness = 2.dp, color = Color.LightGray)
