@@ -11,8 +11,8 @@ import com.pixelrabbit.animalshelterfirebase.data.MainScreenDataObject
 import com.pixelrabbit.animalshelterfirebase.ui.add_animal_screen.AddAnimalScreen
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.LoginScreen
 import com.pixelrabbit.animalshelterfirebase.ui.data.AddScreenObject
-import com.pixelrabbit.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
-import com.pixelrabbit.animalshelterfirebase.ui.details_screen.ui.DetailsScreen
+import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.data.AnimalDetailsNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.ui.AnimalDetailsScreen
 
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreen
 import com.pixelrabbit.animalshelterfirebase.ui.registration.ui.RegisterScreen
@@ -196,7 +196,7 @@ class MainActivity : ComponentActivity() {
                         viewModel = mainScreenViewModel,
                         onAnimalClick = { anim ->
                             navController.navigate(
-                                DetailsNavObject(
+                                AnimalDetailsNavObject(
                                     uid = navData.uid,
                                     imageUrl = anim.imageUrl,
                                     name = anim.name,
@@ -237,10 +237,10 @@ class MainActivity : ComponentActivity() {
 
                 }
 
-                composable<DetailsNavObject> { navEntry ->
-                    val navData = navEntry.toRoute<DetailsNavObject>()
+                composable<AnimalDetailsNavObject> { navEntry ->
+                    val navData = navEntry.toRoute<AnimalDetailsNavObject>()
 
-                    DetailsScreen(
+                    AnimalDetailsScreen(
                         navObject = navData,
                         userViewModel = userViewModel,
                         onBackClick = { navController.popBackStack() },

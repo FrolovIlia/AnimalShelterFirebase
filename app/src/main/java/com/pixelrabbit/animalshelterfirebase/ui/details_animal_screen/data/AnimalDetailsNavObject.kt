@@ -1,9 +1,9 @@
-package com.pixelrabbit.animalshelterfirebase.ui.details_screen.data
+package com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.data
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DetailsNavObject(
+data class AnimalDetailsNavObject(
     val uid: String = "guest",
     val imageUrl: String = "",
     val name: String = "",

@@ -1,4 +1,4 @@
-package com.pixelrabbit.animalshelterfirebase.ui.details_screen.ui
+package com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.ui
 
 import android.widget.Toast
 import androidx.compose.foundation.*
@@ -20,15 +20,15 @@ import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.Animal
 import com.pixelrabbit.animalshelterfirebase.data.UserObject
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
-import com.pixelrabbit.animalshelterfirebase.ui.details_screen.data.DetailsNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.data.AnimalDetailsNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.*
 import com.pixelrabbit.animalshelterfirebase.utils.*
 import androidx.compose.runtime.livedata.observeAsState
 import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.data.DonationNavObject
 
 @Composable
-fun DetailsScreen(
-    navObject: DetailsNavObject,
+fun AnimalDetailsScreen(
+    navObject: AnimalDetailsNavObject,
     userViewModel: UserViewModel,
     onBackClick: () -> Unit,
     onAdoptClick: (Animal, UserObject) -> Unit,
