@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.pixelrabbit.animalshelterfirebase.data.Task
+import com.pixelrabbit.animalshelterfirebase.ui.details_task_screen.data.TaskDetailsNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
@@ -131,10 +132,23 @@ fun TasksScreen(
                                 navController.navigate("edit_task_screen/${taskItem.key}")
                             },
                             onTaskClick = {
-                                // Обработка открытия задачи
+                                navController.navigate(
+                                    TaskDetailsNavObject(
+                                        uid = navData.uid,
+                                        imageUrl = taskItem.imageUrl,
+                                        shortDescription = taskItem.shortDescription,
+                                        fullDescription = taskItem.fullDescription,
+                                        curatorName = taskItem.curatorName,
+                                        curatorPhone = taskItem.curatorPhone,
+                                        location = taskItem.location,
+                                        urgency = taskItem.urgency,
+                                        category = taskItem.category
+                                    )
+                                )
                             }
                         )
                     }
+
                 }
             }
         }

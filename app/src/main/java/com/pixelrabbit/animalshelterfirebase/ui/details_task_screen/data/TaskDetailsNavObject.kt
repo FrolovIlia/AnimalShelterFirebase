@@ -4,10 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TaskDetailsNavObject(
-    val uid: String = "guest",
+    val uid: String,
     val imageUrl: String = "",
-    val title: String = "",
-    val description: String = "",
-    val category: String = "",
-    val location: String = "уточняется"
+    val shortDescription: String = "",
+    val fullDescription: String = "",
+    val curatorName: String = "",
+    val curatorPhone: String = "",
+    val location: String = "",
+    val urgency: String = "",
+    val category: String = ""
 )

@@ -49,9 +49,11 @@ import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskScreen
+import com.pixelrabbit.animalshelterfirebase.ui.details_task_screen.data.TaskDetailsNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
+import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskDetailsScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
 
@@ -402,6 +404,13 @@ class MainActivity : ComponentActivity() {
                     }
                 }
 
+                composable<TaskDetailsNavObject> { navEntry ->
+                    val navData = navEntry.toRoute<TaskDetailsNavObject>()
+                    TaskDetailsScreen(
+                        navObject = navData,
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
 
 
 

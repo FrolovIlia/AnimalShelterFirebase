@@ -45,7 +45,8 @@ fun TaskListItemUI(
             .fillMaxWidth()
             .clip(RoundedCornerShape(15.dp))
             .background(BackgroundWhite)
-            .clickable { onTaskClick(task) }
+            .clickable { onTaskClick(task) } // <- ВОТ ЭТА СТРОКА добавляет обработку
+            .padding(bottom = 12.dp)
     ) {
         Box(
             modifier = Modifier
@@ -94,17 +95,6 @@ fun TaskListItemUI(
         Spacer(modifier = Modifier.height(10.dp))
 
         Column(modifier = Modifier.padding(8.dp)) {
-//            Text(
-//                text = task.shortDescription,
-//                color = Color.Black,
-//                fontWeight = FontWeight.Bold,
-//                fontSize = 20.sp,
-//                maxLines = 1,
-//                overflow = TextOverflow.Ellipsis
-//            )
-//
-//            Spacer(modifier = Modifier.height(4.dp))
-
             Text(
                 text = task.shortDescription,
                 color = Color.Black,
@@ -113,14 +103,6 @@ fun TaskListItemUI(
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
-//
-//            Spacer(modifier = Modifier.height(4.dp))
-
-//            Text(
-//                text = "Куратор: ${task.curatorName} | Тел: ${task.curatorPhone}",
-//                color = Color.LightGray,
-//                fontSize = 12.sp
-//            )
 
             Spacer(modifier = Modifier.height(10.dp))
         }
