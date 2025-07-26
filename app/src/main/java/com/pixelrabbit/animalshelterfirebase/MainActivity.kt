@@ -35,11 +35,16 @@ import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.ui.DonationScree
 
 import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 import com.google.firebase.messaging.FirebaseMessaging
 
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.google.firebase.firestore.FirebaseFirestore
 import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskNavObject
@@ -377,6 +382,27 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
+
+                composable("edit_task_screen/{taskId}") { backStackEntry ->
+                    val taskId = backStackEntry.arguments?.getString("taskId") ?: ""
+                    val firestore = FirebaseFirestore.getInstance()
+                    var task by remember { mutableStateOf<Task?>(null) }
+
+                    LaunchedEffect(taskId) {
+                        firestore.collection("tasks").document(taskId).get()
+                            .addOnSuccessListener { doc ->
+                                task = doc.toObject(Task::class.java)?.copy(key = doc.id)
+                            }
+                    }
+
+                    task?.let {
+                        AddTaskScreen(taskData = it) {
+                            navController.popBackStack()
+                        }
+                    }
+                }
+
+
 
 
             }

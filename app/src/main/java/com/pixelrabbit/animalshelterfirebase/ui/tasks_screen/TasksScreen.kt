@@ -128,7 +128,7 @@ fun TasksScreen(
                             task = taskItem,
                             isAdmin = isAdmin,
                             onEditClick = {
-                                // Обработка редактирования
+                                navController.navigate("edit_task_screen/${taskItem.key}")
                             },
                             onTaskClick = {
                                 // Обработка открытия задачи
