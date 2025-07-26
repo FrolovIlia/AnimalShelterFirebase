@@ -43,6 +43,8 @@ fun AddTaskScreen(
     val firestore = FirebaseFirestore.getInstance()
     val storage = Firebase.storage
 
+    val isEditMode = taskData.key?.isNotBlank() == true
+
     var imageUrl by remember { mutableStateOf(taskData.imageUrl) }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var shortDescription by remember { mutableStateOf(taskData.shortDescription) }
@@ -105,7 +107,7 @@ fun AddTaskScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Добавление новой задачи",
+                text = if (isEditMode) "Редактирование задачи" else "Добавление новой задачи",
                 color = Color.Black,
                 fontFamily = AnimalFont,
                 fontSize = 24.sp,
@@ -217,7 +219,7 @@ fun AddTaskScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
-                ButtonWhite(text = "Сохранить") {
+                ButtonWhite(text = if (isEditMode) "Сохранить изменения" else "Сохранить") {
                     curatorPhoneError = !isPhoneValid(curatorPhone)
 
                     if (
@@ -232,6 +234,7 @@ fun AddTaskScreen(
                     isLoading = true
 
                     val task = Task(
+                        key = taskData.key ?: "",
                         imageUrl = "",
                         shortDescription = shortDescription,
                         fullDescription = fullDescription,
@@ -242,6 +245,17 @@ fun AddTaskScreen(
                         category = category
                     )
 
+                    val onSuccess = {
+                        isLoading = false
+                        Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT).show()
+                        onSaved()
+                    }
+
+                    val onError = {
+                        isLoading = false
+                        Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                    }
+
                     if (imageUri != null) {
                         val storageRef = storage.reference.child("task_images/task_${System.currentTimeMillis()}.jpg")
                         storageRef.putFile(imageUri!!)
@@ -250,36 +264,54 @@ fun AddTaskScreen(
                                     saveTask(
                                         firestore,
                                         task.copy(imageUrl = uri.toString()),
-                                        onSuccess = {
-                                            isLoading = false
-                                            Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT).show()
-                                            onSaved()
-                                        },
-                                        onError = {
-                                            isLoading = false
-                                            Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
-                                        }
+                                        isEditMode,
+                                        onSuccess,
+                                        onError
                                     )
                                 }
                             }
-                            .addOnFailureListener {
-                                isLoading = false
-                                Toast.makeText(context, "Ошибка загрузки изображения", Toast.LENGTH_SHORT).show()
-                            }
+                            .addOnFailureListener { onError() }
                     } else {
                         saveTask(
                             firestore,
                             task.copy(imageUrl = imageUrl),
-                            onSuccess = {
-                                isLoading = false
-                                Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT).show()
-                                onSaved()
-                            },
-                            onError = {
-                                isLoading = false
-                                Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
-                            }
+                            isEditMode,
+                            onSuccess,
+                            onError
                         )
+                    }
+                }
+
+                if (isEditMode) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    ButtonWhite(text = "Удалить задачу") {
+                        isLoading = true
+                        if (taskData.imageUrl.isNotEmpty() && taskData.imageUrl.startsWith("https://firebasestorage.googleapis.com/")) {
+                            val imageRef = storage.getReferenceFromUrl(taskData.imageUrl)
+                            imageRef.delete().addOnCompleteListener {
+                                firestore.collection("tasks").document(taskData.key!!).delete()
+                                    .addOnSuccessListener {
+                                        isLoading = false
+                                        Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT).show()
+                                        onSaved()
+                                    }
+                                    .addOnFailureListener {
+                                        isLoading = false
+                                        Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT).show()
+                                    }
+                            }
+                        } else {
+                            firestore.collection("tasks").document(taskData.key!!).delete()
+                                .addOnSuccessListener {
+                                    isLoading = false
+                                    Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT).show()
+                                    onSaved()
+                                }
+                                .addOnFailureListener {
+                                    isLoading = false
+                                    Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT).show()
+                                }
+                        }
                     }
                 }
 
@@ -292,11 +324,20 @@ fun AddTaskScreen(
 private fun saveTask(
     firestore: FirebaseFirestore,
     task: Task,
+    isEdit: Boolean,
     onSuccess: () -> Unit,
     onError: () -> Unit
 ) {
-    firestore.collection("tasks")
-        .add(task)
+    val collection = firestore.collection("tasks")
+    val docRef = if (isEdit && task.key.isNotBlank()) {
+        collection.document(task.key)
+    } else {
+        collection.document()
+    }
+
+    val taskWithKey = task.copy(key = docRef.id)
+
+    docRef.set(taskWithKey)
         .addOnSuccessListener { onSuccess() }
         .addOnFailureListener { onError() }
 }

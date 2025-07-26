@@ -2,6 +2,7 @@ package com.pixelrabbit.animalshelterfirebase.data
 
 
 data class Task(
+    val key: String = "",
     val imageUrl: String = "",
     val shortDescription: String = "",
     val fullDescription: String = "",
@@ -9,8 +10,7 @@ data class Task(
     val curatorPhone: String = "",
     val location: String = "",
     val urgency: String = "",
-    val category: String = "",
-    val key: String = ""
+    val category: String = ""
 )
 
 
