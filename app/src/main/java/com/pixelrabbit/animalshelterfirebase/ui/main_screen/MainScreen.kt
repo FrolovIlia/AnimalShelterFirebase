@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -203,66 +206,85 @@ fun MainScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    // Левая часть — приветствие
+                    Column(
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text("Привет,", fontSize = 16.sp, fontFamily = AnimalFont)
-                                Text(
-                                    userName.ifEmpty { "..." },
-                                    fontSize = 24.sp,
-                                    fontFamily = AnimalFont
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            if (isAdmin) {
-                                Button(
-                                    onClick = onAdminClick,
-                                    modifier = Modifier.width(130.dp),
-                                    colors = ButtonDefaults.buttonColors(ButtonColorBlue)
-                                ) {
-                                    Text(text = "Добавить\nживотное")
-                                }
-                            }
-                        }
-
-                        // 🔁 Вот тут реклама
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_ad_play),
-                            contentDescription = "Реклама",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clickable {
-                                    val ad = interstitialAd.value
-                                    if (ad != null && activity != null) {
-                                        ad.show(activity)
-                                        Toast.makeText(
-                                            context,
-                                            "Спасибо за просмотр!",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Реклама ещё не загрузилась",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
+                        Text("Привет,", fontSize = 16.sp, fontFamily = AnimalFont)
+                        Text(
+                            userName.ifEmpty { "..."},
+                            fontSize = 24.sp,
+                            fontFamily = AnimalFont
                         )
                     }
+
+                    // Spacer между приветствием и кнопкой
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    // Кнопка администратора (Card)
+                    if (isAdmin) {
+                        val shape = RoundedCornerShape(30.dp)
+                        Card(
+                            modifier = Modifier
+                                .width(105.dp) // <- подобрать под ширину, обычно 100-110
+                                .height(52.dp)
+                                .border(1.dp, BackgroundSecondary, shape)
+                                .clip(shape)
+                                .clickable { onAdminClick() },
+                            shape = shape,
+                            colors = CardDefaults.cardColors(containerColor = ButtonColorWhite),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .padding(horizontal = 8.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Добавить\nживотное",
+                                    fontFamily = AnimalFont,
+                                    fontSize = 13.sp,
+                                    color = TextSecondary,
+                                    maxLines = 2,
+                                    softWrap = true,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+                        }
+                    }
+
+                    // Spacer между кнопкой и рекламой (можно уменьшить до 10dp)
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    // Реклама
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_ad_play),
+                        contentDescription = "Реклама",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clickable {
+                                val ad = interstitialAd.value
+                                if (ad != null && activity != null) {
+                                    ad.show(activity)
+                                    Toast.makeText(
+                                        context,
+                                        "Спасибо за просмотр!",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Реклама ещё не загрузилась",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                    )
                 }
             }
 
