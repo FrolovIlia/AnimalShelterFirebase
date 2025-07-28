@@ -18,6 +18,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
+import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,10 +27,12 @@ fun TasksScreen(
     onSubmitSuccess: () -> Unit,
     onAddTaskClick: () -> Unit,
     viewModel: MainScreenViewModel,
+    userViewModel: UserViewModel,
     navData: TaskNavObject,
     navController: NavController
 ) {
-    val isAdmin by viewModel.isAdmin.collectAsState()
+    val user by userViewModel.currentUser.collectAsState()
+    val isAdmin by userViewModel.isAdmin.collectAsState()
     val tasks by viewModel.tasks.collectAsState()
 
     var query by remember { mutableStateOf("") }
@@ -99,7 +102,6 @@ fun TasksScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-
             SearchField(
                 query = query,
                 onQueryChange = { query = it },
@@ -148,7 +150,6 @@ fun TasksScreen(
                             }
                         )
                     }
-
                 }
             }
         }

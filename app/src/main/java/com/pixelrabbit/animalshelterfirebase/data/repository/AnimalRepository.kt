@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pixelrabbit.animalshelterfirebase.data.Animal
 import com.pixelrabbit.animalshelterfirebase.data.Favourite
+import com.pixelrabbit.animalshelterfirebase.data.Task
 
 class AnimalRepository(private val db: FirebaseFirestore = FirebaseFirestore.getInstance()) {
 
@@ -89,6 +90,24 @@ class AnimalRepository(private val db: FirebaseFirestore = FirebaseFirestore.get
         }
     }
 
+    // --- Новый метод для получения задач
+    fun getTasks(onLoaded: (List<Task>) -> Unit) {
+        db.collection("tasks")
+            .get()
+            .addOnSuccessListener { result ->
+                val loadedTasks = result.mapNotNull { doc ->
+                    val task = doc.toObject(Task::class.java)
+                    task.copy(key = doc.id)
+                }
+                onLoaded(loadedTasks)
+            }
+            .addOnFailureListener {
+                Log.e("AnimalRepository", "Failed to get tasks", it)
+                onLoaded(emptyList())
+            }
+    }
+
+    // Эти методы теперь не используются во ViewModel по новой архитектуре, но оставлены для совместимости
     fun getUserName(uid: String, onResult: (String) -> Unit) {
         if (uid == "guest" || uid.isBlank()) {
             onResult("Гость")

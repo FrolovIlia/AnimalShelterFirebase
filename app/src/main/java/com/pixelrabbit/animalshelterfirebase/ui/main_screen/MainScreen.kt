@@ -1,13 +1,10 @@
 package com.pixelrabbit.animalshelterfirebase.ui.main_screen
 
-
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,84 +26,72 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.Animal
 import com.pixelrabbit.animalshelterfirebase.data.AnimalCategories
 import com.pixelrabbit.animalshelterfirebase.data.MainScreenDataObject
-import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
-import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
-
-import com.pixelrabbit.animalshelterfirebase.ui.theme.TextSecondary
-import com.pixelrabbit.animalshelterfirebase.utils.isAdmin
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
-
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
-import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundSecondary
-import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
-
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.unit.sp
-import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
-import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
-import com.pixelrabbit.animalshelterfirebase.utils.SearchField
-import androidx.compose.foundation.layout.size
-import androidx.navigation.NavController
 import com.pixelrabbit.animalshelterfirebase.data.UserObject
-
+import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
+import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
+import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
+import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
+import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundSecondary
+import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
+import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
+import com.pixelrabbit.animalshelterfirebase.ui.theme.TextSecondary
+import com.pixelrabbit.animalshelterfirebase.utils.SearchField
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.yandex.mobile.ads.common.AdRequestConfiguration
 import com.yandex.mobile.ads.interstitial.InterstitialAd
-
 import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
-
+import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 
 @Composable
 fun MainScreen(
     navData: MainScreenDataObject,
     navController: NavController,
-    currentUser: UserObject,
     viewModel: MainScreenViewModel,
+    userViewModel: UserViewModel,
     onAnimalEditClick: (Animal) -> Unit,
     onAnimalClick: (Animal) -> Unit,
     onAdminClick: () -> Unit
 ) {
-    val db = remember { Firebase.firestore }
     val context = LocalContext.current
     val isGuest = navData.uid == "guest"
 
+    // Собираем состояние экрана
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsState()
     val animals by viewModel.animals.collectAsState()
-    val isAdmin by viewModel.isAdmin.collectAsState()
-    val userName by viewModel.userName.collectAsState()
+    val isAdmin by userViewModel.isAdmin.collectAsState()
+    val user by userViewModel.currentUser.collectAsState()
+    val userName = user?.name ?: ""
 
     var isFavoritesOnly by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
-// Инициализация межстраничной рекламы Яндекс
+
+    // Инициализация межстраничной рекламы Яндекс
     val interstitialAd = remember { mutableStateOf<InterstitialAd?>(null) }
     val activity = remember(context) {
         generateSequence(context) { ctx ->
@@ -136,11 +122,13 @@ fun MainScreen(
             adLoader.loadAd(adRequestConfiguration)
         }
     }
-    // Загрузка userName и isAdmin
+
+    // Загрузка пользователя только при изменении uid
     LaunchedEffect(navData.uid) {
-        viewModel.checkIfUserIsAdmin(navData.uid)
         if (!isGuest) {
-            viewModel.loadUserName(navData.uid)
+            userViewModel.loadUser(navData.uid)
+        } else {
+            userViewModel.clearUser()
         }
     }
 
@@ -192,7 +180,12 @@ fun MainScreen(
                 },
                 isRegistered = !isGuest,
                 navController = navController,
-                currentUser = currentUser
+                currentUser = user ?: UserObject(
+                    uid = "guest",
+                    name = "Гость",
+                    phone = "",
+                    email = ""
+                )
             )
         }
     ) { paddingValues ->
@@ -372,4 +365,3 @@ fun MainScreen(
         }
     }
 }
-

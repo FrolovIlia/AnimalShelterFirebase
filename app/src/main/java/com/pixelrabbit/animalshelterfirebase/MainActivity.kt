@@ -1,140 +1,95 @@
 package com.pixelrabbit.animalshelterfirebase
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.toRoute
-import com.pixelrabbit.animalshelterfirebase.data.MainScreenDataObject
-import com.pixelrabbit.animalshelterfirebase.ui.add_animal_screen.AddAnimalScreen
-import com.pixelrabbit.animalshelterfirebase.ui.authorization.LoginScreen
-import com.pixelrabbit.animalshelterfirebase.ui.data.AddScreenObject
-import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.data.AnimalDetailsNavObject
-import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.ui.AnimalDetailsScreen
-
-import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreen
-import com.pixelrabbit.animalshelterfirebase.ui.registration.ui.RegisterScreen
-import com.pixelrabbit.animalshelterfirebase.ui.registration.RegisterScreenObject
-import com.pixelrabbit.animalshelterfirebase.ui.start_screen.ui.StartScreen
-import com.pixelrabbit.animalshelterfirebase.ui.start_screen.data.StartScreenObject
 import com.google.firebase.auth.FirebaseAuth
-import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import com.pixelrabbit.animalshelterfirebase.data.Animal
+import com.pixelrabbit.animalshelterfirebase.data.MainScreenDataObject
+import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.data.UserObject
+import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.add_animal_screen.AddAnimalScreen
+import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskScreen
 import com.pixelrabbit.animalshelterfirebase.ui.adoption_screen.AdoptionNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.adoption_screen.AdoptionScreen
+import com.pixelrabbit.animalshelterfirebase.ui.authorization.LoginScreen
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.LoginScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.createEncryptedPrefs
-
+import com.pixelrabbit.animalshelterfirebase.ui.data.AddScreenObject
+import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.data.AnimalDetailsNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.ui.AnimalDetailsScreen
+import com.pixelrabbit.animalshelterfirebase.ui.details_task_screen.data.TaskDetailsNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.data.DonationNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.ui.DonationScreen
-
-import android.util.Log
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-
-import com.google.firebase.messaging.FirebaseMessaging
-
-import androidx.navigation.NavType
-import androidx.navigation.navArgument
-import com.google.firebase.firestore.FirebaseFirestore
-import com.pixelrabbit.animalshelterfirebase.data.Task
-import com.pixelrabbit.animalshelterfirebase.model.ShelterViewModel
-import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskNavObject
-import com.pixelrabbit.animalshelterfirebase.ui.add_task_screen.AddTaskScreen
-import com.pixelrabbit.animalshelterfirebase.ui.details_task_screen.data.TaskDetailsNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreen
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.ui.EditProfileScreen
+import com.pixelrabbit.animalshelterfirebase.ui.registration.RegisterScreenObject
+import com.pixelrabbit.animalshelterfirebase.ui.registration.ui.RegisterScreen
+import com.pixelrabbit.animalshelterfirebase.ui.start_screen.data.StartScreenObject
+import com.pixelrabbit.animalshelterfirebase.ui.start_screen.ui.StartScreen
 import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskDetailsScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
-
-import com.yandex.mobile.ads.common.MobileAds
 import com.yandex.mobile.ads.common.InitializationListener
-
+import com.yandex.mobile.ads.common.MobileAds
+import androidx.compose.runtime.*
 
 class MainActivity : ComponentActivity() {
-    private val TAG = "FCM_DEBUG" // TAG определен здесь, чтобы был доступен во всем классе
+    private val TAG = "FCM_DEBUG"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         MobileAds.initialize(this, initializationListener = object : InitializationListener {
-            override fun onInitializationCompleted() {
-                // Можно ничего не делать, просто пустая реализация
-            }
+            override fun onInitializationCompleted() {}
         })
         Log.d("YandexAds", "SDK initialized")
 
-        // --- НАЧАЛО: Блок настройки FCM ---
+        // --- Блок настройки FCM ---
         Log.d(TAG, "MainActivity onCreate called. Starting FCM setup.")
-
-        // Для Android 13+ запросите разрешение на уведомления (если не сделано в другом месте)
-        // Если у вас есть функция askNotificationPermission(), ее можно раскомментировать
-        // askNotificationPermission()
-        // Log.d(TAG, "askNotificationPermission called (if implemented).")
-
 
         FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
             if (!tokenTask.isSuccessful) {
                 Log.e(TAG, "Fetching FCM registration token failed", tokenTask.exception)
                 return@addOnCompleteListener
             }
-
-            // Получить FCM registration token
             val token = tokenTask.result
             Log.d(TAG, "FCM Token obtained: $token")
-
-            // --- Блок отписки, а затем подписки на тему "new_animals" ---
             Log.d(TAG, "Attempting to unsubscribe from topic 'new_animals' before re-subscribing.")
             FirebaseMessaging.getInstance().unsubscribeFromTopic("new_animals")
                 .addOnCompleteListener { unsubscribeTask ->
                     if (unsubscribeTask.isSuccessful) {
-                        Log.d(
-                            TAG,
-                            "Successfully unsubscribed from new_animals topic (if previously subscribed)."
-                        )
+                        Log.d(TAG,"Successfully unsubscribed from new_animals topic (if previously subscribed).")
                     } else {
-                        Log.e(
-                            TAG,
-                            "Failed to unsubscribe from new_animals topic: ${unsubscribeTask.exception?.message}",
-                            unsubscribeTask.exception
-                        )
+                        Log.e(TAG,"Failed to unsubscribe from new_animals topic: ${unsubscribeTask.exception?.message}",unsubscribeTask.exception)
                     }
-
-                    // Теперь, после попытки отписки, выполним подписку
                     FirebaseMessaging.getInstance().subscribeToTopic("new_animals")
                         .addOnCompleteListener { subscribeTask ->
                             var msg = "Subscribed to new_animals topic"
                             if (!subscribeTask.isSuccessful) {
-                                // Если подписка НЕ успешна
-                                msg =
-                                    "FCM Topic Subscription FAILED: ${subscribeTask.exception?.message}"
+                                msg = "FCM Topic Subscription FAILED: ${subscribeTask.exception?.message}"
                                 Log.e(TAG, msg, subscribeTask.exception)
-                                // Выводим более заметный Toast для ошибки
-//                                Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
-                            } else {
-                                // Если подписка успешна
-//                                Log.d(TAG, msg)
-//                                Toast.makeText(
-//                                    baseContext,
-//                                    "FCM Topic Subscribed: new_animals",
-//                                    Toast.LENGTH_SHORT
-//                                ).show()
                             }
                         }
                 }
         }
         Log.d(TAG, "FirebaseMessaging.getInstance().token initiated.")
-        // --- КОНЕЦ: Блок настройки FCM. ---
-
+        // --- Конец блока настройки FCM ---
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
@@ -183,19 +138,20 @@ class MainActivity : ComponentActivity() {
                 composable<MainScreenDataObject> { navEntry ->
                     val navData = navEntry.toRoute<MainScreenDataObject>()
 
-                    val currentUser = userViewModel.currentUser.value ?: UserObject(
-                        uid = "guest",
-                        name = "Гость",
-                        phone = "",
-                        email = ""
-                    )
+                    // При смене uid - обновляем единственный источник пользователя/админа
+                    LaunchedEffect(navData.uid) {
+                        if (navData.uid != "guest") {
+                            userViewModel.loadUser(navData.uid)
+                        } else {
+                            userViewModel.clearUser()
+                        }
+                    }
 
-                    userViewModel.loadUser(navData.uid)
                     MainScreen(
-                        navData,
+                        navData = navData,
                         navController = navController,
-                        currentUser = currentUser,
                         viewModel = mainScreenViewModel,
+                        userViewModel = userViewModel,
                         onAnimalClick = { anim ->
                             navController.navigate(
                                 AnimalDetailsNavObject(
@@ -225,10 +181,11 @@ class MainActivity : ComponentActivity() {
                                     curatorPhone = animal.curatorPhone
                                 )
                             )
+                        },
+                        onAdminClick = {
+                            navController.navigate(AddScreenObject())
                         }
-                    ) {
-                        navController.navigate(AddScreenObject())
-                    }
+                    )
                 }
 
                 composable<AddScreenObject> { navEntry ->
@@ -236,12 +193,10 @@ class MainActivity : ComponentActivity() {
                     AddAnimalScreen(navData) {
                         navController.popBackStack()
                     }
-
                 }
 
                 composable<AnimalDetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<AnimalDetailsNavObject>()
-
                     AnimalDetailsScreen(
                         navObject = navData,
                         userViewModel = userViewModel,
@@ -254,7 +209,6 @@ class MainActivity : ComponentActivity() {
                                     curatorPhone = animal.curatorPhone,
                                     location = animal.location,
                                     description = animal.description,
-
                                     userUid = user.uid,
                                     userName = user.name,
                                     userPhone = user.phone,
@@ -267,9 +221,7 @@ class MainActivity : ComponentActivity() {
                         },
                         savedStateHandle = navEntry.savedStateHandle
                     )
-
                 }
-
 
                 composable(
                     route = DonationNavObject.routeWithArgs,
@@ -287,16 +239,13 @@ class MainActivity : ComponentActivity() {
 
                 composable<EditProfileNavObject> { navEntry ->
                     val navData = navEntry.toRoute<EditProfileNavObject>()
-
-                    // Загружаем пользователя, если нужно
+                    // Для профиля всегда берем UserViewModel
                     userViewModel.loadUser(navData.uid)
-
                     EditProfileScreen(
                         userViewModel = userViewModel,
                         onBack = { navController.popBackStack() }
                     )
                 }
-
 
                 composable<RegisterScreenObject> {
                     RegisterScreen(
@@ -310,10 +259,8 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-
                 composable<AdoptionNavObject> { navEntry ->
                     val navData = navEntry.toRoute<AdoptionNavObject>()
-
                     val animal = Animal(
                         name = navData.name,
                         age = navData.age,
@@ -321,14 +268,12 @@ class MainActivity : ComponentActivity() {
                         location = navData.location,
                         description = navData.description
                     )
-
                     val user = UserObject(
                         uid = navData.userUid,
                         name = navData.userName,
                         phone = navData.userPhone,
                         email = navData.userEmail
                     )
-
                     AdoptionScreen(
                         animal = animal,
                         user = user,
@@ -344,11 +289,8 @@ class MainActivity : ComponentActivity() {
 
                 composable<TaskNavObject> { navEntry ->
                     val navData = navEntry.toRoute<TaskNavObject>()
-                    // Проверка прав администратора при входе в экран
-                    LaunchedEffect(navData.uid) {
-                        mainScreenViewModel.checkIfUserIsAdmin(navData.uid)
-                    }
 
+                    // Не нужна отдельная проверка admin, только подписка на userViewModel!
                     val task = Task(
                         imageUrl = navData.imageUrl,
                         shortDescription = navData.shortDescription,
@@ -372,6 +314,7 @@ class MainActivity : ComponentActivity() {
                             navController.navigate(AddTaskNavObject)
                         },
                         viewModel = mainScreenViewModel,
+                        userViewModel = userViewModel,
                         navData = navData,
                         navController = navController
                     )
@@ -380,7 +323,7 @@ class MainActivity : ComponentActivity() {
                 composable<AddTaskNavObject> {
                     AddTaskScreen(
                         onSaved = {
-                            navController.popBackStack() // возвращаемся после сохранения
+                            navController.popBackStack()
                         }
                     )
                 }
@@ -411,9 +354,6 @@ class MainActivity : ComponentActivity() {
                         onBackClick = { navController.popBackStack() }
                     )
                 }
-
-
-
             }
         }
     }

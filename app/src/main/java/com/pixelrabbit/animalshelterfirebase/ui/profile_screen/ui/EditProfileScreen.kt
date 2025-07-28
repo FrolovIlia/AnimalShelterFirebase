@@ -72,7 +72,8 @@ fun EditProfileScreen(
     var phoneError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
 
-    val errorMessage by userViewModel.userLoadError.collectAsState()
+    // Удалено как неиспользуемое:
+    // val errorMessage by userViewModel.userLoadError.collectAsState()
 
     fun fieldModifier() = Modifier.fillMaxWidth()
 
@@ -290,7 +291,7 @@ fun EditProfileScreen(
                                 currentUser.updatePassword(password)
                                     .addOnSuccessListener {
                                         isLoading = false
-                                        userViewModel.refreshUser()
+                                        userViewModel.loadUser(user!!.uid) // was refreshUser()
                                         Toast.makeText(context, "Данные успешно обновлены", Toast.LENGTH_SHORT).show()
                                         onProfileUpdated()
                                         onBack()
@@ -301,7 +302,7 @@ fun EditProfileScreen(
                                     }
                             } else {
                                 isLoading = false
-                                userViewModel.refreshUser()
+                                userViewModel.loadUser(user!!.uid) // was refreshUser()
                                 Toast.makeText(context, "Данные успешно обновлены", Toast.LENGTH_SHORT).show()
                                 onProfileUpdated()
                                 onBack()

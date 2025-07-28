@@ -2,25 +2,25 @@ package com.pixelrabbit.animalshelterfirebase.ui.main_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 import com.pixelrabbit.animalshelterfirebase.data.Animal
 import com.pixelrabbit.animalshelterfirebase.data.Task
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
 import com.pixelrabbit.animalshelterfirebase.data.repository.AnimalRepository
+import com.pixelrabbit.animalshelterfirebase.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class MainScreenViewModel(
-    private val repository: AnimalRepository = AnimalRepository()
+    private val repository: AnimalRepository = AnimalRepository(),
+    private val userRepository: UserRepository = UserRepository
 ) : ViewModel() {
 
     private val _animals = MutableStateFlow<List<Animal>>(emptyList())
     val animals: StateFlow<List<Animal>> = _animals
 
     private val _favoriteIds = MutableStateFlow<List<String>>(emptyList())
-    val favoriteIds: StateFlow<List<String>> = _favoriteIds
+
 
     private val _selectedCategory = MutableStateFlow("Все")
     val selectedCategory: StateFlow<String> = _selectedCategory
@@ -28,14 +28,11 @@ class MainScreenViewModel(
     private val _selectedTab = MutableStateFlow<BottomMenuItem>(BottomMenuItem.Home)
     val selectedTab: StateFlow<BottomMenuItem> = _selectedTab
 
-    private val _userName = MutableStateFlow("")
-    val userName: StateFlow<String> = _userName
-
-    private val _isAdmin = MutableStateFlow(false)
-    val isAdmin: StateFlow<Boolean> = _isAdmin
-
     private val _tasks = MutableStateFlow<List<Task>>(emptyList())
     val tasks: StateFlow<List<Task>> = _tasks
+
+    // Прокидываем состояние из UserRepository для использования в UI
+    val isAdmin = userRepository.isAdmin
 
     fun selectCategory(category: String) {
         _selectedCategory.value = category
@@ -71,7 +68,6 @@ class MainScreenViewModel(
             _animals.value = emptyList()
             return
         }
-
         viewModelScope.launch {
             repository.getFavoriteIds(uid) { favs ->
                 _favoriteIds.value = favs
@@ -96,33 +92,9 @@ class MainScreenViewModel(
         }
     }
 
-    fun loadUserName(uid: String) {
-        repository.getUserName(uid) {
-            _userName.value = it
-        }
-    }
-
-    fun checkIfUserIsAdmin(uid: String) {
-        repository.checkIfUserIsAdmin(uid) {
-            _isAdmin.value = it
-        }
-    }
-
     fun loadTasks() {
-        Firebase.firestore.collection("tasks")
-            .get()
-            .addOnSuccessListener { result ->
-                val loadedTasks = result.mapNotNull { doc ->
-                    val task = doc.toObject(Task::class.java)
-                    task.copy(key = doc.id) // ← сохраняем Firestore ID
-                }
-                _tasks.value = loadedTasks
-            }
-            .addOnFailureListener {
-                _tasks.value = emptyList()
-            }
+        repository.getTasks { loadedTasks ->
+            _tasks.value = loadedTasks
+        }
     }
-
-
 }
-
