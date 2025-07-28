@@ -1,13 +1,18 @@
 package com.pixelrabbit.animalshelterfirebase.ui.tasks_screen
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -19,6 +24,9 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundSecondary
+import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
+import com.pixelrabbit.animalshelterfirebase.ui.theme.TextSecondary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,13 +88,38 @@ fun TasksScreen(
                 },
                 actions = {
                     if (isAdmin) {
-                        TextButton(onClick = onAddTaskClick) {
-                            Text(
-                                text = "Добавить\nзадачу",
-                                fontSize = 16.sp,
-                                fontFamily = AnimalFont
-                            )
+                        val shape = RoundedCornerShape(30.dp)
+                        // Spacer перед кнопкой (НЕ нужен, TopAppBar сам даёт слева отступ)
+                        Card(
+                            modifier = Modifier
+                                .width(105.dp)
+                                .height(52.dp)
+                                .border(1.dp, BackgroundSecondary, shape)
+                                .clip(shape)
+                                .clickable { onAddTaskClick() },
+                            shape = shape,
+                            colors = CardDefaults.cardColors(containerColor = ButtonColorWhite),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        ) {
+                            Box(
+                                Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 8.dp)
+                            ) {
+                                Text(
+                                    text = "Добавить задачу",
+                                    fontFamily = AnimalFont,
+                                    fontSize = 13.sp,
+                                    color = TextSecondary,
+                                    maxLines = 2,
+                                    softWrap = true,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
                         }
+                        // Spacer вправо, как и слева (balance)
+                        Spacer(modifier = Modifier.width(10.dp))
                     } else {
                         Spacer(modifier = Modifier.width(80.dp))
                     }
