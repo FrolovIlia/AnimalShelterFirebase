@@ -43,11 +43,12 @@ fun TaskListItemUI(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .height(195.dp) // ✅ Фиксированная высота карточки
             .clip(RoundedCornerShape(15.dp))
             .background(BackgroundWhite)
-            .clickable { onTaskClick(task) } // <- ВОТ ЭТА СТРОКА добавляет обработку
-            .padding(bottom = 12.dp)
+            .clickable { onTaskClick(task) }
     ) {
+        // Картинка
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -92,19 +93,21 @@ fun TaskListItemUI(
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
-        Column(modifier = Modifier.padding(8.dp)) {
+        // Текст
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 8.dp)
+        ) {
             Text(
                 text = task.shortDescription,
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-                maxLines = 3,
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
+
