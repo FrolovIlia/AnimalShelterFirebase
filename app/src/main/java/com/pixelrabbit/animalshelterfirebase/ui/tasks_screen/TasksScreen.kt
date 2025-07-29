@@ -152,14 +152,14 @@ fun TasksScreen(
                 onQueryChange = { query = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                    .padding(horizontal = 16.dp),
                 placeholder = "Поиск по задачам"
             )
 
             // Категории задач — LazyRow
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp)
