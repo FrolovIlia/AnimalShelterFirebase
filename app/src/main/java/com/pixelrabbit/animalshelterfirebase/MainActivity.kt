@@ -49,6 +49,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
 import com.yandex.mobile.ads.common.InitializationListener
 import com.yandex.mobile.ads.common.MobileAds
 import androidx.compose.runtime.*
+import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreen
 
 class MainActivity : ComponentActivity() {
     private val TAG = "FCM_DEBUG"
@@ -354,6 +355,13 @@ class MainActivity : ComponentActivity() {
                         onBackClick = { navController.popBackStack() }
                     )
                 }
+
+                composable("slideshow") {
+                    val animals by mainScreenViewModel.animals.collectAsState()
+                    SlideShowScreen(navController, animals)
+                }
+
+
             }
         }
     }
