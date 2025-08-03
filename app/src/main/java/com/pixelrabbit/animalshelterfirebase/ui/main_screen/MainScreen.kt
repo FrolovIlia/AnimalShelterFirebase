@@ -66,6 +66,9 @@ import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreenObject
 
+import android.content.pm.ActivityInfo
+import androidx.compose.runtime.DisposableEffect
+
 @Composable
 fun MainScreen(
     navData: MainScreenDataObject,
@@ -77,7 +80,29 @@ fun MainScreen(
     onAdminClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val activity = remember(context) {
+        generateSequence(context) { ctx ->
+            when (ctx) {
+                is android.app.Activity -> null
+                is android.content.ContextWrapper -> ctx.baseContext
+                else -> null
+            }
+        }.firstOrNull { it is android.app.Activity } as? android.app.Activity
+    }
     val isGuest = navData.uid == "guest"
+
+
+    LaunchedEffect(Unit) {
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+    }
+
+    DisposableEffect(Unit) {
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        onDispose {
+            activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+        }
+    }
+
 
     // Собираем состояние экрана
     val selectedCategory by viewModel.selectedCategory.collectAsState()
@@ -92,15 +117,6 @@ fun MainScreen(
 
     // Инициализация межстраничной рекламы Яндекс
     val interstitialAd = remember { mutableStateOf<InterstitialAd?>(null) }
-    val activity = remember(context) {
-        generateSequence(context) { ctx ->
-            when (ctx) {
-                is android.app.Activity -> null
-                is android.content.ContextWrapper -> ctx.baseContext
-                else -> null
-            }
-        }.firstOrNull { it is android.app.Activity } as? android.app.Activity
-    }
 
     LaunchedEffect(Unit) {
         activity?.let {

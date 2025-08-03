@@ -2,6 +2,7 @@ package com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen
 
 import android.app.Activity
 import android.content.pm.ActivityInfo
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,7 +16,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.pixelrabbit.animalshelterfirebase.data.Animal
 import kotlinx.coroutines.delay
@@ -31,7 +34,7 @@ fun SlideShowScreen(
     val activity = context as? Activity
 
     DisposableEffect(Unit) {
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
         onDispose {
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
@@ -71,25 +74,57 @@ fun SlideShowScreen(
             )
         },
         containerColor = Color.DarkGray
-    ) { _ -> // <-- Изменено здесь. Подсветка ошибки- норм. Оставить
+    ) { _ ->
+        val configuration = LocalConfiguration.current
+        val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
             val animal = animals[page]
 
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                AsyncImage(
-                    model = animal.imageUrl,
-                    contentDescription = animal.name,
+                Box(
                     modifier = Modifier
-                        .fillMaxHeight(0.9f)
-                        .aspectRatio(4f / 3f),
-                    contentScale = ContentScale.Crop
-                )
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AsyncImage(
+                        model = animal.imageUrl,
+                        contentDescription = animal.name,
+                        // Условный модификатор для адаптации изображения
+                        modifier = if (isPortrait) {
+                            Modifier
+                                .fillMaxHeight(0.9f)
+                                .aspectRatio(4f / 3f)
+                        } else {
+                            Modifier
+                                .fillMaxHeight()
+                                .aspectRatio(4f / 3f)
+                        },
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(if (isPortrait) 100.dp else 50.dp)
+                        .background(Color.Gray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Рекламный баннер", color = Color.White)
+                }
             }
         }
     }
