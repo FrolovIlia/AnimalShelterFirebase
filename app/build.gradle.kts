@@ -102,6 +102,6 @@ dependencies {
 
     // Для слайд-шоу
     implementation(libs.androidx.foundation.v160)
-    implementation(libs.androidx.foundation.pager)
+
 
 }

@@ -37,7 +37,6 @@ firebaseMessaging = "24.1.1"
 [libraries]
 
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
-androidx-foundation-pager = { module = "androidx.compose.foundation:foundation-pager", version.ref = "foundationVersion" }
 androidx-foundation-v160 = { module = "androidx.compose.foundation:foundation", version.ref = "foundationVersion" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
