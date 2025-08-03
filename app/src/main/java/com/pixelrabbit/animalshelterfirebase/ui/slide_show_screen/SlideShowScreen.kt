@@ -3,6 +3,7 @@ package com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -33,20 +34,33 @@ fun SlideShowScreen(
     val context = LocalContext.current
     val activity = context as? Activity
 
+    // --- Новый блок для перемешивания списка ---
+    val shuffledAnimals = remember(animals) {
+        animals.shuffled()
+    }
+    // ------------------------------------------
+
     DisposableEffect(Unit) {
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
         onDispose {
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
+    DisposableEffect(Unit) {
+        val window = activity?.window
+        window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose {
+            window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
 
-    val pagerState = rememberPagerState { animals.size }
+    val pagerState = rememberPagerState { shuffledAnimals.size }
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState.currentPage) {
         delay(10_000L)
         coroutineScope.launch {
-            val nextPage = (pagerState.currentPage + 1) % animals.size
+            val nextPage = (pagerState.currentPage + 1) % shuffledAnimals.size
             pagerState.animateScrollToPage(nextPage)
         }
     }
@@ -82,7 +96,7 @@ fun SlideShowScreen(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            val animal = animals[page]
+            val animal = shuffledAnimals[page]
 
             Column(
                 modifier = Modifier
@@ -100,7 +114,6 @@ fun SlideShowScreen(
                     AsyncImage(
                         model = animal.imageUrl,
                         contentDescription = animal.name,
-                        // Условный модификатор для адаптации изображения
                         modifier = if (isPortrait) {
                             Modifier
                                 .fillMaxHeight(0.9f)
