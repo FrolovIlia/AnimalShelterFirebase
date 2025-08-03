@@ -213,14 +213,16 @@ fun MainScreen(
                     bottom = paddingValues.calculateBottomPadding()
                 )
         ) {
-            if (!isGuest) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Левая часть — приветствие
+            // Этот Row будет отображаться всегда
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Левая часть (приветствие или просто Spacer, если гость)
+                if (!isGuest) {
                     Column(
                         modifier = Modifier.weight(1f)
                     ) {
@@ -231,88 +233,84 @@ fun MainScreen(
                             fontFamily = AnimalFont
                         )
                     }
+                } else {
+                    // Можно добавить Spacer, чтобы выровнять кнопки, или оставить пустым
+                    Spacer(modifier = Modifier.weight(1f))
+                }
 
-                    // Spacer между приветствием и кнопкой
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    // Кнопка администратора (Card)
-                    if (isAdmin) {
-                        val shape = RoundedCornerShape(30.dp)
-                        Card(
+                // Кнопка администратора (отображается только для админов)
+                if (isAdmin) {
+                    val shape = RoundedCornerShape(30.dp)
+                    Card(
+                        modifier = Modifier
+                            .width(105.dp) // <- подобрать под ширину, обычно 100-110
+                            .height(52.dp)
+                            .border(1.dp, BackgroundSecondary, shape)
+                            .clip(shape)
+                            .clickable { onAdminClick() },
+                        shape = shape,
+                        colors = CardDefaults.cardColors(containerColor = ButtonColorWhite),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Row(
                             modifier = Modifier
-                                .width(105.dp) // <- подобрать под ширину, обычно 100-110
-                                .height(52.dp)
-                                .border(1.dp, BackgroundSecondary, shape)
-                                .clip(shape)
-                                .clickable { onAdminClick() },
-                            shape = shape,
-                            colors = CardDefaults.cardColors(containerColor = ButtonColorWhite),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                .fillMaxHeight()
+                                .padding(horizontal = 8.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .padding(horizontal = 8.dp),
-                                horizontalArrangement = Arrangement.Center,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Добавить\nживотное",
-                                    fontFamily = AnimalFont,
-                                    fontSize = 13.sp,
-                                    color = TextSecondary,
-                                    maxLines = 2,
-                                    softWrap = true,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
+                            Text(
+                                text = "Добавить\nживотное",
+                                fontFamily = AnimalFont,
+                                fontSize = 13.sp,
+                                color = TextSecondary,
+                                maxLines = 2,
+                                softWrap = true,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
-
                     Spacer(modifier = Modifier.width(10.dp))
-
-                    // Слайд-шоу
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_presentation),
-                        contentDescription = "Слайд-шоу",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable {
-                                navController.navigate(SlideShowScreenObject)
-
-                            }
-                    )
-
-
-                    // Spacer между кнопкой и рекламой (можно уменьшить до 10dp)
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    // Реклама
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_ad_play),
-                        contentDescription = "Реклама",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clickable {
-                                val ad = interstitialAd.value
-                                if (ad != null && activity != null) {
-                                    ad.show(activity)
-                                    Toast.makeText(
-                                        context,
-                                        "Спасибо за просмотр!",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Реклама ещё не загрузилась",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                    )
                 }
+
+                // Слайд-шоу (теперь всегда отображается)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_presentation),
+                    contentDescription = "Слайд-шоу",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable {
+                            navController.navigate(SlideShowScreenObject)
+                        }
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                // Реклама (теперь всегда отображается)
+                Image(
+                    painter = painterResource(id = R.drawable.ic_ad_play),
+                    contentDescription = "Реклама",
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clickable {
+                            val ad = interstitialAd.value
+                            if (ad != null && activity != null) {
+                                ad.show(activity)
+                                Toast.makeText(
+                                    context,
+                                    "Спасибо за просмотр!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Реклама ещё не загрузилась",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                )
             }
 
             SearchField(
