@@ -49,6 +49,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
 import com.yandex.mobile.ads.common.InitializationListener
 import com.yandex.mobile.ads.common.MobileAds
 import androidx.compose.runtime.*
+import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreen
 
 class MainActivity : ComponentActivity() {
@@ -75,15 +76,23 @@ class MainActivity : ComponentActivity() {
             FirebaseMessaging.getInstance().unsubscribeFromTopic("new_animals")
                 .addOnCompleteListener { unsubscribeTask ->
                     if (unsubscribeTask.isSuccessful) {
-                        Log.d(TAG,"Successfully unsubscribed from new_animals topic (if previously subscribed).")
+                        Log.d(
+                            TAG,
+                            "Successfully unsubscribed from new_animals topic (if previously subscribed)."
+                        )
                     } else {
-                        Log.e(TAG,"Failed to unsubscribe from new_animals topic: ${unsubscribeTask.exception?.message}",unsubscribeTask.exception)
+                        Log.e(
+                            TAG,
+                            "Failed to unsubscribe from new_animals topic: ${unsubscribeTask.exception?.message}",
+                            unsubscribeTask.exception
+                        )
                     }
                     FirebaseMessaging.getInstance().subscribeToTopic("new_animals")
                         .addOnCompleteListener { subscribeTask ->
                             var msg = "Subscribed to new_animals topic"
                             if (!subscribeTask.isSuccessful) {
-                                msg = "FCM Topic Subscription FAILED: ${subscribeTask.exception?.message}"
+                                msg =
+                                    "FCM Topic Subscription FAILED: ${subscribeTask.exception?.message}"
                                 Log.e(TAG, msg, subscribeTask.exception)
                             }
                         }
@@ -356,9 +365,14 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                composable("slideshow") {
+                composable<SlideShowScreenObject> {
                     val animals by mainScreenViewModel.animals.collectAsState()
-                    SlideShowScreen(navController, animals)
+                    SlideShowScreen(
+                        animals = animals,
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
                 }
 
 

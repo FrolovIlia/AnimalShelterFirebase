@@ -1,0 +1,6 @@
+package com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+object SlideShowScreenObject

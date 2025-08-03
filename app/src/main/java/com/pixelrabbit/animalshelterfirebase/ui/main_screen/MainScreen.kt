@@ -64,6 +64,7 @@ import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreenObject
 
 @Composable
 fun MainScreen(
@@ -209,7 +210,7 @@ fun MainScreen(
                     ) {
                         Text("Привет,", fontSize = 16.sp, fontFamily = AnimalFont)
                         Text(
-                            userName.ifEmpty { "..."},
+                            userName.ifEmpty { "..." },
                             fontSize = 24.sp,
                             fontFamily = AnimalFont
                         )
@@ -262,10 +263,10 @@ fun MainScreen(
                         modifier = Modifier
                             .size(40.dp)
                             .clickable {
-                                navController.navigate("slideshow")
+                                navController.navigate(SlideShowScreenObject)
+
                             }
                     )
-
 
 
                     // Spacer между кнопкой и рекламой (можно уменьшить до 10dp)
