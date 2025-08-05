@@ -28,13 +28,8 @@ import com.pixelrabbit.animalshelterfirebase.data.TaskCategories
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.details_task_screen.data.TaskDetailsNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
-import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
-import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
-import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundSecondary
-import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
-import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
-import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
-import com.pixelrabbit.animalshelterfirebase.ui.theme.TextSecondary
+import com.pixelrabbit.animalshelterfirebase.ui.theme.*
+
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,15 +40,16 @@ fun TasksScreen(
     onAddTaskClick: () -> Unit,
     viewModel: MainScreenViewModel,
     userViewModel: UserViewModel,
+    tasksViewModel: TasksViewModel,
     navData: TaskNavObject,
     navController: NavController
 ) {
     val user by userViewModel.currentUser.collectAsState()
-    val isAdmin by userViewModel.isAdmin.collectAsState()
-    val tasks by viewModel.tasks.collectAsState()
+    val isAdmin by tasksViewModel.isAdmin.collectAsState()
 
-    var query by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("Все") }
+    val tasks by viewModel.tasks.collectAsState()
+    val query by tasksViewModel.query
+    val selectedCategory by tasksViewModel.selectedCategory
 
     val filteredTasks = remember(query, tasks, selectedCategory) {
         tasks.filter {
@@ -149,14 +145,13 @@ fun TasksScreen(
         ) {
             SearchField(
                 query = query,
-                onQueryChange = { query = it },
+                onQueryChange = { tasksViewModel.updateQuery(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 placeholder = "Поиск по задачам"
             )
 
-            // Категории задач — LazyRow
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -172,9 +167,9 @@ fun TasksScreen(
 
                     Surface(
                         modifier = Modifier
-                            .height(52.dp) // как на главной!
+                            .height(52.dp)
                             .clip(RoundedCornerShape(30.dp))
-                            .clickable { selectedCategory = category.title },
+                            .clickable { tasksViewModel.updateSelectedCategory(category.title) },
                         shape = RoundedCornerShape(30.dp),
                         color = backgroundColor,
                         border = BorderStroke(
@@ -191,7 +186,7 @@ fun TasksScreen(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(RoundedCornerShape(50))
-                                    .background(contentColor.copy(alpha = 0.15f)) // мягкий фон под иконкой
+                                    .background(contentColor.copy(alpha = 0.15f))
                             ) {
                                 Image(
                                     painter = painterResource(id = category.iconResId),
@@ -204,7 +199,7 @@ fun TasksScreen(
 
                             Text(
                                 text = category.title,
-                                fontSize = 13.sp, // как на главной
+                                fontSize = 13.sp,
                                 fontFamily = AnimalFont,
                                 color = contentColor
                             )
@@ -212,9 +207,6 @@ fun TasksScreen(
                     }
                 }
             }
-
-
-
 
             if (filteredTasks.isEmpty()) {
                 Text(

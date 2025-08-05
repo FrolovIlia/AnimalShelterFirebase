@@ -51,6 +51,7 @@ import com.yandex.mobile.ads.common.MobileAds
 import androidx.compose.runtime.*
 import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreen
+import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
 
 class MainActivity : ComponentActivity() {
     private val TAG = "FCM_DEBUG"
@@ -107,6 +108,8 @@ class MainActivity : ComponentActivity() {
             val encryptedPrefs = createEncryptedPrefs(this)
             val userViewModel = viewModel<UserViewModel>()
             val mainScreenViewModel: MainScreenViewModel = viewModel()
+            val tasksViewModel: TasksViewModel = viewModel()
+
 
             NavHost(
                 navController = navController,
@@ -325,6 +328,7 @@ class MainActivity : ComponentActivity() {
                         },
                         viewModel = mainScreenViewModel,
                         userViewModel = userViewModel,
+                        tasksViewModel = tasksViewModel,
                         navData = navData,
                         navController = navController
                     )
