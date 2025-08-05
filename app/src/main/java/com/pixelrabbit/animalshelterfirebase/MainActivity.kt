@@ -50,7 +50,7 @@ import com.yandex.mobile.ads.common.InitializationListener
 import com.yandex.mobile.ads.common.MobileAds
 import androidx.compose.runtime.*
 import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreenObject
-import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreen
+import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.ui.SlideShowScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
 
 class MainActivity : ComponentActivity() {
