@@ -68,6 +68,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScree
 
 import android.content.pm.ActivityInfo
 import androidx.compose.runtime.DisposableEffect
+import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
 
 @Composable
 fun MainScreen(
@@ -374,7 +375,10 @@ fun MainScreen(
                                     .padding(end = 8.dp),
                                 contentScale = ContentScale.Crop
                             )
-                            Text(text = category.categoryName, color = TextSecondary)
+                            Text(
+                                text = category.categoryName,
+                                color = if (isSelected) TextBlack else TextSecondary
+                            )
                         }
                     }
                 }
