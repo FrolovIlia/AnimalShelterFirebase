@@ -9,13 +9,16 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -115,9 +118,10 @@ fun AddTaskScreen(
                 textAlign = TextAlign.Center
             )
 
-            AnimalImage(
+            TaskImageWithUrgencyBadge(
                 imageUri = imageUri,
                 imageUrl = imageUrl,
+                urgency = urgency,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
@@ -227,7 +231,11 @@ fun AddTaskScreen(
                         curatorName.isBlank() || curatorPhone.isBlank() || curatorPhoneError ||
                         location.isBlank() || urgency.isBlank() || category.isBlank()
                     ) {
-                        Toast.makeText(context, "Пожалуйста, заполните все поля", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            "Пожалуйста, заполните все поля",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         return@ButtonWhite
                     }
 
@@ -257,7 +265,8 @@ fun AddTaskScreen(
                     }
 
                     if (imageUri != null) {
-                        val storageRef = storage.reference.child("task_images/task_${System.currentTimeMillis()}.jpg")
+                        val storageRef =
+                            storage.reference.child("task_images/task_${System.currentTimeMillis()}.jpg")
                         storageRef.putFile(imageUri!!)
                             .addOnSuccessListener {
                                 storageRef.downloadUrl.addOnSuccessListener { uri ->
@@ -292,24 +301,34 @@ fun AddTaskScreen(
                                 firestore.collection("tasks").document(taskData.key!!).delete()
                                     .addOnSuccessListener {
                                         isLoading = false
-                                        Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Задача удалена",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         onSaved()
                                     }
                                     .addOnFailureListener {
                                         isLoading = false
-                                        Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Ошибка удаления",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                             }
                         } else {
                             firestore.collection("tasks").document(taskData.key!!).delete()
                                 .addOnSuccessListener {
                                     isLoading = false
-                                    Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT)
+                                        .show()
                                     onSaved()
                                 }
                                 .addOnFailureListener {
                                     isLoading = false
-                                    Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT)
+                                        .show()
                                 }
                         }
                     }
@@ -319,6 +338,42 @@ fun AddTaskScreen(
             }
         }
     }
+}
+
+@Composable
+fun TaskImageWithUrgencyBadge(
+    imageUri: Uri?,
+    imageUrl: String,
+    urgency: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+    ) {
+        AnimalImage(
+            imageUri = imageUri,
+            imageUrl = imageUrl,
+            modifier = Modifier.fillMaxSize()
+            // Убедитесь, что contentScale не дублируется здесь
+        )
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd) // Привязываем к правому верхнему углу
+                .padding(top = 16.dp, end = 32.dp) // Отступ сверху и справа
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(urgencyColor(urgency))
+        )
+    }
+}
+
+
+fun urgencyColor(urgency: String): Color = when (urgency) {
+    "Низкая" -> Color.Green
+    "Средняя" -> Color.Yellow
+    "Высокая" -> Color(0xFFFFA500) // Оранжевый
+    "Критическая" -> Color.Red
+    else -> Color.Gray
 }
 
 private fun saveTask(

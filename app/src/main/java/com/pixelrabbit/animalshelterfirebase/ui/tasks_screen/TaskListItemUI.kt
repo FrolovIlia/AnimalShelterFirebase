@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,12 +43,11 @@ fun TaskListItemUI(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(195.dp) // ✅ Фиксированная высота карточки
+            .height(195.dp)
             .clip(RoundedCornerShape(15.dp))
             .background(BackgroundWhite)
             .clickable { onTaskClick(task) }
     ) {
-        // Картинка
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -68,12 +68,22 @@ fun TaskListItemUI(
                     contentDescription = task.shortDescription,
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(15.dp)),
+                        .clip(RoundedCornerShape(15.dp)),  // clip тоже только на картинке
                     contentScale = ContentScale.Crop,
                     error = painterResource(id = R.drawable.default_animal_image),
                     placeholder = painterResource(id = R.drawable.default_animal_image)
                 )
             }
+
+            // Точка с padding для отступа от краёв
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp, end = 8.dp)  // Отступ сверху и справа
+                    .size(16.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(urgencyColor(task.urgency))
+            )
 
             if (isAdmin) {
                 IconButton(
@@ -92,7 +102,6 @@ fun TaskListItemUI(
             }
         }
 
-        // Текст
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -110,3 +119,13 @@ fun TaskListItemUI(
     }
 }
 
+@Composable
+fun urgencyColor(urgency: String): Color {
+    return when (urgency.trim()) {
+        "Низкая" -> Color.Green
+        "Средняя" -> Color(0xFFFFA500) // Оранжевый
+        "Высокая" -> Color.Red
+        "Критическая" -> Color(0xFF8B0000) // Темно-красный
+        else -> Color.Gray
+    }
+}
