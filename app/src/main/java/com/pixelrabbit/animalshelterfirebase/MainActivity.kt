@@ -1,5 +1,6 @@
 package com.pixelrabbit.animalshelterfirebase
 
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -57,6 +58,7 @@ class MainActivity : ComponentActivity() {
     private val TAG = "FCM_DEBUG"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onCreate(savedInstanceState)
         MobileAds.initialize(this, initializationListener = object : InitializationListener {
             override fun onInitializationCompleted() {}
