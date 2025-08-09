@@ -23,11 +23,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.pixelrabbit.animalshelterfirebase.data.Task
-import com.pixelrabbit.animalshelterfirebase.data.TaskCategories
+import com.pixelrabbit.animalshelterfirebase.data.model.Task
+import com.pixelrabbit.animalshelterfirebase.data.model.TaskCategories
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
-import com.pixelrabbit.animalshelterfirebase.ui.details_task_screen.data.TaskDetailsNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.navigation.TaskDetailsNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.navigation.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.*
 
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField

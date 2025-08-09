@@ -19,8 +19,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.pixelrabbit.animalshelterfirebase.data.Animal
-import com.pixelrabbit.animalshelterfirebase.data.UserObject
+import com.pixelrabbit.animalshelterfirebase.data.model.Animal
+import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue

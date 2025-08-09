@@ -1,6 +1,6 @@
 package com.pixelrabbit.animalshelterfirebase.data.repository
 
-import com.pixelrabbit.animalshelterfirebase.data.UserObject
+import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,10 +1,12 @@
-package com.pixelrabbit.animalshelterfirebase.ui.tasks_screen
+package com.pixelrabbit.animalshelterfirebase.ui.animal_list_item_UI
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -27,35 +30,40 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.pixelrabbit.animalshelterfirebase.R
-import com.pixelrabbit.animalshelterfirebase.data.model.Task
+import com.pixelrabbit.animalshelterfirebase.data.model.Animal
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundWhite
 
+
 @Composable
-fun TaskListItemUI(
-    task: Task,
-    isAdmin: Boolean = false,
-    onEditClick: (Task) -> Unit = {},
-    onTaskClick: (Task) -> Unit = {}
+fun AnimalListItemUI(
+    showEditButton: Boolean = false,
+    animal: Animal,
+    isFavourite: Boolean,
+    onEditClick: (Animal) -> Unit = {},
+    onFavouriteClick: () -> Unit = {},
+    onAnimalClick: (Animal) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(195.dp) // ✅ Фиксированная высота карточки
+            .padding(8.dp)
+            .clickable{
+                onAnimalClick(animal)
+            }
             .clip(RoundedCornerShape(15.dp))
             .background(BackgroundWhite)
-            .clickable { onTaskClick(task) }
     ) {
-        // Картинка
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(130.dp)
         ) {
-            if (task.imageUrl.isNullOrBlank()) {
+            if (animal.imageUrl.isNullOrBlank()) {
                 Image(
-                    painter = painterResource(id = R.drawable.default_animal_image),
+                    painter = painterResource(id = R.drawable.default_animal_image), // заглушка
                     contentDescription = "Placeholder image",
                     modifier = Modifier
                         .fillMaxSize()
@@ -64,24 +72,46 @@ fun TaskListItemUI(
                 )
             } else {
                 AsyncImage(
-                    model = task.imageUrl,
-                    contentDescription = task.shortDescription,
+                    model = animal.imageUrl,
+                    contentDescription = animal.name,
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(15.dp)),
                     contentScale = ContentScale.Crop,
-                    error = painterResource(id = R.drawable.default_animal_image),
-                    placeholder = painterResource(id = R.drawable.default_animal_image)
+                    error = painterResource(id = R.drawable.default_animal_image), // если загрузка не удалась
+                    placeholder = painterResource(id = R.drawable.default_animal_image) // placeholder во время загрузки
                 )
             }
 
-            if (isAdmin) {
+            IconButton(
+                onClick = onFavouriteClick,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(24.dp)
+                    .zIndex(1f)
+            ) {
+                Image(
+                    painter = painterResource(
+                        if (isFavourite) {
+                            R.drawable.favourite
+                        } else {
+                            R.drawable.favourite_border
+                        }
+                    ),
+                    contentDescription = "Favorite icon"
+                )
+
+            }
+
+            if (showEditButton) {
                 IconButton(
-                    onClick = { onEditClick(task) },
+                    onClick = { onEditClick(animal) },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(8.dp)
                         .size(24.dp)
+                        .zIndex(1f)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,
@@ -92,21 +122,39 @@ fun TaskListItemUI(
             }
         }
 
-        // Текст
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 8.dp)
-        ) {
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Column(modifier = Modifier.padding(8.dp)) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = animal.name,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Text(
+                    text = animal.age,
+                    color = Color.LightGray,
+                    fontSize = 16.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             Text(
-                text = task.shortDescription,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
+                text = animal.feature,
+                color = Color.Gray,
+                fontSize = 14.sp,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 }
-

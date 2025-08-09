@@ -19,9 +19,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.pixelrabbit.animalshelterfirebase.R
-import com.pixelrabbit.animalshelterfirebase.data.UserObject
-import com.pixelrabbit.animalshelterfirebase.ui.profile_screen.EditProfileNavObject
-import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TaskNavObject
+import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
+import com.pixelrabbit.animalshelterfirebase.ui.navigation.EditProfileNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.navigation.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
 

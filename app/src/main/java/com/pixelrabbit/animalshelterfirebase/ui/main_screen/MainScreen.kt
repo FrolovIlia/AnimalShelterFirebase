@@ -45,10 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.pixelrabbit.animalshelterfirebase.R
-import com.pixelrabbit.animalshelterfirebase.data.Animal
-import com.pixelrabbit.animalshelterfirebase.data.AnimalCategories
-import com.pixelrabbit.animalshelterfirebase.data.MainScreenDataObject
-import com.pixelrabbit.animalshelterfirebase.data.UserObject
+import com.pixelrabbit.animalshelterfirebase.data.model.Animal
+import com.pixelrabbit.animalshelterfirebase.data.model.AnimalCategories
+import com.pixelrabbit.animalshelterfirebase.data.model.MainScreenDataObject
+import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
@@ -68,6 +68,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScree
 
 import android.content.pm.ActivityInfo
 import androidx.compose.runtime.DisposableEffect
+import com.pixelrabbit.animalshelterfirebase.ui.animal_list_item_UI.AnimalListItemUI
 import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
 
 @Composable

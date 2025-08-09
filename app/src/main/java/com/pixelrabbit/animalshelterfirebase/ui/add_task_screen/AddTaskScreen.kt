@@ -24,9 +24,9 @@ import androidx.core.content.FileProvider
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
-import com.pixelrabbit.animalshelterfirebase.data.Task
-import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerDropDownMenu
-import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerTextField
+import com.pixelrabbit.animalshelterfirebase.data.model.Task
+import com.pixelrabbit.animalshelterfirebase.common.RoundedCornerDropDownMenu
+import com.pixelrabbit.animalshelterfirebase.common.RoundedCornerTextField
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.AnimalImage

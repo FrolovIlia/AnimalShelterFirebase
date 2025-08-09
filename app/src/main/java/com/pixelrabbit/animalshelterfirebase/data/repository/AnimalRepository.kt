@@ -3,9 +3,9 @@ package com.pixelrabbit.animalshelterfirebase.data.repository
 import android.util.Log
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
-import com.pixelrabbit.animalshelterfirebase.data.Animal
-import com.pixelrabbit.animalshelterfirebase.data.Favourite
-import com.pixelrabbit.animalshelterfirebase.data.Task
+import com.pixelrabbit.animalshelterfirebase.data.model.Animal
+import com.pixelrabbit.animalshelterfirebase.data.model.Favourite
+import com.pixelrabbit.animalshelterfirebase.data.model.Task
 
 class AnimalRepository(private val db: FirebaseFirestore = FirebaseFirestore.getInstance()) {
 

@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
-import com.pixelrabbit.animalshelterfirebase.data.MainScreenDataObject
+import com.pixelrabbit.animalshelterfirebase.data.model.MainScreenDataObject
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray

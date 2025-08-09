@@ -2,8 +2,8 @@ package com.pixelrabbit.animalshelterfirebase.ui.main_screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.pixelrabbit.animalshelterfirebase.data.Animal
-import com.pixelrabbit.animalshelterfirebase.data.Task
+import com.pixelrabbit.animalshelterfirebase.data.model.Animal
+import com.pixelrabbit.animalshelterfirebase.data.model.Task
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
 import com.pixelrabbit.animalshelterfirebase.data.repository.AnimalRepository
 import com.pixelrabbit.animalshelterfirebase.data.repository.UserRepository

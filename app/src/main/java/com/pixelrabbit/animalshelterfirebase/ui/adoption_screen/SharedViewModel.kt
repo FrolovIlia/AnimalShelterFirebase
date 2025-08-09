@@ -3,8 +3,8 @@ package com.pixelrabbit.animalshelterfirebase.ui.adoption_screen
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.pixelrabbit.animalshelterfirebase.data.Animal
-import com.pixelrabbit.animalshelterfirebase.data.UserObject
+import com.pixelrabbit.animalshelterfirebase.data.model.Animal
+import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
 
 class AdoptionViewModel : ViewModel() {
     private val _animal = mutableStateOf<Animal?>(null)

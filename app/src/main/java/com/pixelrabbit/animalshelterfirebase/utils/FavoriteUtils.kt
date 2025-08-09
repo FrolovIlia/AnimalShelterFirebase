@@ -1,7 +1,7 @@
 package com.pixelrabbit.animalshelterfirebase.utils
 
 import android.util.Log
-import com.pixelrabbit.animalshelterfirebase.data.Favourite
+import com.pixelrabbit.animalshelterfirebase.data.model.Favourite
 import com.google.firebase.firestore.FirebaseFirestore
 
 fun updateFavorite(

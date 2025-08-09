@@ -26,10 +26,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.ktx.storage
-import com.pixelrabbit.animalshelterfirebase.data.Animal
-import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerDropDownMenu
-import com.pixelrabbit.animalshelterfirebase.ui.common.RoundedCornerTextField
-import com.pixelrabbit.animalshelterfirebase.ui.data.AddScreenObject
+import com.pixelrabbit.animalshelterfirebase.data.model.Animal
+import com.pixelrabbit.animalshelterfirebase.common.RoundedCornerDropDownMenu
+import com.pixelrabbit.animalshelterfirebase.common.RoundedCornerTextField
+import com.pixelrabbit.animalshelterfirebase.data.model.AddScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.AnimalImage
