@@ -17,11 +17,20 @@ class TasksViewModel(
     var selectedCategory = mutableStateOf("Все")
         private set
 
+    // Флаг для сигнализации об обновлении списка задач
+    var shouldRefreshTasks = mutableStateOf(false)
+        private set
+
     fun updateQuery(newQuery: String) {
         query.value = newQuery
     }
 
     fun updateSelectedCategory(newCategory: String) {
         selectedCategory.value = newCategory
+    }
+
+    // Метод для установки флага обновления
+    fun setRefreshTasks(value: Boolean) {
+        shouldRefreshTasks.value = value
     }
 }

@@ -64,6 +64,15 @@ fun TasksScreen(
         }
     }
 
+    // LaunchedEffect, который будет запускать загрузку задач при изменении shouldRefreshTasks
+    val shouldRefresh by tasksViewModel.shouldRefreshTasks
+    LaunchedEffect(shouldRefresh) {
+        if (shouldRefresh) {
+            viewModel.loadTasks()
+            tasksViewModel.setRefreshTasks(false)
+        }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.loadTasks()
     }
