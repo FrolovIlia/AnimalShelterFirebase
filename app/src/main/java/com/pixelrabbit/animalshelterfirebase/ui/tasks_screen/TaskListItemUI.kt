@@ -2,13 +2,13 @@ package com.pixelrabbit.animalshelterfirebase.ui.tasks_screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -68,21 +68,25 @@ fun TaskListItemUI(
                     contentDescription = task.shortDescription,
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(15.dp)),  // clip тоже только на картинке
+                        .clip(RoundedCornerShape(15.dp)),
                     contentScale = ContentScale.Crop,
                     error = painterResource(id = R.drawable.default_animal_image),
                     placeholder = painterResource(id = R.drawable.default_animal_image)
                 )
             }
 
-            // Точка с padding для отступа от краёв
+            // Получаем цвета для точки и ободка
+            val (mainColor, borderColor) = getUrgencyColors(task.urgency)
+
+            // Точка с ободком, цвет которого зависит от цвета точки
             Box(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(top = 8.dp, end = 8.dp)  // Отступ сверху и справа
+                    .padding(top = 8.dp, end = 8.dp)
                     .size(16.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(urgencyColor(task.urgency))
+                    .border(1.dp, borderColor, RoundedCornerShape(50)) // Используем цвет для ободка
+                    .background(mainColor)
             )
 
             if (isAdmin) {
@@ -119,13 +123,14 @@ fun TaskListItemUI(
     }
 }
 
+// Теперь функция возвращает пару цветов: основной и для ободка
 @Composable
-fun urgencyColor(urgency: String): Color {
+fun getUrgencyColors(urgency: String): Pair<Color, Color> {
     return when (urgency.trim()) {
-        "Низкая" -> Color.Green
-        "Средняя" -> Color(0xFFFFA500) // Оранжевый
-        "Высокая" -> Color.Red
-        "Критическая" -> Color(0xFF8B0000) // Темно-красный
-        else -> Color.Gray
+        "Низкая" -> Pair(Color.Green, Color(0xFF006400)) // Темно-зеленый
+        "Средняя" -> Pair(Color(0xFFFFA500), Color(0xFFCC8400)) // Темно-оранжевый
+        "Высокая" -> Pair(Color.Red, Color(0xFF8B0000)) // Темно-красный
+        "Критическая" -> Pair(Color(0xFF8B0000), Color(0xFF5A0000)) // Очень темно-красный
+        else -> Pair(Color.Gray, Color.DarkGray)
     }
 }
