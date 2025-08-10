@@ -30,7 +30,6 @@ import com.pixelrabbit.animalshelterfirebase.ui.navigation.TaskDetailsNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.navigation.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.*
-
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +51,8 @@ fun TasksScreen(
     val query by tasksViewModel.query
     val selectedCategory by tasksViewModel.selectedCategory
 
-    val filteredTasks = remember(query, tasks, selectedCategory) {
+    // Логика фильтрации и постоянной сортировки
+    val sortedAndFilteredTasks = remember(query, tasks, selectedCategory) {
         tasks.filter {
             val matchesQuery = it.shortDescription.contains(query, ignoreCase = true) ||
                     it.fullDescription.contains(query, ignoreCase = true) ||
@@ -61,10 +61,17 @@ fun TasksScreen(
             val matchesCategory = selectedCategory == "Все" || it.category == selectedCategory
 
             matchesQuery && matchesCategory
+        }.sortedByDescending { task ->
+            when (task.urgency.trim()) {
+                "Критическая" -> 4
+                "Высокая" -> 3
+                "Средняя" -> 2
+                "Низкая" -> 1
+                else -> 0
+            }
         }
     }
 
-    // LaunchedEffect, который будет запускать загрузку задач при изменении shouldRefreshTasks
     val shouldRefresh by tasksViewModel.shouldRefreshTasks
     LaunchedEffect(shouldRefresh) {
         if (shouldRefresh) {
@@ -218,7 +225,7 @@ fun TasksScreen(
                 }
             }
 
-            if (filteredTasks.isEmpty()) {
+            if (sortedAndFilteredTasks.isEmpty()) {
                 Text(
                     text = "Задач пока нет.",
                     style = MaterialTheme.typography.bodyMedium,
@@ -235,7 +242,7 @@ fun TasksScreen(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp)
                 ) {
-                    items(filteredTasks) { taskItem ->
+                    items(sortedAndFilteredTasks) { taskItem ->
                         TaskListItemUI(
                             task = taskItem,
                             isAdmin = isAdmin,
