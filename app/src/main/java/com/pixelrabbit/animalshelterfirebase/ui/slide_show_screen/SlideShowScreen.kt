@@ -124,7 +124,7 @@ fun SlideShowScreen(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(vertical = 8.dp), // Убрал horizontal padding
+                            .padding(vertical = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
@@ -138,7 +138,7 @@ fun SlideShowScreen(
                                 model = animal.imageUrl,
                                 contentDescription = animal.name,
                                 modifier = Modifier
-                                    .fillMaxWidth() // Изменил с fillMaxHeight(0.9f)
+                                    .fillMaxWidth()
                                     .aspectRatio(4f / 3f),
                                 contentScale = ContentScale.Crop
                             )
@@ -149,7 +149,7 @@ fun SlideShowScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(if (isPortrait) 100.dp else 50.dp)
+                        .height(100.dp)
                         .background(Color.Black.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -157,7 +157,10 @@ fun SlideShowScreen(
                         factory = { context ->
                             BannerAdView(context).apply {
                                 setAdUnitId(adUnitId)
-                                setAdSize(BannerAdSize.stickySize(context, 320))
+                                // Используем гибкий размер баннера для портретной ориентации
+                                val displayMetrics = context.resources.displayMetrics
+                                val adWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+                                setAdSize(BannerAdSize.stickySize(context, adWidth))
                                 loadAd(AdRequest.Builder().build())
                                 bannerAdViewRef.value = this
                             }
@@ -227,7 +230,10 @@ fun SlideShowScreen(
                         factory = { context ->
                             BannerAdView(context).apply {
                                 setAdUnitId(adUnitId)
-                                setAdSize(BannerAdSize.stickySize(context, 728))
+                                // Используем гибкий размер баннера для ландшафтной ориентации
+                                val displayMetrics = context.resources.displayMetrics
+                                val adWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+                                setAdSize(BannerAdSize.stickySize(context, adWidth))
                                 loadAd(AdRequest.Builder().build())
                                 bannerAdViewRef.value = this
                             }
