@@ -1,10 +1,14 @@
 package com.pixelrabbit.animalshelterfirebase
 
+import android.Manifest
 import android.content.pm.ActivityInfo
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -65,45 +69,6 @@ class MainActivity : ComponentActivity() {
         })
         Log.d("YandexAds", "SDK initialized")
 
-        // --- Блок настройки FCM ---
-        Log.d(TAG, "MainActivity onCreate called. Starting FCM setup.")
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
-            if (!tokenTask.isSuccessful) {
-                Log.e(TAG, "Fetching FCM registration token failed", tokenTask.exception)
-                return@addOnCompleteListener
-            }
-            val token = tokenTask.result
-            Log.d(TAG, "FCM Token obtained: $token")
-            Log.d(TAG, "Attempting to unsubscribe from topic 'new_animals' before re-subscribing.")
-            FirebaseMessaging.getInstance().unsubscribeFromTopic("new_animals")
-                .addOnCompleteListener { unsubscribeTask ->
-                    if (unsubscribeTask.isSuccessful) {
-                        Log.d(
-                            TAG,
-                            "Successfully unsubscribed from new_animals topic (if previously subscribed)."
-                        )
-                    } else {
-                        Log.e(
-                            TAG,
-                            "Failed to unsubscribe from new_animals topic: ${unsubscribeTask.exception?.message}",
-                            unsubscribeTask.exception
-                        )
-                    }
-                    FirebaseMessaging.getInstance().subscribeToTopic("new_animals")
-                        .addOnCompleteListener { subscribeTask ->
-                            var msg = "Subscribed to new_animals topic"
-                            if (!subscribeTask.isSuccessful) {
-                                msg =
-                                    "FCM Topic Subscription FAILED: ${subscribeTask.exception?.message}"
-                                Log.e(TAG, msg, subscribeTask.exception)
-                            }
-                        }
-                }
-        }
-        Log.d(TAG, "FirebaseMessaging.getInstance().token initiated.")
-        // --- Конец блока настройки FCM ---
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val navController = rememberNavController()
@@ -111,6 +76,51 @@ class MainActivity : ComponentActivity() {
             val userViewModel = viewModel<UserViewModel>()
             val mainScreenViewModel: MainScreenViewModel = viewModel()
             val tasksViewModel: TasksViewModel = viewModel()
+
+            // --- Блок настройки FCM и запроса разрешения ---
+            // Объявляем лаунчер для запроса разрешения на уведомления
+            val requestPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission(),
+                onResult = { isGranted ->
+                    if (isGranted) {
+                        Log.d(TAG, "Notification permission granted.")
+                    } else {
+                        Log.w(TAG, "Notification permission denied.")
+                    }
+                }
+            )
+
+            // Используем LaunchedEffect для выполнения действий, зависимых от жизненного цикла
+            LaunchedEffect(Unit) {
+                Log.d(TAG, "MainActivity LaunchedEffect called. Starting FCM setup.")
+
+                // Запрашиваем разрешение на уведомления для Android 13+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+
+                // Подписываемся на топик "new_animals"
+                FirebaseMessaging.getInstance().subscribeToTopic("new_animals")
+                    .addOnCompleteListener { task ->
+                        if (!task.isSuccessful) {
+                            Log.e(TAG, "FCM Topic Subscription FAILED: ${task.exception?.message}", task.exception)
+                            return@addOnCompleteListener
+                        }
+                        Log.d(TAG, "Successfully subscribed to topic 'new_animals'.")
+                    }
+
+                // Получаем токен устройства (независимо от подписки на топик)
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
+                    if (!tokenTask.isSuccessful) {
+                        Log.e(TAG, "Fetching FCM registration token failed", tokenTask.exception)
+                        return@addOnCompleteListener
+                    }
+                    val token = tokenTask.result
+                    Log.d(TAG, "FCM Token obtained: $token")
+                }
+            }
+            Log.d(TAG, "FirebaseMessaging.getInstance().token and subscribeToTopic initiated.")
+            // --- Конец блока настройки FCM ---
 
 
             NavHost(

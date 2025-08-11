@@ -97,4 +97,8 @@ class MainScreenViewModel(
             _tasks.value = loadedTasks
         }
     }
+
+    fun getAnimalByKey(key: String): Animal? {
+        return _animals.value.find { it.key == key }
+    }
 }
