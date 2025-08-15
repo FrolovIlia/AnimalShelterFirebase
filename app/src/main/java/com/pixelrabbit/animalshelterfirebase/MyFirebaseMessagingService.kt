@@ -11,10 +11,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.pixelrabbit.animalshelterfirebase.data.model.Animal
-import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreen
-import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.AnimalDetailsScreen
-import com.pixelrabbit.animalshelterfirebase.ui.navigation.AnimalDetailsNavObject
+
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
@@ -30,22 +27,41 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         Log.d(TAG, "MyFCMService: Message received from: ${remoteMessage.from}")
 
-        if (remoteMessage.data.isNotEmpty()) {
-            Log.d(TAG, "MyFCMService: Message data payload: ${remoteMessage.data}")
-        }
-
+        // Проверяем, есть ли уведомление
         remoteMessage.notification?.let { notification ->
             Log.d(TAG, "MyFCMService: Message Notification Title: ${notification.title}")
             Log.d(TAG, "MyFCMService: Message Notification Body: ${notification.body}")
 
-            // Получаем ключ животного из данных payload
-            val animalKey = remoteMessage.data["animalKey"]
+            // Получаем данные из payload
+            val data = remoteMessage.data
 
-            sendNotification(notification.title, notification.body, remoteMessage.data)
+            // Определяем уникальный ключ уведомления в зависимости от топика
+            val uniqueKey = when (remoteMessage.from) {
+                "/topics/new_animals" -> {
+                    // Это уведомление о животном, получаем animalKey
+                    data["animalKey"]
+                }
+                "/topics/new_tasks" -> {
+                    // Это уведомление о задаче, получаем taskKey
+                    data["taskKey"]
+                }
+                else -> {
+                    // Неизвестный топик
+                    null
+                }
+            }
+
+            // Отправляем уведомление с правильным ключом
+            sendNotification(
+                title = notification.title,
+                body = notification.body,
+                data = data,
+                uniqueId = uniqueKey
+            )
         }
     }
 
-    private fun sendNotification(title: String?, body: String?, data: Map<String, String>) {
+    private fun sendNotification(title: String?, body: String?, data: Map<String, String>, uniqueId: String?) {
         // Создаем Intent для запуска MainActivity
         val intent = Intent(this, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -55,11 +71,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             }
         }
 
-        // Создаем PendingIntent, который будет запущен при нажатии на уведомление
-        // Используем animalKey для уникального request code
+        // Создаем PendingIntent, используя уникальный ID
         val pendingIntent = PendingIntent.getActivity(
             this,
-            data["animalKey"]?.hashCode() ?: 0,
+            uniqueId?.hashCode() ?: 0,
             intent,
             PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -88,6 +103,6 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         }
 
         // Используем уникальный ID для каждого уведомления, чтобы они не заменяли друг друга
-        notificationManager.notify(data["animalKey"]?.hashCode() ?: 0, notificationBuilder.build())
+        notificationManager.notify(uniqueId?.hashCode() ?: 0, notificationBuilder.build())
     }
 }

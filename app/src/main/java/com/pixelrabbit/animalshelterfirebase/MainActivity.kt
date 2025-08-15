@@ -19,9 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -59,9 +61,11 @@ import com.pixelrabbit.animalshelterfirebase.ui.start_screen.StartScreen
 import com.pixelrabbit.animalshelterfirebase.ui.start_screen.StartScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskDetailsScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
-import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
 import com.yandex.mobile.ads.common.InitializationListener
 import com.yandex.mobile.ads.common.MobileAds
+import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
+// Note: We remove the Serializable class here to use a string-based approach
+// import com.pixelrabbit.animalshelterfirebase.ui.navigation.EditTaskNavObject
 
 class MainActivity : ComponentActivity() {
     private val TAG = "FCM_DEBUG"
@@ -120,6 +124,16 @@ class MainActivity : ComponentActivity() {
                             Log.e(TAG, "FCM Topic Subscription FAILED: ${task.exception?.message}", task.exception)
                         } else {
                             Log.d(TAG, "Successfully subscribed to topic 'new_animals'.")
+                        }
+                    }
+
+                // Подписываемся на тему "new_tasks"
+                FirebaseMessaging.getInstance().subscribeToTopic("new_tasks")
+                    .addOnCompleteListener { task ->
+                        if (!task.isSuccessful) {
+                            Log.e(TAG, "FCM Topic Subscription FAILED: ${task.exception?.message}", task.exception)
+                        } else {
+                            Log.d(TAG, "Successfully subscribed to topic 'new_tasks'.")
                         }
                     }
 
@@ -399,6 +413,10 @@ class MainActivity : ComponentActivity() {
                         onAddTaskClick = {
                             navController.navigate(AddTaskNavObject)
                         },
+                        // We use a string route here to avoid navigation issues
+                        onTaskEditClick = { taskId ->
+                            navController.navigate("edit_task_screen/${taskId}")
+                        },
                         viewModel = mainScreenViewModel,
                         userViewModel = userViewModel,
                         tasksViewModel = tasksViewModel,
@@ -406,6 +424,22 @@ class MainActivity : ComponentActivity() {
                         navController = navController
                     )
                 }
+
+
+                // We change this composable to use a string route and arguments
+                composable(
+                    route = "edit_task_screen/{taskId}",
+                    arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+                ) { navBackStackEntry ->
+                    val taskId = navBackStackEntry.arguments?.getString("taskId")
+                    AddTaskScreen(
+                        taskKey = taskId,
+                        onSaved = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
 
                 composable<AddTaskNavObject> {
                     AddTaskScreen(

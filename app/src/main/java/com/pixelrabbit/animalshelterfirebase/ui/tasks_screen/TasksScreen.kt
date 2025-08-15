@@ -31,6 +31,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.navigation.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.*
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
+import android.util.Log // Добавили Log для отладки
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +39,7 @@ fun TasksScreen(
     task: Task,
     onSubmitSuccess: () -> Unit,
     onAddTaskClick: () -> Unit,
+    onTaskEditClick: (String) -> Unit,
     viewModel: MainScreenViewModel,
     userViewModel: UserViewModel,
     tasksViewModel: TasksViewModel,
@@ -247,20 +249,25 @@ fun TasksScreen(
                             task = taskItem,
                             isAdmin = isAdmin,
                             onEditClick = {
-                                navController.navigate("edit_task_screen/${taskItem.key}")
+                                // Добавлена проверка на null, чтобы избежать вылета
+                                if (it.key != null) {
+                                    navController.navigate("edit_task_screen/${it.key}")
+                                } else {
+                                    Log.e("TasksScreen", "Task key is null, cannot navigate to edit screen.")
+                                }
                             },
                             onTaskClick = {
                                 navController.navigate(
                                     TaskDetailsNavObject(
                                         uid = navData.uid,
-                                        imageUrl = taskItem.imageUrl,
-                                        shortDescription = taskItem.shortDescription,
-                                        fullDescription = taskItem.fullDescription,
-                                        curatorName = taskItem.curatorName,
-                                        curatorPhone = taskItem.curatorPhone,
-                                        location = taskItem.location,
-                                        urgency = taskItem.urgency,
-                                        category = taskItem.category
+                                        imageUrl = it.imageUrl,
+                                        shortDescription = it.shortDescription,
+                                        fullDescription = it.fullDescription,
+                                        curatorName = it.curatorName,
+                                        curatorPhone = it.curatorPhone,
+                                        location = it.location,
+                                        urgency = it.urgency,
+                                        category = it.category
                                     )
                                 )
                             }

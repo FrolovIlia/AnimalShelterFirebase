@@ -2,6 +2,7 @@ package com.pixelrabbit.animalshelterfirebase.ui.add_task_screen
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -18,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,29 +39,75 @@ import java.io.File
 
 @Composable
 fun AddTaskScreen(
-    taskData: Task = Task(),
+    taskKey: String? = null,
     onSaved: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val firestore = FirebaseFirestore.getInstance()
     val storage = Firebase.storage
 
-    val isEditMode = taskData.key?.isNotBlank() == true
-
-    var imageUrl by remember { mutableStateOf(taskData.imageUrl) }
+    // Локальное состояние для данных формы, которые будут отображаться
+    var imageUrl by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
-    var shortDescription by remember { mutableStateOf(taskData.shortDescription) }
-    var fullDescription by remember { mutableStateOf(taskData.fullDescription) }
-    var curatorName by remember { mutableStateOf(taskData.curatorName) }
-    var curatorPhone by remember { mutableStateOf(taskData.curatorPhone) }
-    var location by remember { mutableStateOf(taskData.location) }
-    var urgency by remember { mutableStateOf(taskData.urgency) }
-    var category by remember { mutableStateOf(taskData.category) }
+    var shortDescription by remember { mutableStateOf("") }
+    var fullDescription by remember { mutableStateOf("") }
+    var curatorName by remember { mutableStateOf("") }
+    var curatorPhone by remember { mutableStateOf("") }
+    var location by remember { mutableStateOf("") }
+    var urgency by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
     var curatorPhoneError by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
 
+    val isEditMode = taskKey?.isNotBlank() == true
+
     val taskCategoryOptions = listOf("С животными", "По хозяйству", "Орг. вопросы")
     val urgencyOptions = listOf("Низкая", "Средняя", "Высокая", "Критическая")
+
+    // Логика для загрузки данных задачи при наличии taskKey
+    LaunchedEffect(taskKey) {
+        if (isEditMode) {
+            isLoading = true
+            val docRef = firestore.collection("tasks").document(taskKey!!)
+            docRef.get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val task = document.toObject(Task::class.java)
+                        if (task != null) {
+                            // Логируем загруженные данные для отладки
+                            Log.d("AddTaskScreen", "Loaded task data from Firestore:")
+                            Log.d("AddTaskScreen", "  imageUrl: ${task.imageUrl}")
+                            Log.d("AddTaskScreen", "  shortDescription: ${task.shortDescription}")
+                            Log.d("AddTaskScreen", "  fullDescription: ${task.fullDescription}")
+                            Log.d("AddTaskScreen", "  curatorName: ${task.curatorName}")
+                            Log.d("AddTaskScreen", "  curatorPhone: ${task.curatorPhone}")
+                            Log.d("AddTaskScreen", "  location: ${task.location}")
+                            Log.d("AddTaskScreen", "  urgency: ${task.urgency}")
+                            Log.d("AddTaskScreen", "  category: ${task.category}")
+
+                            // Заполняем поля формы полученными данными, используя null-safe оператор
+                            imageUrl = task.imageUrl ?: ""
+                            shortDescription = task.shortDescription ?: ""
+                            fullDescription = task.fullDescription ?: ""
+                            curatorName = task.curatorName ?: ""
+                            curatorPhone = task.curatorPhone ?: ""
+                            location = task.location ?: ""
+                            urgency = task.urgency ?: ""
+                            category = task.category ?: ""
+                        }
+                    } else {
+                        Log.e("AddTaskScreen", "Document with key $taskKey does not exist.")
+                    }
+                    isLoading = false
+                }
+                .addOnFailureListener { e ->
+                    isLoading = false
+                    Toast.makeText(context, "Ошибка загрузки задачи", Toast.LENGTH_SHORT).show()
+                    Log.e("AddTaskScreen", "Error loading task: ${e.message}", e)
+                    onSaved()
+                }
+        }
+    }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -103,238 +149,247 @@ fun AddTaskScreen(
             .background(BackgroundGray)
             .padding(WindowInsets.systemBars.asPaddingValues())
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = if (isEditMode) "Редактирование задачи" else "Добавление новой задачи",
-                color = Color.Black,
-                fontFamily = AnimalFont,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(top = 16.dp, bottom = 12.dp),
-                textAlign = TextAlign.Center
-            )
-
-            TaskImageWithUrgencyBadge(
-                imageUri = imageUri,
-                imageUrl = imageUrl,
-                urgency = urgency,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
             Column(
                 modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                RoundedCornerDropDownMenu(
-                    defValue = category,
-                    options = taskCategoryOptions,
-                    placeholder = "Категория задачи"
-                ) { category = it }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                RoundedCornerDropDownMenu(
-                    defValue = urgency,
-                    options = urgencyOptions,
-                    placeholder = "Срочность"
-                ) { urgency = it }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                RoundedCornerTextField(text = shortDescription, label = "Краткое описание") {
-                    shortDescription = it
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                RoundedCornerTextField(
-                    text = fullDescription,
-                    label = "Полное описание",
-                    singleLine = false,
-                    maxLines = Int.MAX_VALUE
-                ) { fullDescription = it }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                RoundedCornerTextField(text = location, label = "Расположение") {
-                    location = it
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                RoundedCornerTextField(text = curatorName, label = "Имя куратора") {
-                    curatorName = it
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-
-                PhoneNumberField(
-                    value = curatorPhone,
-                    onValueChange = {
-                        curatorPhone = it
-                        curatorPhoneError = !isPhoneValid(it)
-                    },
-                    isError = curatorPhoneError,
-                    label = "Номер куратора"
+                Text(
+                    text = if (isEditMode) "Редактирование задачи" else "Добавление новой задачи",
+                    color = Color.Black,
+                    fontFamily = AnimalFont,
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 12.dp),
+                    textAlign = TextAlign.Center
                 )
 
-                if (curatorPhoneError) {
-                    Text(
-                        text = "Неверный номер (формат: +7XXXXXXXXXX)",
-                        color = Color.Red,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                }
+                TaskImageWithUrgencyBadge(
+                    imageUri = imageUri,
+                    imageUrl = imageUrl,
+                    urgency = urgency,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    ButtonWhite(text = "+ Файл") {
-                        imagePickerLauncher.launch("image/*")
-                    }
+                    RoundedCornerDropDownMenu(
+                        defValue = category,
+                        options = taskCategoryOptions,
+                        placeholder = "Категория задачи"
+                    ) { category = it }
 
-                    ButtonWhite(text = "+ Снимок") {
-                        if (androidx.core.content.ContextCompat.checkSelfPermission(
-                                context,
-                                android.Manifest.permission.CAMERA
-                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-                        ) {
-                            launchCamera(context, photoFile, photoUri, cameraLauncher)
-                        } else {
-                            permissionLauncher.launch(android.Manifest.permission.CAMERA)
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                if (isLoading) {
-                    CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(8.dp))
-                }
 
-                ButtonWhite(text = if (isEditMode) "Сохранить изменения" else "Сохранить") {
-                    curatorPhoneError = !isPhoneValid(curatorPhone)
+                    RoundedCornerDropDownMenu(
+                        defValue = urgency,
+                        options = urgencyOptions,
+                        placeholder = "Срочность"
+                    ) { urgency = it }
 
-                    if (
-                        shortDescription.isBlank() || fullDescription.isBlank() ||
-                        curatorName.isBlank() || curatorPhone.isBlank() || curatorPhoneError ||
-                        location.isBlank() || urgency.isBlank() || category.isBlank()
-                    ) {
-                        Toast.makeText(
-                            context,
-                            "Пожалуйста, заполните все поля",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@ButtonWhite
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    RoundedCornerTextField(text = shortDescription, label = "Краткое описание") {
+                        shortDescription = it
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    isLoading = true
+                    RoundedCornerTextField(
+                        text = fullDescription,
+                        label = "Полное описание",
+                        singleLine = false,
+                        maxLines = Int.MAX_VALUE
+                    ) { fullDescription = it }
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    val task = Task(
-                        key = taskData.key ?: "",
-                        imageUrl = "",
-                        shortDescription = shortDescription,
-                        fullDescription = fullDescription,
-                        curatorName = curatorName,
-                        curatorPhone = curatorPhone,
-                        location = location,
-                        urgency = urgency,
-                        category = category
+                    RoundedCornerTextField(text = location, label = "Расположение") {
+                        location = it
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    RoundedCornerTextField(text = curatorName, label = "Имя куратора") {
+                        curatorName = it
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    PhoneNumberField(
+                        value = curatorPhone,
+                        onValueChange = {
+                            curatorPhone = it
+                            curatorPhoneError = !isPhoneValid(it)
+                        },
+                        isError = curatorPhoneError,
+                        label = "Номер куратора"
                     )
 
-                    val onSuccess = {
-                        isLoading = false
-                        Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT).show()
-                        onSaved()
-                    }
-
-                    val onError = {
-                        isLoading = false
-                        Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
-                    }
-
-                    if (imageUri != null) {
-                        val storageRef =
-                            storage.reference.child("task_images/task_${System.currentTimeMillis()}.jpg")
-                        storageRef.putFile(imageUri!!)
-                            .addOnSuccessListener {
-                                storageRef.downloadUrl.addOnSuccessListener { uri ->
-                                    saveTask(
-                                        firestore,
-                                        task.copy(imageUrl = uri.toString()),
-                                        isEditMode,
-                                        onSuccess,
-                                        onError
-                                    )
-                                }
-                            }
-                            .addOnFailureListener { onError() }
-                    } else {
-                        saveTask(
-                            firestore,
-                            task.copy(imageUrl = imageUrl),
-                            isEditMode,
-                            onSuccess,
-                            onError
+                    if (curatorPhoneError) {
+                        Text(
+                            text = "Неверный номер (формат: +7XXXXXXXXXX)",
+                            color = Color.Red,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(start = 8.dp)
                         )
                     }
-                }
 
-                if (isEditMode) {
                     Spacer(modifier = Modifier.height(12.dp))
-                    ButtonWhite(text = "Удалить задачу") {
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        ButtonWhite(text = "+ Файл") {
+                            imagePickerLauncher.launch("image/*")
+                        }
+
+                        ButtonWhite(text = "+ Снимок") {
+                            if (androidx.core.content.ContextCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.CAMERA
+                                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            ) {
+                                launchCamera(context, photoFile, photoUri, cameraLauncher)
+                            } else {
+                                permissionLauncher.launch(android.Manifest.permission.CAMERA)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ButtonWhite(text = if (isEditMode) "Сохранить изменения" else "Сохранить") {
+                        curatorPhoneError = !isPhoneValid(curatorPhone)
+
+                        if (
+                            shortDescription.isBlank() || fullDescription.isBlank() ||
+                            curatorName.isBlank() || curatorPhone.isBlank() || curatorPhoneError ||
+                            location.isBlank() || urgency.isBlank() || category.isBlank()
+                        ) {
+                            Toast.makeText(
+                                context,
+                                "Пожалуйста, заполните все поля",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            return@ButtonWhite
+                        }
+
                         isLoading = true
-                        if (taskData.imageUrl.isNotEmpty() && taskData.imageUrl.startsWith("https://firebasestorage.googleapis.com/")) {
-                            val imageRef = storage.getReferenceFromUrl(taskData.imageUrl)
-                            imageRef.delete().addOnCompleteListener {
-                                firestore.collection("tasks").document(taskData.key!!).delete()
+                        val onSuccess = {
+                            isLoading = false
+                            Toast.makeText(context, "Задача сохранена", Toast.LENGTH_SHORT).show()
+                            onSaved()
+                        }
+                        val onError = {
+                            isLoading = false
+                            Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
+                        }
+
+                        if (imageUri != null) {
+                            val storageRef = storage.reference.child("task_images/task_${System.currentTimeMillis()}.jpg")
+                            storageRef.putFile(imageUri!!)
+                                .addOnSuccessListener {
+                                    storageRef.downloadUrl.addOnSuccessListener { uri ->
+                                        saveTask(
+                                            firestore,
+                                            Task(
+                                                key = taskKey ?: "",
+                                                imageUrl = uri.toString(),
+                                                shortDescription = shortDescription,
+                                                fullDescription = fullDescription,
+                                                curatorName = curatorName,
+                                                curatorPhone = curatorPhone,
+                                                location = location,
+                                                urgency = urgency,
+                                                category = category
+                                            ),
+                                            isEditMode,
+                                            onSuccess,
+                                            onError
+                                        )
+                                    }
+                                }
+                                .addOnFailureListener { onError() }
+                        } else {
+                            saveTask(
+                                firestore,
+                                Task(
+                                    key = taskKey ?: "",
+                                    imageUrl = imageUrl,
+                                    shortDescription = shortDescription,
+                                    fullDescription = fullDescription,
+                                    curatorName = curatorName,
+                                    curatorPhone = curatorPhone,
+                                    location = location,
+                                    urgency = urgency,
+                                    category = category
+                                ),
+                                isEditMode,
+                                onSuccess,
+                                onError
+                            )
+                        }
+                    }
+
+                    if (isEditMode) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        ButtonWhite(text = "Удалить задачу") {
+                            isLoading = true
+                            if (imageUrl.isNotEmpty() && imageUrl.startsWith("https://firebasestorage.googleapis.com/")) {
+                                val imageRef = storage.getReferenceFromUrl(imageUrl)
+                                imageRef.delete().addOnCompleteListener {
+                                    firestore.collection("tasks").document(taskKey!!).delete()
+                                        .addOnSuccessListener {
+                                            isLoading = false
+                                            Toast.makeText(
+                                                context,
+                                                "Задача удалена",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            onSaved()
+                                        }
+                                        .addOnFailureListener {
+                                            isLoading = false
+                                            Toast.makeText(
+                                                context,
+                                                "Ошибка удаления",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                }
+                            } else {
+                                firestore.collection("tasks").document(taskKey!!).delete()
                                     .addOnSuccessListener {
                                         isLoading = false
-                                        Toast.makeText(
-                                            context,
-                                            "Задача удалена",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT)
+                                            .show()
                                         onSaved()
                                     }
                                     .addOnFailureListener {
                                         isLoading = false
-                                        Toast.makeText(
-                                            context,
-                                            "Ошибка удаления",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT)
+                                            .show()
                                     }
                             }
-                        } else {
-                            firestore.collection("tasks").document(taskData.key!!).delete()
-                                .addOnSuccessListener {
-                                    isLoading = false
-                                    Toast.makeText(context, "Задача удалена", Toast.LENGTH_SHORT)
-                                        .show()
-                                    onSaved()
-                                }
-                                .addOnFailureListener {
-                                    isLoading = false
-                                    Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT)
-                                        .show()
-                                }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
         }
     }
@@ -343,8 +398,8 @@ fun AddTaskScreen(
 @Composable
 fun TaskImageWithUrgencyBadge(
     imageUri: Uri?,
-    imageUrl: String,
-    urgency: String,
+    imageUrl: String?,
+    urgency: String?,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -354,15 +409,14 @@ fun TaskImageWithUrgencyBadge(
             imageUri = imageUri,
             imageUrl = imageUrl,
             modifier = Modifier.fillMaxSize()
-            // Убедитесь, что contentScale не дублируется здесь
         )
         Box(
             modifier = Modifier
-                .align(Alignment.TopEnd) // Привязываем к правому верхнему углу
-                .padding(top = 16.dp, end = 32.dp) // Отступ сверху и справа
+                .align(Alignment.TopEnd)
+                .padding(top = 16.dp, end = 32.dp)
                 .size(20.dp)
                 .clip(CircleShape)
-                .background(urgencyColor(urgency))
+                .background(urgencyColor(urgency ?: ""))
         )
     }
 }
@@ -370,9 +424,9 @@ fun TaskImageWithUrgencyBadge(
 
 fun urgencyColor(urgency: String): Color = when (urgency) {
     "Низкая" -> Color.Green
-    "Средняя" -> Color.Yellow
-    "Высокая" -> Color(0xFFFFA500) // Оранжевый
-    "Критическая" -> Color.Red
+    "Средняя" -> Color(0xFFFFA500) // Оранжевый
+    "Высокая" -> Color.Red
+    "Критическая" -> Color(0xFF8B0000) // Очень темно-красный
     else -> Color.Gray
 }
 
