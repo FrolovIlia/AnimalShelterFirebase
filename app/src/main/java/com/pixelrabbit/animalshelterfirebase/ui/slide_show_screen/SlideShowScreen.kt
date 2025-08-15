@@ -25,7 +25,10 @@ import coil.compose.AsyncImage
 import com.pixelrabbit.animalshelterfirebase.data.model.Animal
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
+import com.yandex.mobile.ads.banner.BannerAdEventListener
 import com.yandex.mobile.ads.common.AdRequest
+import com.yandex.mobile.ads.common.AdRequestError
+import com.yandex.mobile.ads.common.ImpressionData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -57,15 +60,6 @@ fun SlideShowScreen(
         onDispose {
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
             window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
-    }
-
-    val bannerAdViewRef = remember { mutableStateOf<BannerAdView?>(null) }
-
-    LaunchedEffect(adUnitId) {
-        while (true) {
-            delay(30_000L)
-            bannerAdViewRef.value?.loadAd(AdRequest.Builder().build())
         }
     }
 
@@ -120,54 +114,15 @@ fun SlideShowScreen(
                         .fillMaxWidth()
                 ) { page ->
                     val animal = shuffledAnimals[page]
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = 8.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .weight(1f),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            AsyncImage(
-                                model = animal.imageUrl,
-                                contentDescription = animal.name,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(4f / 3f),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
-                    }
+                    SlideShowItem(animal)
                 }
 
-                Box(
+                AdBanner(
+                    adUnitId = adUnitId,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
-                        .background(Color.Black.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AndroidView(
-                        factory = { context ->
-                            BannerAdView(context).apply {
-                                setAdUnitId(adUnitId)
-                                // Используем гибкий размер баннера для портретной ориентации
-                                val displayMetrics = context.resources.displayMetrics
-                                val adWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
-                                setAdSize(BannerAdSize.stickySize(context, adWidth))
-                                loadAd(AdRequest.Builder().build())
-                                bannerAdViewRef.value = this
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                )
             }
         } else {
             Column(
@@ -185,20 +140,7 @@ fun SlideShowScreen(
                             .fillMaxSize()
                     ) { page ->
                         val animal = shuffledAnimals[page]
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            AsyncImage(
-                                model = animal.imageUrl,
-                                contentDescription = animal.name,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .aspectRatio(4f / 3f, matchHeightConstraintsFirst = true)
-                                    .background(Color.DarkGray),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
+                        SlideShowItem(animal)
                     }
 
                     TopAppBar(
@@ -219,29 +161,81 @@ fun SlideShowScreen(
                     )
                 }
 
-                Box(
+                AdBanner(
+                    adUnitId = adUnitId,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
-                        .background(Color.Black.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    AndroidView(
-                        factory = { context ->
-                            BannerAdView(context).apply {
-                                setAdUnitId(adUnitId)
-                                // Используем гибкий размер баннера для ландшафтной ориентации
-                                val displayMetrics = context.resources.displayMetrics
-                                val adWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
-                                setAdSize(BannerAdSize.stickySize(context, adWidth))
-                                loadAd(AdRequest.Builder().build())
-                                bannerAdViewRef.value = this
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                )
             }
         }
     }
+}
+
+@Composable
+fun SlideShowItem(animal: Animal) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            AsyncImage(
+                model = animal.imageUrl,
+                contentDescription = animal.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(4f / 3f),
+                contentScale = ContentScale.Crop
+            )
+        }
+    }
+}
+
+@Composable
+fun AdBanner(adUnitId: String, modifier: Modifier) {
+    val context = LocalContext.current
+    val bannerAdView = remember { BannerAdView(context) }
+
+    DisposableEffect(adUnitId) {
+        val listener = object : BannerAdEventListener {
+            override fun onAdLoaded() {
+                // Реклама успешно загружена. Через 30 секунд перезагрузим её.
+                // Можно добавить логику для отслеживания показов
+            }
+            override fun onAdFailedToLoad(error: AdRequestError) {
+                // Ошибка загрузки. Попробуем снова через 30 секунд.
+                // Это предотвращает лишние запросы.
+            }
+            override fun onAdClicked() {}
+            override fun onLeftApplication() {}
+            override fun onReturnedToApplication() {}
+            override fun onImpression(impressionData: ImpressionData?) {}
+        }
+
+        bannerAdView.apply {
+            setAdUnitId(adUnitId)
+            setBannerAdEventListener(listener)
+            val displayMetrics = context.resources.displayMetrics
+            val adWidth = (displayMetrics.widthPixels / displayMetrics.density).toInt()
+            setAdSize(BannerAdSize.stickySize(context, adWidth))
+            loadAd(AdRequest.Builder().build())
+        }
+
+        onDispose {
+            bannerAdView.destroy()
+        }
+    }
+
+    AndroidView(
+        factory = { bannerAdView },
+        modifier = modifier
+    )
 }
