@@ -148,9 +148,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            // Moved intent processing logic to a separate function for clarity
             fun processIntent(intent: Intent?) {
                 val animalKeyFromIntent = intent?.extras?.getString("animalKey")
+                val taskKeyFromIntent = intent?.extras?.getString("taskKey")
+
+                // Получаем UID и email текущего пользователя, если он вошел в систему.
+                val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
+                val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: "guest@anonymous.com"
 
                 if (animalKeyFromIntent != null) {
                     Log.d(TAG, "processIntent: Found animalKeyFromIntent = $animalKeyFromIntent")
@@ -160,11 +164,7 @@ class MainActivity : ComponentActivity() {
                         if (document.exists()) {
                             val animal = document.toObject(Animal::class.java)
                             if (animal != null) {
-                                // Получаем UID и email текущего пользователя, а не из Intent.
-                                val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
-                                val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: "guest@anonymous.com"
-
-                                // Теперь мы сначала переходим на главный экран...
+                                // Сначала переходим на главный экран...
                                 val mainScreenNavObject = MainScreenDataObject(
                                     uid = currentUid,
                                     email = currentUserEmail
@@ -196,6 +196,57 @@ class MainActivity : ComponentActivity() {
                     }.addOnFailureListener { e ->
                         Log.e(TAG, "Error fetching animal document: ${e.message}", e)
                     }
+                } else if (taskKeyFromIntent != null) {
+                    Log.d(TAG, "processIntent: Found taskKeyFromIntent = $taskKeyFromIntent")
+
+                    val taskRef = FirebaseFirestore.getInstance().collection("tasks").document(taskKeyFromIntent)
+                    taskRef.get().addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val task = document.toObject(Task::class.java)
+                            if (task != null) {
+                                val mainScreenNavObject = MainScreenDataObject(
+                                    uid = currentUid,
+                                    email = currentUserEmail
+                                )
+                                navController.navigate(mainScreenNavObject) {
+                                    popUpTo(StartScreenObject::class) { inclusive = true }
+                                }
+
+                                val taskNavObject = TaskNavObject(
+                                    uid = currentUid,
+                                    imageUrl = "",
+                                    shortDescription = "",
+                                    fullDescription = "",
+                                    curatorName = "",
+                                    curatorPhone = "",
+                                    location = "",
+                                    urgency = "Низкая",
+                                    category = "Общее"
+                                )
+                                navController.navigate(taskNavObject)
+
+                                val navObject = TaskDetailsNavObject(
+                                    imageUrl = task.imageUrl ?: "",
+                                    shortDescription = task.shortDescription ?: "",
+                                    fullDescription = task.fullDescription ?: "",
+                                    curatorName = task.curatorName ?: "",
+                                    curatorPhone = task.curatorPhone ?: "",
+                                    location = task.location ?: "",
+                                    urgency = task.urgency ?: "Низкая",
+                                    category = task.category ?: "Общее",
+                                    uid = task.key ?: ""
+                                )
+                                navController.navigate(navObject)
+
+                            } else {
+                                Log.e(TAG, "Failed to parse Task object from document.")
+                            }
+                        } else {
+                            Log.e(TAG, "Document with taskKey $taskKeyFromIntent does not exist.")
+                        }
+                    }.addOnFailureListener { e ->
+                        Log.e(TAG, "Error fetching task document: ${e.message}", e)
+                    }
                 }
             }
 
@@ -203,6 +254,9 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(currentIntent) {
                 processIntent(currentIntent)
             }
+
+
+
 
             NavHost(
                 navController = navController,
