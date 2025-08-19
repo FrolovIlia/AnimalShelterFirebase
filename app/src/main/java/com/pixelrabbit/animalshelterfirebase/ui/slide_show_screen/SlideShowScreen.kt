@@ -114,7 +114,7 @@ fun SlideShowScreen(
                         .fillMaxWidth()
                 ) { page ->
                     val animal = shuffledAnimals[page]
-                    SlideShowItem(animal)
+                    SlideShowItem(animal = animal, isPortrait = isPortrait)
                 }
 
                 AdBanner(
@@ -140,7 +140,7 @@ fun SlideShowScreen(
                             .fillMaxSize()
                     ) { page ->
                         val animal = shuffledAnimals[page]
-                        SlideShowItem(animal)
+                        SlideShowItem(animal = animal, isPortrait = isPortrait)
                     }
 
                     TopAppBar(
@@ -173,11 +173,14 @@ fun SlideShowScreen(
 }
 
 @Composable
-fun SlideShowItem(animal: Animal) {
+fun SlideShowItem(animal: Animal, isPortrait: Boolean) {
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp.dp
+
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 8.dp),
+            .fillMaxSize(),
+//            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -190,9 +193,15 @@ fun SlideShowItem(animal: Animal) {
             AsyncImage(
                 model = animal.imageUrl,
                 contentDescription = animal.name,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(4f / 3f),
+                modifier = if (isPortrait) {
+                    Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(4f / 3f)
+                } else {
+                    Modifier
+                        .height(screenHeight)
+                        .aspectRatio(4f / 3f)
+                },
                 contentScale = ContentScale.Crop
             )
         }
@@ -206,14 +215,8 @@ fun AdBanner(adUnitId: String, modifier: Modifier) {
 
     DisposableEffect(adUnitId) {
         val listener = object : BannerAdEventListener {
-            override fun onAdLoaded() {
-                // Реклама успешно загружена. Через 30 секунд перезагрузим её.
-                // Можно добавить логику для отслеживания показов
-            }
-            override fun onAdFailedToLoad(error: AdRequestError) {
-                // Ошибка загрузки. Попробуем снова через 30 секунд.
-                // Это предотвращает лишние запросы.
-            }
+            override fun onAdLoaded() {}
+            override fun onAdFailedToLoad(error: AdRequestError) {}
             override fun onAdClicked() {}
             override fun onLeftApplication() {}
             override fun onReturnedToApplication() {}
