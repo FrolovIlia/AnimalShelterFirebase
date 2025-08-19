@@ -180,7 +180,6 @@ fun SlideShowItem(animal: Animal, isPortrait: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
-//            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

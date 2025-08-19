@@ -26,7 +26,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.pixelrabbit.animalshelterfirebase.data.model.AddScreenObject
 import com.pixelrabbit.animalshelterfirebase.data.model.Animal
@@ -64,20 +66,13 @@ import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
 import com.yandex.mobile.ads.common.InitializationListener
 import com.yandex.mobile.ads.common.MobileAds
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
-// Note: We remove the Serializable class here to use a string-based approach
-// import com.pixelrabbit.animalshelterfirebase.ui.navigation.EditTaskNavObject
 
 class MainActivity : ComponentActivity() {
     private val TAG = "FCM_DEBUG"
-
-    // Mutable state to hold the current intent, updated on new intents
     private var currentIntent by mutableStateOf(intent)
 
-    // Override onNewIntent to handle incoming intents when the activity is already running
-    // The signature is corrected to match the Activity base class
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        // Update the current intent state, which will trigger recomposition
         currentIntent = intent
     }
 
@@ -88,7 +83,6 @@ class MainActivity : ComponentActivity() {
             override fun onInitializationCompleted() {}
         })
         Log.d("YandexAds", "SDK initialized")
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
@@ -110,14 +104,11 @@ class MainActivity : ComponentActivity() {
                 }
             )
 
-            // Эффект, который запускается один раз при создании Composable-функции
             LaunchedEffect(Unit) {
-                // Запрашиваем разрешение на уведомления для Android 13+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
 
-                // Подписываемся на тему "new_animals"
                 FirebaseMessaging.getInstance().subscribeToTopic("new_animals")
                     .addOnCompleteListener { task ->
                         if (!task.isSuccessful) {
@@ -127,7 +118,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                // Подписываемся на тему "new_tasks"
                 FirebaseMessaging.getInstance().subscribeToTopic("new_tasks")
                     .addOnCompleteListener { task ->
                         if (!task.isSuccessful) {
@@ -137,7 +127,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                // Получаем FCM токен
                 FirebaseMessaging.getInstance().token.addOnCompleteListener { tokenTask ->
                     if (tokenTask.isSuccessful) {
                         val token = tokenTask.result
@@ -151,30 +140,23 @@ class MainActivity : ComponentActivity() {
             fun processIntent(intent: Intent?) {
                 val animalKeyFromIntent = intent?.extras?.getString("animalKey")
                 val taskKeyFromIntent = intent?.extras?.getString("taskKey")
-
-                // Получаем UID и email текущего пользователя, если он вошел в систему.
                 val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
                 val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email ?: "guest@anonymous.com"
 
                 if (animalKeyFromIntent != null) {
                     Log.d(TAG, "processIntent: Found animalKeyFromIntent = $animalKeyFromIntent")
-
                     val animalRef = FirebaseFirestore.getInstance().collection("animals").document(animalKeyFromIntent)
                     animalRef.get().addOnSuccessListener { document ->
                         if (document.exists()) {
                             val animal = document.toObject(Animal::class.java)
                             if (animal != null) {
-                                // Сначала переходим на главный экран...
                                 val mainScreenNavObject = MainScreenDataObject(
                                     uid = currentUid,
                                     email = currentUserEmail
                                 )
                                 navController.navigate(mainScreenNavObject) {
-                                    // ... и очищаем навигационный стек до него
-                                    popUpTo(StartScreenObject::class) { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
-
-                                // ... а затем переходим на экран с деталями животного
                                 val navObject = AnimalDetailsNavObject(
                                     uid = currentUid,
                                     imageUrl = animal.imageUrl,
@@ -198,7 +180,6 @@ class MainActivity : ComponentActivity() {
                     }
                 } else if (taskKeyFromIntent != null) {
                     Log.d(TAG, "processIntent: Found taskKeyFromIntent = $taskKeyFromIntent")
-
                     val taskRef = FirebaseFirestore.getInstance().collection("tasks").document(taskKeyFromIntent)
                     taskRef.get().addOnSuccessListener { document ->
                         if (document.exists()) {
@@ -209,9 +190,8 @@ class MainActivity : ComponentActivity() {
                                     email = currentUserEmail
                                 )
                                 navController.navigate(mainScreenNavObject) {
-                                    popUpTo(StartScreenObject::class) { inclusive = true }
+                                    popUpTo(0) { inclusive = true }
                                 }
-
                                 val taskNavObject = TaskNavObject(
                                     uid = currentUid,
                                     imageUrl = "",
@@ -224,7 +204,6 @@ class MainActivity : ComponentActivity() {
                                     category = "Общее"
                                 )
                                 navController.navigate(taskNavObject)
-
                                 val navObject = TaskDetailsNavObject(
                                     imageUrl = task.imageUrl ?: "",
                                     shortDescription = task.shortDescription ?: "",
@@ -237,7 +216,6 @@ class MainActivity : ComponentActivity() {
                                     uid = task.key ?: ""
                                 )
                                 navController.navigate(navObject)
-
                             } else {
                                 Log.e(TAG, "Failed to parse Task object from document.")
                             }
@@ -250,17 +228,23 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            // LaunchedEffect to observe the currentIntent state
             LaunchedEffect(currentIntent) {
                 processIntent(currentIntent)
             }
 
-
-
+            val auth = Firebase.auth
+            val startDestination = if (auth.currentUser != null) {
+                MainScreenDataObject(
+                    uid = auth.currentUser!!.uid,
+                    email = auth.currentUser!!.email ?: "email_not_found"
+                )
+            } else {
+                StartScreenObject
+            }
 
             NavHost(
                 navController = navController,
-                startDestination = StartScreenObject::class.qualifiedName ?: "StartScreenObject"
+                startDestination = startDestination
             ) {
 
                 composable<LoginScreenObject> {
@@ -268,7 +252,9 @@ class MainActivity : ComponentActivity() {
                         auth = FirebaseAuth.getInstance(),
                         prefs = encryptedPrefs,
                         onNavigateToMainScreen = { navData ->
-                            navController.navigate(navData)
+                            navController.navigate(navData) {
+                                popUpTo(StartScreenObject::class) { inclusive = true }
+                            }
                         },
                         onBackClick = {
                             navController.popBackStack()
@@ -406,7 +392,9 @@ class MainActivity : ComponentActivity() {
                     RegisterScreen(
                         auth = FirebaseAuth.getInstance(),
                         onRegistered = { navData ->
-                            navController.navigate(navData)
+                            navController.navigate(navData) {
+                                popUpTo(StartScreenObject::class) { inclusive = true }
+                            }
                         },
                         onBack = {
                             navController.popBackStack()
@@ -467,7 +455,6 @@ class MainActivity : ComponentActivity() {
                         onAddTaskClick = {
                             navController.navigate(AddTaskNavObject)
                         },
-                        // We use a string route here to avoid navigation issues
                         onTaskEditClick = { taskId ->
                             navController.navigate("edit_task_screen/${taskId}")
                         },
@@ -479,8 +466,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-
-                // We change this composable to use a string route and arguments
                 composable(
                     route = "edit_task_screen/{taskId}",
                     arguments = listOf(navArgument("taskId") { type = NavType.StringType })
@@ -493,7 +478,6 @@ class MainActivity : ComponentActivity() {
                         }
                     )
                 }
-
 
                 composable<AddTaskNavObject> {
                     AddTaskScreen(
