@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.androidx.animation.core.lint)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.firebase.messaging)
+    implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
