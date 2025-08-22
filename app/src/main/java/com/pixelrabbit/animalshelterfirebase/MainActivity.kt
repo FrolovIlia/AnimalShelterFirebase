@@ -384,7 +384,12 @@ class MainActivity : ComponentActivity() {
                     userViewModel.loadUser(navData.uid)
                     EditProfileScreen(
                         userViewModel = userViewModel,
-                        onBack = { navController.popBackStack() }
+                        onBack = { navController.popBackStack() },
+                        onLogout = {
+                            navController.navigate(StartScreenObject) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
                     )
                 }
 

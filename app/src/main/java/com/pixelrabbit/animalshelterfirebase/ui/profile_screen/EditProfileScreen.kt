@@ -27,6 +27,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.authorization.createEncryptedPrefs
 import com.pixelrabbit.animalshelterfirebase.ui.registration.isPhoneValid
 import com.pixelrabbit.animalshelterfirebase.ui.registration.isValidDate
 import com.pixelrabbit.animalshelterfirebase.ui.registration.isValidEmail
@@ -38,7 +39,8 @@ import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
 fun EditProfileScreen(
     userViewModel: UserViewModel,
     onProfileUpdated: () -> Unit = {},
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val db = Firebase.firestore
     val auth = Firebase.auth
@@ -71,9 +73,6 @@ fun EditProfileScreen(
     var birthDateError by remember { mutableStateOf(false) }
     var phoneError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
-
-    // Удалено как неиспользуемое:
-    // val errorMessage by userViewModel.userLoadError.collectAsState()
 
     fun fieldModifier() = Modifier.fillMaxWidth()
 
@@ -331,6 +330,21 @@ fun EditProfileScreen(
             },
             modifier = fieldModifier()
         )
+
+        Spacer(Modifier.height(16.dp))
+
+        ButtonBlue(
+            text = "Выйти из профиля",
+            onClick = {
+                Firebase.auth.signOut()
+                val prefs = createEncryptedPrefs(context)
+                prefs.edit().clear().apply()
+
+                onLogout()
+            },
+            modifier = fieldModifier()
+        )
+
 
         if (isLoading) {
             Spacer(Modifier.height(16.dp))
