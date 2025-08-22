@@ -1,7 +1,6 @@
 package com.pixelrabbit.animalshelterfirebase
 
 import android.Manifest
-import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Build
@@ -54,15 +53,11 @@ import com.pixelrabbit.animalshelterfirebase.ui.start_screen.StartScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskDetailsScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
-import com.yandex.mobile.ads.common.InitializationListener
-import com.yandex.mobile.ads.common.MobileAds
-import com.pixelrabbit.animalshelterfirebase.utils.AdManager
 
 class MainActivity : ComponentActivity() {
 
     private val TAG = "FCM_DEBUG"
     private var currentIntent by mutableStateOf(intent)
-    private lateinit var adManager: AdManager
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -72,12 +67,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onCreate(savedInstanceState)
-
-        adManager = AdManager(this)
-
-        MobileAds.initialize(this, initializationListener = object : InitializationListener {
-            override fun onInitializationCompleted() {}
-        })
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
@@ -106,30 +95,48 @@ class MainActivity : ComponentActivity() {
             }
 
             fun processIntent(intent: Intent?) {
-                val animalKeyFromNotification = intent?.extras?.getString("animalKey")
+                val animalKey = intent?.extras?.getString("animalKey")
+                val taskKey = intent?.extras?.getString("taskKey")
                 val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
 
-                if (animalKeyFromNotification != null) {
-                    val animalRef = FirebaseFirestore.getInstance().collection("animals").document(animalKeyFromNotification)
-                    animalRef.get().addOnSuccessListener { document ->
-                        val animal = document.toObject(Animal::class.java)
+                if (animalKey != null) {
+                    val animalRef = FirebaseFirestore.getInstance().collection("animals").document(animalKey)
+                    animalRef.get().addOnSuccessListener { doc ->
+                        val animal = doc.toObject(Animal::class.java)
                         if (animal != null) {
-                            // Показываем рекламу только при переходе через уведомление
-                            adManager.loadAndShowAd("R-M-16111641-6") {
-                                navController.navigate(
-                                    AnimalDetailsNavObject(
-                                        uid = currentUid,
-                                        imageUrl = animal.imageUrl,
-                                        name = animal.name,
-                                        age = animal.age,
-                                        category = animal.category,
-                                        description = animal.description,
-                                        feature = animal.feature,
-                                        location = animal.location,
-                                        curatorPhone = animal.curatorPhone
-                                    )
+                            navController.navigate(
+                                AnimalDetailsNavObject(
+                                    uid = currentUid,
+                                    imageUrl = animal.imageUrl,
+                                    name = animal.name,
+                                    age = animal.age,
+                                    category = animal.category,
+                                    description = animal.description,
+                                    feature = animal.feature,
+                                    location = animal.location,
+                                    curatorPhone = animal.curatorPhone
                                 )
-                            }
+                            )
+                        }
+                    }
+                } else if (taskKey != null) {
+                    val taskRef = FirebaseFirestore.getInstance().collection("tasks").document(taskKey)
+                    taskRef.get().addOnSuccessListener { doc ->
+                        val task = doc.toObject(Task::class.java)
+                        if (task != null) {
+                            navController.navigate(
+                                TaskDetailsNavObject(
+                                    uid = task.key ?: "",
+                                    imageUrl = task.imageUrl ?: "",
+                                    shortDescription = task.shortDescription ?: "",
+                                    fullDescription = task.fullDescription ?: "",
+                                    curatorName = task.curatorName ?: "",
+                                    curatorPhone = task.curatorPhone ?: "",
+                                    location = task.location ?: "",
+                                    urgency = task.urgency ?: "Низкая",
+                                    category = task.category ?: "Общее"
+                                )
+                            )
                         }
                     }
                 }
@@ -146,6 +153,14 @@ class MainActivity : ComponentActivity() {
 
             NavHost(navController = navController, startDestination = startDestination) {
 
+                composable<StartScreenObject> {
+                    StartScreen(
+                        onLoginClick = { navController.navigate(LoginScreenObject) },
+                        onRegisterClick = { navController.navigate(RegisterScreenObject) },
+                        onGuestClick = { navController.navigate(MainScreenDataObject(uid = "guest", email = "guest@anonymous.com")) }
+                    )
+                }
+
                 composable<LoginScreenObject> {
                     LoginScreen(
                         auth = FirebaseAuth.getInstance(),
@@ -157,16 +172,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                composable<StartScreenObject> {
-                    StartScreen(
-                        onLoginClick = { navController.navigate(LoginScreenObject) },
-                        onRegisterClick = { navController.navigate(RegisterScreenObject) },
-                        onGuestClick = {
-                            navController.navigate(MainScreenDataObject(uid = "guest", email = "guest@anonymous.com"))
-                        }
-                    )
-                }
-
                 composable<MainScreenDataObject> { navEntry ->
                     val navData = navEntry.toRoute<MainScreenDataObject>()
                     MainScreen(
@@ -175,7 +180,6 @@ class MainActivity : ComponentActivity() {
                         viewModel = mainScreenViewModel,
                         userViewModel = userViewModel,
                         onAnimalClick = { animal ->
-                            // Обычный клик на карточку - реклама не показывается
                             navController.navigate(
                                 AnimalDetailsNavObject(
                                     uid = navData.uid,
@@ -277,9 +281,7 @@ class MainActivity : ComponentActivity() {
                         phone = navData.userPhone,
                         email = navData.userEmail
                     )
-                    AdoptionScreen(
-                        animal = animal,
-                        user = user,
+                    AdoptionScreen(animal = animal, user = user,
                         onBack = { navController.popBackStack() },
                         onSubmitSuccess = {
                             navController.previousBackStackEntry?.savedStateHandle?.set("showAdoptionSuccess", true)
@@ -313,12 +315,17 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                composable("edit_task_screen/{taskId}", arguments = listOf(navArgument("taskId") { type = NavType.StringType })) { navBackStackEntry ->
+                composable(
+                    "edit_task_screen/{taskId}",
+                    arguments = listOf(navArgument("taskId") { type = NavType.StringType })
+                ) { navBackStackEntry ->
                     val taskId = navBackStackEntry.arguments?.getString("taskId")
                     AddTaskScreen(taskKey = taskId, onSaved = { navController.popBackStack() })
                 }
 
-                composable<AddTaskNavObject> { AddTaskScreen(onSaved = { navController.popBackStack() }) }
+                composable<AddTaskNavObject> {
+                    AddTaskScreen(onSaved = { navController.popBackStack() })
+                }
 
                 composable<TaskDetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<TaskDetailsNavObject>()
