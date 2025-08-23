@@ -1,5 +1,6 @@
 package com.pixelrabbit.animalshelterfirebase.ui.main_screen
 
+import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,8 +16,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,6 +29,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,27 +51,24 @@ import com.pixelrabbit.animalshelterfirebase.data.model.Animal
 import com.pixelrabbit.animalshelterfirebase.data.model.AnimalCategories
 import com.pixelrabbit.animalshelterfirebase.data.model.MainScreenDataObject
 import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
+import com.pixelrabbit.animalshelterfirebase.ui.animal_list_item_UI.AnimalListItemUI
+import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem
+import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundSecondary
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
+import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
 import com.pixelrabbit.animalshelterfirebase.ui.theme.TextSecondary
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 import com.yandex.mobile.ads.common.AdRequestConfiguration
-import com.yandex.mobile.ads.interstitial.InterstitialAd
 import com.yandex.mobile.ads.common.AdRequestError
+import com.yandex.mobile.ads.interstitial.InterstitialAd
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
-import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
-import com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen.SlideShowScreenObject
-
-import android.content.pm.ActivityInfo
-import androidx.compose.runtime.DisposableEffect
-import com.pixelrabbit.animalshelterfirebase.ui.animal_list_item_UI.AnimalListItemUI
-import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
 
 @Composable
 fun MainScreen(
@@ -92,55 +91,40 @@ fun MainScreen(
         }.firstOrNull { it is android.app.Activity } as? android.app.Activity
     }
     val isGuest = navData.uid == "guest"
-
-
     LaunchedEffect(Unit) {
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
-
     DisposableEffect(Unit) {
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         onDispose {
             activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
-
-
-    // Собираем состояние экрана
     val selectedCategory by viewModel.selectedCategory.collectAsState()
     val selectedTab by viewModel.selectedTab.collectAsState()
     val animals by viewModel.animals.collectAsState()
     val isAdmin by userViewModel.isAdmin.collectAsState()
     val user by userViewModel.currentUser.collectAsState()
     val userName = user?.name ?: ""
-
     var isFavoritesOnly by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
-
-    // Инициализация межстраничной рекламы Яндекс
     val interstitialAd = remember { mutableStateOf<InterstitialAd?>(null) }
-
     LaunchedEffect(Unit) {
         activity?.let {
             val adLoader = InterstitialAdLoader(it)
-
             adLoader.setAdLoadListener(object : InterstitialAdLoadListener {
                 override fun onAdLoaded(ad: InterstitialAd) {
                     interstitialAd.value = ad
                 }
-
                 override fun onAdFailedToLoad(error: AdRequestError) {
                     interstitialAd.value = null
                 }
             })
-
             val adRequestConfiguration =
-                AdRequestConfiguration.Builder("R-M-16111641-1").build() // замените на ваш ID
+                AdRequestConfiguration.Builder("R-M-16111641-1").build()
             adLoader.loadAd(adRequestConfiguration)
         }
     }
-
-    // Загрузка пользователя только при изменении uid
     LaunchedEffect(navData.uid) {
         if (!isGuest) {
             userViewModel.loadUser(navData.uid)
@@ -148,8 +132,6 @@ fun MainScreen(
             userViewModel.clearUser()
         }
     }
-
-    // Загрузка животных при смене вкладки или категории
     LaunchedEffect(selectedTab, selectedCategory) {
         if (selectedTab == BottomMenuItem.Favs) {
             isFavoritesOnly = true
@@ -168,7 +150,6 @@ fun MainScreen(
             viewModel.loadAnimals(navData.uid)
         }
     }
-
     val filteredAnimals = remember(query, animals, selectedCategory, isFavoritesOnly) {
         val queryLower = query.lowercase()
         animals.filter { animal ->
@@ -177,15 +158,11 @@ fun MainScreen(
                     animal.location.lowercase().contains(queryLower) ||
                     animal.feature.lowercase().contains(queryLower) ||
                     animal.category.lowercase().contains(queryLower)
-
             val matchesCategory = selectedCategory == "Все" || animal.category == selectedCategory
             val matchesFavs = !isFavoritesOnly || animal.isFavourite
-
             matchesQuery && matchesCategory && matchesFavs
         }
     }
-
-    // UI-код
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
@@ -215,7 +192,6 @@ fun MainScreen(
                     bottom = paddingValues.calculateBottomPadding()
                 )
         ) {
-            // Этот Row будет отображаться всегда
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -223,7 +199,6 @@ fun MainScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Левая часть (приветствие или просто Spacer, если гость)
                 if (!isGuest) {
                     Column(
                         modifier = Modifier.weight(1f)
@@ -236,16 +211,13 @@ fun MainScreen(
                         )
                     }
                 } else {
-                    // Можно добавить Spacer, чтобы выровнять кнопки, или оставить пустым
                     Spacer(modifier = Modifier.weight(1f))
                 }
-
-                // Кнопка администратора (отображается только для админов)
                 if (isAdmin) {
                     val shape = RoundedCornerShape(30.dp)
                     Card(
                         modifier = Modifier
-                            .width(105.dp) // <- подобрать под ширину, обычно 100-110
+                            .width(105.dp)
                             .height(52.dp)
                             .border(1.dp, BackgroundSecondary, shape)
                             .clip(shape)
@@ -275,8 +247,6 @@ fun MainScreen(
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                 }
-
-                // Слайд-шоу (теперь всегда отображается)
                 Image(
                     painter = painterResource(id = R.drawable.ic_presentation),
                     contentDescription = "Слайд-шоу",
@@ -286,10 +256,7 @@ fun MainScreen(
                             navController.navigate(SlideShowScreenObject)
                         }
                 )
-
                 Spacer(modifier = Modifier.width(10.dp))
-
-                // Реклама (теперь всегда отображается)
                 Image(
                     painter = painterResource(id = R.drawable.ic_ad_play),
                     contentDescription = "Реклама",
@@ -314,7 +281,6 @@ fun MainScreen(
                         }
                 )
             }
-
             SearchField(
                 query = query,
                 onQueryChange = { query = it },
@@ -323,8 +289,6 @@ fun MainScreen(
                     .padding(horizontal = 16.dp),
                 placeholder = "Поиск по животным"
             )
-
-            // Категории
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -338,11 +302,9 @@ fun MainScreen(
                     AnimalCategories(R.drawable.ic_dogs, "Собачки"),
                     AnimalCategories(R.drawable.ic_other_anim, "Остальные")
                 )
-
                 items(categories) { category ->
                     val isSelected = selectedCategory == category.categoryName
                     val shape = RoundedCornerShape(30.dp)
-
                     Card(
                         modifier = Modifier
                             .height(52.dp)
@@ -385,7 +347,6 @@ fun MainScreen(
                     }
                 }
             }
-
             if (filteredAnimals.isEmpty()) {
                 EmptyStateScreen()
             } else {
