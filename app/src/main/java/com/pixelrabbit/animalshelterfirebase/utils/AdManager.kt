@@ -11,7 +11,7 @@ import com.yandex.mobile.ads.interstitial.InterstitialAdEventListener
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoader
 import com.yandex.mobile.ads.interstitial.InterstitialAdLoadListener
 
-
+//На случай если решу интегрировать межстраничную рекламу
 class AdManager(private val activity: Activity) {
 
     private var interstitialAd: InterstitialAd? = null

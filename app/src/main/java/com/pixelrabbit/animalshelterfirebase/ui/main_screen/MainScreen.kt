@@ -335,7 +335,8 @@ fun MainScreen(
                 val categories = listOf(
                     AnimalCategories(R.drawable.ic_all_animals, "Все"),
                     AnimalCategories(R.drawable.ic_cats, "Котики"),
-                    AnimalCategories(R.drawable.ic_dogs, "Собачки")
+                    AnimalCategories(R.drawable.ic_dogs, "Собачки"),
+                    AnimalCategories(R.drawable.ic_other_anim, "Остальные")
                 )
 
                 items(categories) { category ->
