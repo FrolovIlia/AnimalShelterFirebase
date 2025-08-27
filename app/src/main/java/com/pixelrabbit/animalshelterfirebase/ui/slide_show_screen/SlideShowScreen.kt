@@ -5,7 +5,6 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -31,6 +30,8 @@ import com.yandex.mobile.ads.common.AdRequestError
 import com.yandex.mobile.ads.common.ImpressionData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +41,16 @@ fun SlideShowScreen(
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
+
+    val systemUiController = rememberSystemUiController()
+    val navBarColor = Color(0xFF454545)
+
+    SideEffect {
+        systemUiController.setNavigationBarColor(
+            color = navBarColor,
+            darkIcons = false // false → иконки будут белыми
+        )
+    }
 
     val shuffledAnimals = remember(animals) {
         animals.shuffled()

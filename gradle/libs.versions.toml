@@ -1,6 +1,7 @@
 [versions]
 accompanistSystemuicontroller = "0.20.3"
 
+accompanistSystemuicontrollerVersion = "0.34.0"
 agp = "8.9.2"
 
 coilCompose = "2.5.0"
@@ -38,6 +39,7 @@ appcompat = "1.7.1"
 [libraries]
 
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
+accompanist-systemuicontroller-v0340 = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontrollerVersion" }
 androidx-foundation-v160 = { module = "androidx.compose.foundation:foundation", version.ref = "foundationVersion" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }

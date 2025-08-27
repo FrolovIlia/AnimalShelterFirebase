@@ -104,5 +104,5 @@ dependencies {
     // Для слайд-шоу
     implementation(libs.androidx.foundation.v160)
 
-
+    implementation(libs.accompanist.systemuicontroller.v0340)
 }
