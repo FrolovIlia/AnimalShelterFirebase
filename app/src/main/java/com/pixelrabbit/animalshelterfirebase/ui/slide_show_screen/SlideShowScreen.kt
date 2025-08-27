@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -18,9 +19,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
+import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.model.Animal
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
@@ -31,7 +34,6 @@ import com.yandex.mobile.ads.common.ImpressionData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +50,7 @@ fun SlideShowScreen(
     SideEffect {
         systemUiController.setNavigationBarColor(
             color = navBarColor,
-            darkIcons = false // false → иконки будут белыми
+            darkIcons = false
         )
     }
 
@@ -90,7 +92,7 @@ fun SlideShowScreen(
     }
 
     Scaffold(
-        containerColor = Color.DarkGray,
+        containerColor = Color.Transparent,
         topBar = {
             if (isPortrait) {
                 TopAppBar(
@@ -112,72 +114,83 @@ fun SlideShowScreen(
         }
     ) { paddingValues ->
 
-        if (isPortrait) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                HorizontalPager(
-                    state = pagerState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                ) { page ->
-                    val animal = shuffledAnimals[page]
-                    SlideShowItem(animal = animal, isPortrait = isPortrait)
-                }
+        Box(modifier = Modifier.fillMaxSize()) {
+            // Фон
+            Image(
+                painter = painterResource(id = R.drawable.background_gray),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
 
-                AdBanner(
-                    adUnitId = adUnitId,
+            // Контент поверх
+            if (isPortrait) {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                )
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
+                        .fillMaxSize()
+                        .padding(paddingValues)
                 ) {
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier
-                            .fillMaxSize()
+                            .weight(1f)
+                            .fillMaxWidth()
                     ) { page ->
                         val animal = shuffledAnimals[page]
                         SlideShowItem(animal = animal, isPortrait = isPortrait)
                     }
 
-                    TopAppBar(
-                        title = { },
-                        navigationIcon = {
-                            IconButton(onClick = { onBackClick() }) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Назад",
-                                    tint = Color.White
-                                )
-                            }
-                        },
-                        colors = TopAppBarDefaults.topAppBarColors(
-                            containerColor = Color.Transparent
-                        ),
-                        modifier = Modifier.align(Alignment.TopStart)
+                    AdBanner(
+                        adUnitId = adUnitId,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
                     )
                 }
-
-                AdBanner(
-                    adUnitId = adUnitId,
+            } else {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                )
+                        .fillMaxSize()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                    ) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .fillMaxSize()
+                        ) { page ->
+                            val animal = shuffledAnimals[page]
+                            SlideShowItem(animal = animal, isPortrait = isPortrait)
+                        }
+
+                        TopAppBar(
+                            title = { },
+                            navigationIcon = {
+                                IconButton(onClick = { onBackClick() }) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowBack,
+                                        contentDescription = "Назад",
+                                        tint = Color.White
+                                    )
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent
+                            ),
+                            modifier = Modifier.align(Alignment.TopStart)
+                        )
+                    }
+
+                    AdBanner(
+                        adUnitId = adUnitId,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                    )
+                }
             }
         }
     }

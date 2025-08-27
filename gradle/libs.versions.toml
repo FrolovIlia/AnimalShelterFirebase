@@ -34,6 +34,7 @@ animationCoreLint = "1.8.1"
 runtimeLivedata = "1.8.2"
 firebaseMessaging = "24.1.1"
 appcompat = "1.7.1"
+foundation = "1.9.0"
 
 
 [libraries]
@@ -79,6 +80,7 @@ androidx-animation-core-lint = { group = "androidx.compose.animation", name = "a
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
