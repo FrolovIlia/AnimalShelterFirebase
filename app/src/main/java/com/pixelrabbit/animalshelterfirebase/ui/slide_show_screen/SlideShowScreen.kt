@@ -45,11 +45,10 @@ fun SlideShowScreen(
     val activity = context as? Activity
 
     val systemUiController = rememberSystemUiController()
-    val navBarColor = Color(0xFF454545)
 
     SideEffect {
         systemUiController.setNavigationBarColor(
-            color = navBarColor,
+            color = Color.Transparent,
             darkIcons = false
         )
     }
@@ -117,7 +116,7 @@ fun SlideShowScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             // Фон
             Image(
-                painter = painterResource(id = R.drawable.background_gray),
+                painter = painterResource(id = R.drawable.background_gray_dark),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
