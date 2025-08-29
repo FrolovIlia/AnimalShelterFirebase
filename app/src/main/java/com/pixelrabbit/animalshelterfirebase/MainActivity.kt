@@ -53,21 +53,30 @@ import com.pixelrabbit.animalshelterfirebase.ui.start_screen.StartScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskDetailsScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
+import com.pixelrabbit.animalshelterfirebase.utils.AppOpenAdManager
 
 class MainActivity : ComponentActivity() {
 
     private val TAG = "FCM_DEBUG"
     private var currentIntent by mutableStateOf(intent)
+    private lateinit var adManager: AppOpenAdManager
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         currentIntent = intent
     }
 
+
+    override fun onResume() {
+        super.onResume()
+        adManager.setCurrentActivity(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        adManager = AppOpenAdManager(application, "R-M-16111641-8")
 
         setContent {
             val navController = rememberNavController()
@@ -76,6 +85,7 @@ class MainActivity : ComponentActivity() {
             val mainScreenViewModel: MainScreenViewModel = viewModel()
             val tasksViewModel: TasksViewModel = viewModel()
             val context = LocalContext.current
+
 
             val requestPermissionLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.RequestPermission(),
@@ -100,7 +110,9 @@ class MainActivity : ComponentActivity() {
                 val currentUid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
 
                 if (animalKey != null) {
-                    val animalRef = FirebaseFirestore.getInstance().collection("animals").document(animalKey)
+                    adManager.showAdIfAvailable()
+                    val animalRef =
+                        FirebaseFirestore.getInstance().collection("animals").document(animalKey)
                     animalRef.get().addOnSuccessListener { doc ->
                         val animal = doc.toObject(Animal::class.java)
                         if (animal != null) {
@@ -120,7 +132,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 } else if (taskKey != null) {
-                    val taskRef = FirebaseFirestore.getInstance().collection("tasks").document(taskKey)
+                    val taskRef =
+                        FirebaseFirestore.getInstance().collection("tasks").document(taskKey)
                     taskRef.get().addOnSuccessListener { doc ->
                         val task = doc.toObject(Task::class.java)
                         if (task != null) {
@@ -148,7 +161,10 @@ class MainActivity : ComponentActivity() {
 
             val auth = Firebase.auth
             val startDestination = if (auth.currentUser != null) {
-                MainScreenDataObject(uid = auth.currentUser!!.uid, email = auth.currentUser!!.email ?: "email_not_found")
+                MainScreenDataObject(
+                    uid = auth.currentUser!!.uid,
+                    email = auth.currentUser!!.email ?: "email_not_found"
+                )
             } else StartScreenObject
 
             NavHost(navController = navController, startDestination = startDestination) {
@@ -157,7 +173,14 @@ class MainActivity : ComponentActivity() {
                     StartScreen(
                         onLoginClick = { navController.navigate(LoginScreenObject) },
                         onRegisterClick = { navController.navigate(RegisterScreenObject) },
-                        onGuestClick = { navController.navigate(MainScreenDataObject(uid = "guest", email = "guest@anonymous.com")) }
+                        onGuestClick = {
+                            navController.navigate(
+                                MainScreenDataObject(
+                                    uid = "guest",
+                                    email = "guest@anonymous.com"
+                                )
+                            )
+                        }
                     )
                 }
 
@@ -166,7 +189,11 @@ class MainActivity : ComponentActivity() {
                         auth = FirebaseAuth.getInstance(),
                         prefs = encryptedPrefs,
                         onNavigateToMainScreen = { navData ->
-                            navController.navigate(navData) { popUpTo(StartScreenObject::class) { inclusive = true } }
+                            navController.navigate(navData) {
+                                popUpTo(StartScreenObject::class) {
+                                    inclusive = true
+                                }
+                            }
                         },
                         onBackClick = { navController.popBackStack() }
                     )
@@ -239,13 +266,19 @@ class MainActivity : ComponentActivity() {
                                 )
                             )
                         },
-                        onDonateClick = { donationNavObject -> navController.navigate(donationNavObject.toRoute()) },
+                        onDonateClick = { donationNavObject ->
+                            navController.navigate(
+                                donationNavObject.toRoute()
+                            )
+                        },
                         savedStateHandle = navEntry.savedStateHandle
                     )
                 }
 
                 composable(DonationNavObject.routeWithArgs) {
-                    DonationScreen(viewModel = viewModel<ShelterViewModel>(), onBack = { navController.popBackStack() })
+                    DonationScreen(
+                        viewModel = viewModel<ShelterViewModel>(),
+                        onBack = { navController.popBackStack() })
                 }
 
                 composable<EditProfileNavObject> { navEntry ->
@@ -254,14 +287,26 @@ class MainActivity : ComponentActivity() {
                     EditProfileScreen(
                         userViewModel = userViewModel,
                         onBack = { navController.popBackStack() },
-                        onLogout = { navController.navigate(StartScreenObject) { popUpTo(0) { inclusive = true } } }
+                        onLogout = {
+                            navController.navigate(StartScreenObject) {
+                                popUpTo(0) {
+                                    inclusive = true
+                                }
+                            }
+                        }
                     )
                 }
 
                 composable<RegisterScreenObject> {
                     RegisterScreen(
                         auth = FirebaseAuth.getInstance(),
-                        onRegistered = { navData -> navController.navigate(navData) { popUpTo(StartScreenObject::class) { inclusive = true } } },
+                        onRegistered = { navData ->
+                            navController.navigate(navData) {
+                                popUpTo(
+                                    StartScreenObject::class
+                                ) { inclusive = true }
+                            }
+                        },
                         onBack = { navController.popBackStack() }
                     )
                 }
@@ -281,10 +326,14 @@ class MainActivity : ComponentActivity() {
                         phone = navData.userPhone,
                         email = navData.userEmail
                     )
-                    AdoptionScreen(animal = animal, user = user,
+                    AdoptionScreen(
+                        animal = animal, user = user,
                         onBack = { navController.popBackStack() },
                         onSubmitSuccess = {
-                            navController.previousBackStackEntry?.savedStateHandle?.set("showAdoptionSuccess", true)
+                            navController.previousBackStackEntry?.savedStateHandle?.set(
+                                "showAdoptionSuccess",
+                                true
+                            )
                             navController.navigateUp()
                         }
                     )
@@ -329,12 +378,16 @@ class MainActivity : ComponentActivity() {
 
                 composable<TaskDetailsNavObject> { navEntry ->
                     val navData = navEntry.toRoute<TaskDetailsNavObject>()
-                    TaskDetailsScreen(navObject = navData, onBackClick = { navController.popBackStack() })
+                    TaskDetailsScreen(
+                        navObject = navData,
+                        onBackClick = { navController.popBackStack() })
                 }
 
                 composable<SlideShowScreenObject> {
                     val animals by mainScreenViewModel.animals.collectAsState()
-                    SlideShowScreen(animals = animals, onBackClick = { navController.popBackStack() })
+                    SlideShowScreen(
+                        animals = animals,
+                        onBackClick = { navController.popBackStack() })
                 }
             }
         }
