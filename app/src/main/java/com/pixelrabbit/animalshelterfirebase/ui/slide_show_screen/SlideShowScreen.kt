@@ -45,7 +45,6 @@ fun SlideShowScreen(
     val activity = context as? Activity
 
     val systemUiController = rememberSystemUiController()
-
     SideEffect {
         systemUiController.setNavigationBarColor(
             color = Color.Transparent,
@@ -76,11 +75,11 @@ fun SlideShowScreen(
     }
 
     val pagerState = rememberPagerState { shuffledAnimals.size }
-    val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(pagerState.currentPage) {
-        delay(10_000L)
-        coroutineScope.launch {
+    // 🔥 Автопереключение слайдов (фикс)
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(10_000L)
             val nextPage = (pagerState.currentPage + 1) % shuffledAnimals.size
             pagerState.animateScrollToPage(nextPage)
         }
@@ -194,6 +193,7 @@ fun SlideShowScreen(
         }
     }
 }
+
 
 @Composable
 fun SlideShowItem(animal: Animal, isPortrait: Boolean) {
