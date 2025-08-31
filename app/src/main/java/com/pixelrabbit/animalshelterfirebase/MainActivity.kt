@@ -210,12 +210,14 @@ class MainActivity : ComponentActivity() {
                             navController.navigate(
                                 AnimalDetailsNavObject(
                                     uid = navData.uid,
+                                    key = animal.key,
                                     imageUrl = animal.imageUrl,
                                     name = animal.name,
                                     age = animal.age,
                                     category = animal.category,
                                     description = animal.description,
                                     feature = animal.feature,
+                                    isFavourite = animal.isFavourite,
                                     location = animal.location,
                                     curatorPhone = animal.curatorPhone
                                 )
@@ -250,6 +252,7 @@ class MainActivity : ComponentActivity() {
                     AnimalDetailsScreen(
                         navObject = navData,
                         userViewModel = userViewModel,
+                        mainScreenViewModel = mainScreenViewModel,
                         onBackClick = { navController.popBackStack() },
                         onAdoptClick = { animal, user ->
                             navController.navigate(

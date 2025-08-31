@@ -1,35 +1,42 @@
 package com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen
 
 import android.widget.Toast
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.SavedStateHandle
 import coil.compose.AsyncImage
 import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.model.Animal
 import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.navigation.AnimalDetailsNavObject
-import com.pixelrabbit.animalshelterfirebase.ui.theme.*
-import com.pixelrabbit.animalshelterfirebase.utils.*
-import androidx.compose.runtime.livedata.observeAsState
 import com.pixelrabbit.animalshelterfirebase.ui.navigation.DonationNavObject
+import com.pixelrabbit.animalshelterfirebase.ui.theme.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import com.pixelrabbit.animalshelterfirebase.utils.*
 
 @Composable
 fun AnimalDetailsScreen(
     navObject: AnimalDetailsNavObject,
     userViewModel: UserViewModel,
+    mainScreenViewModel: MainScreenViewModel,
     onBackClick: () -> Unit,
     onAdoptClick: (Animal, UserObject) -> Unit,
     savedStateHandle: SavedStateHandle? = null,
@@ -51,6 +58,10 @@ fun AnimalDetailsScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     val isGuest = navObject.uid == "guest" || navObject.uid.isEmpty()
+    val animal = mainScreenViewModel.getAnimalByKey(navObject.key)
+
+    // Состояние избранного для реактивного обновления иконки
+    var isFavouriteState by remember { mutableStateOf(animal?.isFavourite ?: navObject.isFavourite) }
 
     LaunchedEffect(adoptionSuccessState.value) {
         if (adoptionSuccessState.value) {
@@ -61,7 +72,6 @@ fun AnimalDetailsScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         if (userState == null && !isGuest) {
-            // Показать загрузку, если пользователь не загружен и не гость
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
             Column(
@@ -98,9 +108,14 @@ fun AnimalDetailsScreen(
                         )
                     }
 
+                    // кнопка назад
                     IconButton(
                         onClick = onBackClick,
-                        modifier = Modifier.padding(24.dp)
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(24.dp)
+                            .size(32.dp)
+
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_back),
@@ -108,8 +123,36 @@ fun AnimalDetailsScreen(
                             tint = Color.Unspecified
                         )
                     }
-                }
 
+                    // кнопка избранного
+                    IconButton(
+                        onClick = {
+                            if (isGuest) {
+                                Toast.makeText(
+                                    context,
+                                    "Авторизуйтесь, чтобы добавлять в избранное",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                mainScreenViewModel.toggleFavorite(navObject.uid, navObject.key)
+                                isFavouriteState = !isFavouriteState // обновляем состояние для UI
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(24.dp)
+                            .size(32.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(
+                                if (isFavouriteState) R.drawable.favourite else R.drawable.favourite_border
+                            ),
+                            contentDescription = "Favorite icon",
+                            contentScale = ContentScale.Fit, // добавляем, чтобы размер картинок был одинаковым
+                            modifier = Modifier.fillMaxSize() // гарантируем, что картинка занимает весь IconButton
+                        )
+                    }
+                }
 
                 Column(
                     modifier = Modifier
@@ -165,22 +208,6 @@ fun AnimalDetailsScreen(
                                 fontSize = 16.sp
                             )
                         }
-
-//                        Column(modifier = Modifier.weight(1f)) {
-//                            Text(
-//                                text = "Расположение",
-//                                color = Color.Gray,
-//                                fontFamily = AnimalFont,
-//                                fontSize = 13.sp,
-//                                modifier = Modifier.padding(bottom = 5.dp)
-//                            )
-//                            Text(
-//                                text = navObject.location,
-//                                color = Color.Gray,
-//                                fontFamily = AnimalFont,
-//                                fontSize = 16.sp
-//                            )
-//                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -204,7 +231,8 @@ fun AnimalDetailsScreen(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } else {
-                                val animal = Animal(
+                                val animalData = Animal(
+                                    key = navObject.key,
                                     name = navObject.name,
                                     age = navObject.age,
                                     curatorPhone = navObject.curatorPhone,
@@ -212,14 +240,12 @@ fun AnimalDetailsScreen(
                                     description = navObject.description,
                                     imageUrl = navObject.imageUrl,
                                     category = navObject.category,
-                                    feature = navObject.feature,
-                                    key = ""
+                                    feature = navObject.feature
                                 )
-                                onAdoptClick(animal, user)
+                                onAdoptClick(animalData, user)
                             }
                         }
                     )
-
 
                     ButtonWhite(
                         text = "Донат",
@@ -289,4 +315,3 @@ fun AnimalDetailsScreen(
         }
     }
 }
-

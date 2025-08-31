@@ -84,13 +84,26 @@ class MainScreenViewModel(
         if (index == -1) return
 
         val isNowFav = !currentList[index].isFavourite
+
+        // оптимистично сразу меняем в UI
+        currentList[index] = currentList[index].copy(isFavourite = isNowFav)
+        _animals.value = currentList
+
+        // потом обновляем в Firestore
         repository.toggleFavorite(uid, animalKey, isNowFav) { success ->
-            if (success) {
-                currentList[index] = currentList[index].copy(isFavourite = isNowFav)
-                _animals.value = currentList
+            if (!success) {
+                // если ошибка — откатываем обратно
+                val rollbackList = _animals.value.toMutableList()
+                val rollbackIndex = rollbackList.indexOfFirst { it.key == animalKey }
+                if (rollbackIndex != -1) {
+                    rollbackList[rollbackIndex] =
+                        rollbackList[rollbackIndex].copy(isFavourite = !isNowFav)
+                    _animals.value = rollbackList
+                }
             }
         }
     }
+
 
     fun loadTasks() {
         repository.getTasks { loadedTasks ->
