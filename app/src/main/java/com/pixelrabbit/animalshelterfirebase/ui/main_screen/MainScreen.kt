@@ -51,7 +51,6 @@ import com.pixelrabbit.animalshelterfirebase.data.model.Animal
 import com.pixelrabbit.animalshelterfirebase.data.model.AnimalCategories
 import com.pixelrabbit.animalshelterfirebase.data.model.MainScreenDataObject
 import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
-import com.pixelrabbit.animalshelterfirebase.ui.animal_list_item_UI.AnimalListItemUI
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenu
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.bottom_menu.BottomMenuItem

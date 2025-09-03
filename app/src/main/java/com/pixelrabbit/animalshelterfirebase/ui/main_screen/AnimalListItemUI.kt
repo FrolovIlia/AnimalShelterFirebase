@@ -1,4 +1,4 @@
-package com.pixelrabbit.animalshelterfirebase.ui.animal_list_item_UI
+package com.pixelrabbit.animalshelterfirebase.ui.main_screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -28,6 +28,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -35,7 +37,6 @@ import coil.compose.AsyncImage
 import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.model.Animal
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundWhite
-
 
 @Composable
 fun AnimalListItemUI(
@@ -157,4 +158,56 @@ fun AnimalListItemUI(
             Spacer(modifier = Modifier.height(10.dp))
         }
     }
+}
+
+@Preview(name = "Стандартный вид", showBackground = true)
+@Composable
+fun AnimalListItemUIPreview() {
+    val sampleAnimal = Animal(
+        key = "1",
+        name = "Рекс",
+        age = "3 года",
+        imageUrl = "", // Пустая ссылка покажет заглушку
+        feature = "Игривый и добрый пёс, любит детей и прогулки."
+    )
+
+    AnimalListItemUI(
+        animal = sampleAnimal,
+        isFavourite = false,
+        showEditButton = true // Показываем кнопку редактирования
+    )
+}
+
+@Preview(name = "Избранный питомец", showBackground = true)
+@Composable
+fun AnimalListItemUIFavouritePreview() {
+    val sampleAnimal = Animal(
+        key = "2",
+        name = "Муся",
+        age = "1 год",
+        imageUrl = "",
+        feature = "Ласковая и пушистая кошечка."
+    )
+    AnimalListItemUI(
+        animal = sampleAnimal,
+        isFavourite = true, // Тестируем состояние "избранное"
+        showEditButton = false // Скрываем кнопку редактирования
+    )
+}
+
+@Preview(name = "Длинное описание", showBackground = true)
+@Composable
+fun AnimalListItemUILongTextPreview() {
+    val sampleAnimal = Animal(
+        key = "3",
+        name = "Барсик",
+        age = "2 года",
+        imageUrl = "",
+        feature = "Очень длинное и подробное описание, чтобы проверить, как работает обрезка текста и многострочность, а также как компонент выглядит с большим объемом данных."
+    )
+    AnimalListItemUI(
+        animal = sampleAnimal,
+        isFavourite = false,
+        showEditButton = true
+    )
 }

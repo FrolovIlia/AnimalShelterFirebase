@@ -84,7 +84,6 @@ class MainActivity : ComponentActivity() {
             val userViewModel = viewModel<UserViewModel>()
             val mainScreenViewModel: MainScreenViewModel = viewModel()
             val tasksViewModel: TasksViewModel = viewModel()
-            val context = LocalContext.current
 
 
             val requestPermissionLauncher = rememberLauncherForActivityResult(
