@@ -49,7 +49,7 @@ fun EditProfileScreen(
     onProfileUpdated: () -> Unit = {},
     onBack: () -> Unit,
     onLogout: () -> Unit,
-    onAdminClick: () -> Unit
+    onOwnerClick: () -> Unit
 ) {
     val db = Firebase.firestore
     val auth = Firebase.auth
@@ -130,7 +130,7 @@ fun EditProfileScreen(
                                 .height(52.dp)
                                 .border(1.dp, BackgroundSecondary, shape)
                                 .clip(shape)
-                                .clickable { onAdminClick() },
+                                .clickable { onOwnerClick() },
                             shape = shape,
                             colors = CardDefaults.cardColors(containerColor = ButtonColorWhite),
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

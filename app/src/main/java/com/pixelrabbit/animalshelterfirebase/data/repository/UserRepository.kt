@@ -18,7 +18,6 @@ object UserRepository {
     val isAdmin: StateFlow<Boolean> = _isAdmin
 
     private val _userLoadError = MutableStateFlow<String?>(null)
-    val userLoadError: StateFlow<String?> = _userLoadError
 
     fun loadUser(uid: String) {
         if (uid.isBlank() || uid == "guest") {
