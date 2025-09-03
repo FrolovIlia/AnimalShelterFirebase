@@ -35,6 +35,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
     userViewModel: UserViewModel,
@@ -56,14 +57,17 @@ fun EditProfileScreen(
         }
     }
 
-    var name by remember { mutableStateOf(user?.name ?: "") }
-    var birthDateField by remember {
+    // Состояния полей, инициализируем данными из ViewModel
+    var name by remember(user) { mutableStateOf(user?.name ?: "") }
+    var birthDateField by remember(user) {
         mutableStateOf(
             TextFieldValue(user?.birthDate ?: "", TextRange((user?.birthDate ?: "").length))
         )
     }
-    var phone by remember { mutableStateOf(if (user?.phone.isNullOrBlank()) "+7" else user!!.phone) }
-    var email by remember { mutableStateOf(user?.email ?: "") }
+    var phone by remember(user) {
+        mutableStateOf(if (user?.phone.isNullOrBlank()) "+7" else user!!.phone)
+    }
+    var email by remember(user) { mutableStateOf(user?.email ?: "") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
@@ -74,7 +78,7 @@ fun EditProfileScreen(
     var phoneError by remember { mutableStateOf(false) }
     var emailError by remember { mutableStateOf(false) }
 
-    fun fieldModifier() = Modifier.fillMaxWidth()
+    val fieldModifier = Modifier.fillMaxWidth()
 
     @Composable
     fun fieldColors() = TextFieldDefaults.colors(
@@ -121,7 +125,7 @@ fun EditProfileScreen(
             value = name,
             onValueChange = { name = it },
             label = { Text("Имя") },
-            modifier = fieldModifier(),
+            modifier = fieldModifier,
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
@@ -154,7 +158,7 @@ fun EditProfileScreen(
             },
             label = { Text("Дата рождения (ДД.ММ.ГГГГ)") },
             isError = birthDateError,
-            modifier = fieldModifier(),
+            modifier = fieldModifier,
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
@@ -178,7 +182,7 @@ fun EditProfileScreen(
             },
             label = { Text("Телефон") },
             isError = phoneError,
-            modifier = fieldModifier(),
+            modifier = fieldModifier,
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
@@ -200,7 +204,7 @@ fun EditProfileScreen(
             },
             label = { Text("Email") },
             isError = emailError,
-            modifier = fieldModifier(),
+            modifier = fieldModifier,
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
@@ -227,7 +231,7 @@ fun EditProfileScreen(
                     )
                 }
             },
-            modifier = fieldModifier(),
+            modifier = fieldModifier,
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -269,13 +273,15 @@ fun EditProfileScreen(
                 isLoading = true
 
                 val currentUser = auth.currentUser
-                if (currentUser == null) {
-                    error = "Пользователь не авторизован"
+                // 💡 ИСПРАВЛЕНИЕ: Создаём локальную неизменяемую копию user
+                val localUser = user
+                if (currentUser == null || localUser == null) {
+                    error = "Пользователь не авторизован или данные не загружены"
                     isLoading = false
                     return@ButtonBlue
                 }
 
-                fun updateFirestoreAndPassword() {
+                fun updatePasswordAndFirestore() {
                     val updatedData = mapOf(
                         "name" to name,
                         "birthDate" to birthDate,
@@ -283,29 +289,15 @@ fun EditProfileScreen(
                         "email" to email
                     )
 
-                    db.collection("users").document(user!!.uid)
+                    // 💡 ИСПРАВЛЕНИЕ: Используем localUser.uid
+                    db.collection("users").document(localUser.uid)
                         .update(updatedData)
                         .addOnSuccessListener {
-                            if (password.isNotBlank()) {
-                                currentUser.updatePassword(password)
-                                    .addOnSuccessListener {
-                                        isLoading = false
-                                        userViewModel.loadUser(user!!.uid) // was refreshUser()
-                                        Toast.makeText(context, "Данные успешно обновлены", Toast.LENGTH_SHORT).show()
-                                        onProfileUpdated()
-                                        onBack()
-                                    }
-                                    .addOnFailureListener { e ->
-                                        isLoading = false
-                                        error = "Ошибка при обновлении пароля: ${e.message}"
-                                    }
-                            } else {
-                                isLoading = false
-                                userViewModel.loadUser(user!!.uid) // was refreshUser()
-                                Toast.makeText(context, "Данные успешно обновлены", Toast.LENGTH_SHORT).show()
-                                onProfileUpdated()
-                                onBack()
-                            }
+                            isLoading = false
+                            userViewModel.loadUser(localUser.uid)
+                            Toast.makeText(context, "Данные успешно обновлены", Toast.LENGTH_SHORT).show()
+                            onProfileUpdated()
+                            onBack()
                         }
                         .addOnFailureListener { e ->
                             isLoading = false
@@ -313,9 +305,20 @@ fun EditProfileScreen(
                         }
                 }
 
-                if (email != user!!.email) {
+                if (email != localUser.email) {
                     currentUser.updateEmail(email)
-                        .addOnSuccessListener { updateFirestoreAndPassword() }
+                        .addOnSuccessListener {
+                            if (password.isNotBlank()) {
+                                currentUser.updatePassword(password)
+                                    .addOnSuccessListener { updatePasswordAndFirestore() }
+                                    .addOnFailureListener { e ->
+                                        isLoading = false
+                                        error = "Ошибка при обновлении пароля: ${e.message}"
+                                    }
+                            } else {
+                                updatePasswordAndFirestore()
+                            }
+                        }
                         .addOnFailureListener { e ->
                             isLoading = false
                             error = if (e is FirebaseAuthRecentLoginRequiredException) {
@@ -325,10 +328,19 @@ fun EditProfileScreen(
                             }
                         }
                 } else {
-                    updateFirestoreAndPassword()
+                    if (password.isNotBlank()) {
+                        currentUser.updatePassword(password)
+                            .addOnSuccessListener { updatePasswordAndFirestore() }
+                            .addOnFailureListener { e ->
+                                isLoading = false
+                                error = "Ошибка при обновлении пароля: ${e.message}"
+                            }
+                    } else {
+                        updatePasswordAndFirestore()
+                    }
                 }
             },
-            modifier = fieldModifier()
+            modifier = fieldModifier
         )
 
         Spacer(Modifier.height(16.dp))
@@ -339,16 +351,9 @@ fun EditProfileScreen(
                 Firebase.auth.signOut()
                 val prefs = createEncryptedPrefs(context)
                 prefs.edit().clear().apply()
-
                 onLogout()
             },
-            modifier = fieldModifier()
+            modifier = fieldModifier
         )
-
-
-        if (isLoading) {
-            Spacer(Modifier.height(16.dp))
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-        }
     }
 }
