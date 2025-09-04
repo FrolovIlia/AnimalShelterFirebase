@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
@@ -40,6 +41,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.authorization.createEncryptedPre
 import com.pixelrabbit.animalshelterfirebase.ui.details_animal_screen.AnimalDetailsScreen
 import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.DonationScreen
 import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.shelter_data.ShelterViewModel
+import com.pixelrabbit.animalshelterfirebase.ui.list_users_screen.ListUsersScreen
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreen
 import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.navigation.*
@@ -288,20 +290,34 @@ class MainActivity : ComponentActivity() {
                     userViewModel.loadUser(navData.uid)
                     EditProfileScreen(
                         userViewModel = userViewModel,
+                        navController = navController, // <- добавлено
                         onBack = { navController.popBackStack() },
                         onLogout = {
                             navController.navigate(StartScreenObject) {
-                                popUpTo(0) {
-                                    inclusive = true
-                                }
+                                popUpTo(0) { inclusive = true }
                             }
                         },
-                        // 💡 Временная заглушка
                         onOwnerClick = {
-
+                            val currentUid = Firebase.auth.currentUser?.uid ?: return@EditProfileScreen
+                            navController.navigate(ListUsersNavObject(uid = currentUid))
                         }
                     )
                 }
+
+                composable<ListUsersNavObject> { navEntry ->
+                    val navData = navEntry.toRoute<ListUsersNavObject>()
+
+                    val users by remember {
+                        mutableStateOf<List<UserObject>>(emptyList())
+                    }
+                    // Или лучше: userViewModel.loadAllUsers() и потом collectAsState()
+                    ListUsersScreen(
+                        users = users,
+                        navController = navController,
+                        onRoleChanged = { user, isOwner -> /* обновление роли */ }
+                    )
+                }
+
 
                 composable<RegisterScreenObject> {
                     RegisterScreen(

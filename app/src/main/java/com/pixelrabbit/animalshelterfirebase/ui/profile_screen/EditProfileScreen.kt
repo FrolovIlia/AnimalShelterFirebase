@@ -41,11 +41,14 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.TextSecondary
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.clip
+import androidx.navigation.NavController
+import com.pixelrabbit.animalshelterfirebase.ui.navigation.ListUsersNavObject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditProfileScreen(
     userViewModel: UserViewModel,
+    navController: NavController,
     onProfileUpdated: () -> Unit = {},
     onBack: () -> Unit,
     onLogout: () -> Unit,
@@ -127,7 +130,10 @@ fun EditProfileScreen(
                                 .height(52.dp)
                                 .border(1.dp, BackgroundSecondary, shape)
                                 .clip(shape)
-                                .clickable { onOwnerClick() },
+                                .clickable {
+                                    val currentUid = Firebase.auth.currentUser?.uid ?: return@clickable
+                                    navController.navigate(ListUsersNavObject(uid = currentUid))
+                                },
                             shape = shape,
                             colors = CardDefaults.cardColors(containerColor = ButtonColorWhite),
                             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
