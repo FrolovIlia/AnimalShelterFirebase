@@ -104,16 +104,13 @@ fun EditProfileScreen(
         modifier = Modifier.fillMaxSize(),
         containerColor = BackgroundGray,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "Профиль",
-                            fontSize = 20.sp,
-                            fontFamily = AnimalFont,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
+                    Text(
+                        text = "Профиль",
+                        fontSize = 20.sp,
+                        fontFamily = AnimalFont
+                    )
                 },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
@@ -121,8 +118,8 @@ fun EditProfileScreen(
                     }
                 },
                 actions = {
-                    val localUser = user // Используем локальную переменную
-                    if (localUser?.isAdmin == true) {
+                    val localUser = user
+                    if (localUser?.isOwner == true) {
                         val shape = RoundedCornerShape(30.dp)
                         Card(
                             modifier = Modifier
@@ -157,11 +154,12 @@ fun EditProfileScreen(
                         Spacer(modifier = Modifier.width(10.dp))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = BackgroundGray
                 )
             )
         }
+
     ) { paddingValues ->
         Column(
             modifier = Modifier
