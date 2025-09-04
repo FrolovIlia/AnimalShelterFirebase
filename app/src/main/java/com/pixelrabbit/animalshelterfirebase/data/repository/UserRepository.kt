@@ -1,5 +1,6 @@
 package com.pixelrabbit.animalshelterfirebase.data.repository
 
+import com.google.firebase.auth.ktx.auth
 import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -16,6 +17,9 @@ object UserRepository {
 
     private val _isAdmin = MutableStateFlow(false)
     val isAdmin: StateFlow<Boolean> = _isAdmin
+
+    private val _allUsers = MutableStateFlow<List<UserObject>>(emptyList())
+    val allUsers: StateFlow<List<UserObject>> = _allUsers
 
     private val _userLoadError = MutableStateFlow<String?>(null)
 
@@ -48,5 +52,25 @@ object UserRepository {
         _currentUser.value = null
         _isAdmin.value = false
         _userLoadError.value = null
+    }
+
+    fun loadAllUsers() {
+        val currentUid = Firebase.auth.currentUser?.uid ?: return
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val snapshot = Firebase.firestore.collection("users").get().await()
+                val users = snapshot.documents.mapNotNull { it.toObject(UserObject::class.java)?.copy(uid = it.id) }
+                // Owner видит всех
+                val currentUserDoc = users.find { it.uid == currentUid }
+                if (currentUserDoc?.isOwner == true) {
+                    _allUsers.value = users
+                } else {
+                    // Обычный пользователь видит только себя
+                    _allUsers.value = listOfNotNull(currentUserDoc)
+                }
+            } catch (e: Exception) {
+                _allUsers.value = emptyList()
+            }
+        }
     }
 }

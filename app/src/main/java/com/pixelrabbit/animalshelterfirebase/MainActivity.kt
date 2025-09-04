@@ -28,6 +28,7 @@ import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import com.pixelrabbit.animalshelterfirebase.data.model.*
@@ -290,7 +291,7 @@ class MainActivity : ComponentActivity() {
                     userViewModel.loadUser(navData.uid)
                     EditProfileScreen(
                         userViewModel = userViewModel,
-                        navController = navController, // <- добавлено
+                        navController = navController,
                         onBack = { navController.popBackStack() },
                         onLogout = {
                             navController.navigate(StartScreenObject) {
@@ -298,25 +299,29 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         onOwnerClick = {
-                            val currentUid = Firebase.auth.currentUser?.uid ?: return@EditProfileScreen
+                            val currentUid =
+                                Firebase.auth.currentUser?.uid ?: return@EditProfileScreen
+                            userViewModel.loadAllUsers() // <- загружаем список пользователей
                             navController.navigate(ListUsersNavObject(uid = currentUid))
                         }
                     )
                 }
 
                 composable<ListUsersNavObject> { navEntry ->
-                    val navData = navEntry.toRoute<ListUsersNavObject>()
+                    val users by userViewModel.allUsers.collectAsState()
+                    LaunchedEffect(Unit) { userViewModel.loadAllUsers() }
 
-                    val users by remember {
-                        mutableStateOf<List<UserObject>>(emptyList())
-                    }
-                    // Или лучше: userViewModel.loadAllUsers() и потом collectAsState()
                     ListUsersScreen(
                         users = users,
                         navController = navController,
-                        onRoleChanged = { user, isOwner -> /* обновление роли */ }
+                        onRoleChanged = { user, isOwner ->
+                            Firebase.firestore.collection("users").document(user.uid)
+                                .update("isOwner", isOwner)
+                        }
                     )
                 }
+
+
 
 
                 composable<RegisterScreenObject> {
