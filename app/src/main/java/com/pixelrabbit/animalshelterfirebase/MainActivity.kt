@@ -313,11 +313,8 @@ class MainActivity : ComponentActivity() {
 
                     ListUsersScreen(
                         users = users,
-                        navController = navController,
-                        onRoleChanged = { user, isOwner ->
-                            Firebase.firestore.collection("users").document(user.uid)
-                                .update("isOwner", isOwner)
-                        }
+                        userViewModel = userViewModel, // передаём viewModel
+                        navController = navController
                     )
                 }
 

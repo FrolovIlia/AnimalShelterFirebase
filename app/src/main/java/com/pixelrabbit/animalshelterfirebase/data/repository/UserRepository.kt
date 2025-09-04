@@ -73,4 +73,24 @@ object UserRepository {
             }
         }
     }
+
+    fun updateUserRole(userUid: String, isAdmin: Boolean) {
+        val currentUid = Firebase.auth.currentUser?.uid ?: return
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val currentDoc = Firebase.firestore.collection("users").document(currentUid).get().await()
+                val isOwner = currentDoc.getBoolean("isOwner") == true
+                if (!isOwner) return@launch
+
+                Firebase.firestore.collection("users").document(userUid)
+                    .update("isAdmin", isAdmin)
+                    .await()
+
+                // После успешного обновления перезагружаем список пользователей
+                loadAllUsers()
+            } catch (e: Exception) {
+                // Ошибка игнорируем или логируем
+            }
+        }
+    }
 }

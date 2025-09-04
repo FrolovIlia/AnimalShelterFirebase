@@ -11,4 +11,6 @@ class UserViewModel : ViewModel() {
     fun loadUser(uid: String) = UserRepository.loadUser(uid)
     fun clearUser() = UserRepository.clearUser()
     fun loadAllUsers() = UserRepository.loadAllUsers()
+    fun updateUserRole(userUid: String, isAdmin: Boolean) =
+        UserRepository.updateUserRole(userUid, isAdmin)
 }

@@ -14,12 +14,13 @@ import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
+import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListUsersScreen(
     users: List<UserObject>,
-    onRoleChanged: (UserObject, Boolean) -> Unit,
+    userViewModel: UserViewModel,
     navController: NavController
 ) {
     Scaffold(
@@ -76,10 +77,18 @@ fun ListUsersScreen(
                 items(users) { user ->
                     ListUsersItemUI(
                         user = user,
-                        onRoleChanged = onRoleChanged
+                        userViewModel = userViewModel,
+                        onRoleChanged = { updatedUser, isAdmin ->
+                            val index = users.indexOfFirst { it.uid == updatedUser.uid }
+                            if (index != -1) {
+                                val mutableList = users.toMutableList()
+                                mutableList[index] = mutableList[index].copy(isAdmin = isAdmin)
+                                // здесь можно использовать state для перерисовки
+                            }
+                        }
                     )
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) } // нижний отступ
+                item { Spacer(modifier = Modifier.height(16.dp)) }
             }
         }
     }
