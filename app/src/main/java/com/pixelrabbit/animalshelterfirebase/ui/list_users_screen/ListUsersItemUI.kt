@@ -1,7 +1,6 @@
 package com.pixelrabbit.animalshelterfirebase.ui.list_users_screen
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -21,7 +20,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserListItemsUI(
+fun ListUsersItemUI(
     user: UserObject,
     onRoleChanged: (UserObject, Boolean) -> Unit
 ) {
@@ -122,7 +121,7 @@ fun UserListItemUIPreview() {
         isOwner = false
     )
 
-    UserListItemsUI(
+    ListUsersItemUI(
         user = sampleUser,
         onRoleChanged = { _, _ -> }
     )
