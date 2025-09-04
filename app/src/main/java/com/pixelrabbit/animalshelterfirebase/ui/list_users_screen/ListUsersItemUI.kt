@@ -17,6 +17,8 @@ import com.pixelrabbit.animalshelterfirebase.data.model.UserObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundWhite
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
+import com.pixelrabbit.animalshelterfirebase.utils.ButtonBlue
+import com.pixelrabbit.animalshelterfirebase.utils.ButtonWhite
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,84 +32,84 @@ fun ListUsersItemUI(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 2.dp) // Уменьшили вертикальный отступ
-            .clip(RoundedCornerShape(15.dp)),
+            .padding(horizontal = 16.dp, vertical = 2.dp),
         colors = CardDefaults.cardColors(containerColor = BackgroundWhite),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp), // Уменьшили общий внутренний отступ
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Левая сторона: Имя, Телефон, Email
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = user.name,
-                    fontSize = 16.sp, // Уменьшили шрифт
+                    fontSize = 16.sp,
                     fontFamily = AnimalFont,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
-                Spacer(Modifier.height(2.dp)) // Уменьшили отступ
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = user.phone,
-                    fontSize = 12.sp, // Уменьшили шрифт
+                    fontSize = 12.sp,
                     fontFamily = AnimalFont,
                     color = Color.Gray
                 )
-                Spacer(Modifier.height(2.dp)) // Уменьшили отступ
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = user.email,
-                    fontSize = 12.sp, // Уменьшили шрифт
+                    fontSize = 12.sp,
                     fontFamily = AnimalFont,
                     color = Color.Gray
                 )
             }
 
-            // Правая сторона: Выпадающий список
+            // Правая кнопка с общим стилем
             Box(
                 modifier = Modifier
                     .wrapContentSize(Alignment.TopEnd)
-                    .height(36.dp) // Уменьшили высоту кнопки
+                    .height(36.dp)
             ) {
-                OutlinedButton(
-                    onClick = { expanded = true },
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = Color.Transparent,
-                        contentColor = TextBlack
-                    ),
-                    border = BorderStroke(1.dp, Color.LightGray)
+                if (user.isAdmin) {
+                    ButtonBlue(
+                        text = currentRole,
+                        modifier = Modifier,
+                        onClick = { expanded = true }
+                    )
+                } else {
+                    ButtonWhite(
+                        text = currentRole,
+                        modifier = Modifier,
+                        onClick = { expanded = true }
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
                 ) {
-                    Text(currentRole, fontFamily = AnimalFont, fontSize = 12.sp) // Уменьшили шрифт
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Редактор", fontFamily = AnimalFont, fontSize = 12.sp) }, // Уменьшили шрифт
-                            onClick = {
-                                onRoleChanged(user, true)
-                                expanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Пользователь", fontFamily = AnimalFont, fontSize = 12.sp) }, // Уменьшили шрифт
-                            onClick = {
-                                onRoleChanged(user, false)
-                                expanded = false
-                            }
-                        )
-                    }
+                    DropdownMenuItem(
+                        text = { Text("Редактор", fontFamily = AnimalFont, fontSize = 12.sp) },
+                        onClick = {
+                            onRoleChanged(user, true)
+                            expanded = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Пользователь", fontFamily = AnimalFont, fontSize = 12.sp) },
+                        onClick = {
+                            onRoleChanged(user, false)
+                            expanded = false
+                        }
+                    )
                 }
             }
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable
