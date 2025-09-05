@@ -117,7 +117,11 @@ fun EditProfileScreen(
                 },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
-                        Text("Назад", fontSize = 16.sp, fontFamily = AnimalFont)
+                        Text(
+                            text = "Назад",
+                            fontSize = 16.sp,
+                            fontFamily = AnimalFont
+                        )
                     }
                 },
                 actions = {
@@ -131,7 +135,8 @@ fun EditProfileScreen(
                                 .border(1.dp, BackgroundSecondary, shape)
                                 .clip(shape)
                                 .clickable {
-                                    val currentUid = Firebase.auth.currentUser?.uid ?: return@clickable
+                                    val currentUid =
+                                        Firebase.auth.currentUser?.uid ?: return@clickable
                                     navController.navigate(ListUsersNavObject(uid = currentUid))
                                 },
                             shape = shape,
@@ -217,7 +222,10 @@ fun EditProfileScreen(
                 isError = birthDateError,
                 modifier = fieldModifier,
                 shape = RoundedCornerShape(10.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                 colors = fieldColors()
             )
@@ -241,7 +249,10 @@ fun EditProfileScreen(
                 isError = phoneError,
                 modifier = fieldModifier,
                 shape = RoundedCornerShape(10.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Phone,
+                    imeAction = ImeAction.Next
+                ),
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                 colors = fieldColors()
             )
@@ -263,7 +274,10 @@ fun EditProfileScreen(
                 isError = emailError,
                 modifier = fieldModifier,
                 shape = RoundedCornerShape(10.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
                 keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
                 colors = fieldColors()
             )
@@ -350,7 +364,11 @@ fun EditProfileScreen(
                             .addOnSuccessListener {
                                 isLoading = false
                                 userViewModel.loadUser(localUser.uid)
-                                Toast.makeText(context, "Данные успешно обновлены", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    context,
+                                    "Данные успешно обновлены",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                                 onProfileUpdated()
                                 onBack()
                             }

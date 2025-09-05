@@ -15,6 +15,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
 import com.pixelrabbit.animalshelterfirebase.ui.authorization.UserViewModel
+import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,28 +24,39 @@ fun ListUsersScreen(
     userViewModel: UserViewModel,
     navController: NavController
 ) {
+    var query by remember { mutableStateOf("") }
+
+    val filteredUsers = remember(query, users) {
+        if (query.isBlank()) {
+            users
+        } else {
+            val lowerCaseQuery = query.lowercase()
+            users.filter {
+                it.name.lowercase().contains(lowerCaseQuery) ||
+                        it.email.lowercase().contains(lowerCaseQuery) ||
+                        it.phone.contains(lowerCaseQuery)
+            }
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = BackgroundGray,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            text = "Список Пользователей",
-                            fontSize = 20.sp,
-                            fontFamily = AnimalFont,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
+                    Text(
+                        text = "Управление доступом",
+                        fontSize = 20.sp,
+                        fontFamily = AnimalFont
+                    )
                 },
                 navigationIcon = {
                     TextButton(onClick = { navController.navigateUp() }) {
                         Text(
                             text = "Назад",
                             fontSize = 16.sp,
-                            fontFamily = AnimalFont,
-                            color = TextBlack
+                            fontFamily = AnimalFont
                         )
                     }
                 },
@@ -54,40 +66,57 @@ fun ListUsersScreen(
             )
         }
     ) { paddingValues ->
-        if (users.isEmpty()) {
-            Box(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            SearchField(
+                query = query,
+                onQueryChange = { query = it },
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Пользователей пока нет.",
-                    fontFamily = AnimalFont,
-                    color = TextBlack
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(users) { user ->
-                    ListUsersItemUI(
-                        user = user,
-                        userViewModel = userViewModel,
-                        onRoleChanged = { updatedUser, isAdmin ->
-                            val index = users.indexOfFirst { it.uid == updatedUser.uid }
-                            if (index != -1) {
-                                val mutableList = users.toMutableList()
-                                mutableList[index] = mutableList[index].copy(isAdmin = isAdmin)
-                            }
-                        }
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                placeholder = "Поиск по всем полям"
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (filteredUsers.isEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Пользователей не найдено.",
+                        fontFamily = AnimalFont,
+                        color = TextBlack
                     )
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filteredUsers) { user ->
+                        ListUsersItemUI(
+                            user = user,
+                            userViewModel = userViewModel,
+                            onRoleChanged = { updatedUser, isAdmin ->
+                                val index = filteredUsers.indexOfFirst { it.uid == updatedUser.uid }
+                                if (index != -1) {
+                                    val mutableList = filteredUsers.toMutableList()
+                                    mutableList[index] = mutableList[index].copy(isAdmin = isAdmin)
+                                }
+                            }
+                        )
+                    }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                }
             }
         }
     }
