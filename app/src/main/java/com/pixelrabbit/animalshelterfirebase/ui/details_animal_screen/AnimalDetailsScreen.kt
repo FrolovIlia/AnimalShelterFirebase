@@ -58,10 +58,21 @@ fun AnimalDetailsScreen(
     val context = LocalContext.current
     val scrollState = rememberScrollState()
     val isGuest = navObject.uid == "guest" || navObject.uid.isEmpty()
-    val animal = mainScreenViewModel.getAnimalByKey(navObject.key)
+    val animals by mainScreenViewModel.animals.collectAsState()
 
-    // Состояние избранного для реактивного обновления иконки
-    var isFavouriteState by remember { mutableStateOf(animal?.isFavourite ?: navObject.isFavourite) }
+    // Находим животное в списке по ключу
+    val currentAnimal by remember(animals) {
+        derivedStateOf {
+            animals.firstOrNull { it.key == navObject.key }
+        }
+    }
+
+    // Загружаем список животных, если он пуст, чтобы получить актуальные данные
+    LaunchedEffect(Unit) {
+        if (animals.isEmpty()) {
+            mainScreenViewModel.loadAnimals(navObject.uid)
+        }
+    }
 
     LaunchedEffect(adoptionSuccessState.value) {
         if (adoptionSuccessState.value) {
@@ -71,9 +82,16 @@ fun AnimalDetailsScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (userState == null && !isGuest) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        if (userState == null && !isGuest || currentAnimal == null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         } else {
+            val animal = currentAnimal!!
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -86,7 +104,7 @@ fun AnimalDetailsScreen(
                         .height(360.dp)
                         .padding(16.dp)
                 ) {
-                    if (navObject.imageUrl.isNullOrBlank()) {
+                    if (animal.imageUrl.isNullOrBlank()) {
                         Image(
                             painter = painterResource(id = R.drawable.default_animal_image),
                             contentDescription = "Placeholder image",
@@ -97,8 +115,8 @@ fun AnimalDetailsScreen(
                         )
                     } else {
                         AsyncImage(
-                            model = navObject.imageUrl,
-                            contentDescription = navObject.name,
+                            model = animal.imageUrl,
+                            contentDescription = animal.name,
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(RoundedCornerShape(30.dp)),
@@ -108,7 +126,6 @@ fun AnimalDetailsScreen(
                         )
                     }
 
-                    // кнопка назад
                     IconButton(
                         onClick = onBackClick,
                         modifier = Modifier
@@ -124,7 +141,6 @@ fun AnimalDetailsScreen(
                         )
                     }
 
-                    // кнопка избранного
                     IconButton(
                         onClick = {
                             if (isGuest) {
@@ -134,8 +150,7 @@ fun AnimalDetailsScreen(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } else {
-                                mainScreenViewModel.toggleFavorite(navObject.uid, navObject.key)
-                                isFavouriteState = !isFavouriteState // обновляем состояние для UI
+                                mainScreenViewModel.toggleFavorite(navObject.uid, animal.key)
                             }
                         },
                         modifier = Modifier
@@ -145,11 +160,11 @@ fun AnimalDetailsScreen(
                     ) {
                         Image(
                             painter = painterResource(
-                                if (isFavouriteState) R.drawable.favourite else R.drawable.favourite_border
+                                if (animal.isFavourite) R.drawable.favourite else R.drawable.favourite_border
                             ),
                             contentDescription = "Favorite icon",
-                            contentScale = ContentScale.Fit, // добавляем, чтобы размер картинок был одинаковым
-                            modifier = Modifier.fillMaxSize() // гарантируем, что картинка занимает весь IconButton
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize()
                         )
                     }
                 }
@@ -161,7 +176,7 @@ fun AnimalDetailsScreen(
                         .padding(horizontal = 16.dp)
                 ) {
                     Text(
-                        text = navObject.name,
+                        text = animal.name,
                         color = Color.Black,
                         fontFamily = AnimalFont,
                         fontSize = 36.sp
@@ -173,14 +188,14 @@ fun AnimalDetailsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        InfoTag(text = navObject.age, backgroundColor = InfoColorOrange)
-                        InfoTag(text = navObject.feature, backgroundColor = InfoColorPurple)
+                        InfoTag(text = animal.age, backgroundColor = InfoColorOrange)
+                        InfoTag(text = animal.feature, backgroundColor = InfoColorPurple)
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = navObject.description,
+                        text = animal.description,
                         color = Color.Gray,
                         fontFamily = AnimalFont,
                         fontSize = 16.sp
@@ -202,7 +217,7 @@ fun AnimalDetailsScreen(
                                 modifier = Modifier.padding(bottom = 5.dp)
                             )
                             Text(
-                                text = navObject.curatorPhone,
+                                text = animal.curatorPhone,
                                 color = Color.Gray,
                                 fontFamily = AnimalFont,
                                 fontSize = 16.sp
@@ -231,18 +246,7 @@ fun AnimalDetailsScreen(
                                     Toast.LENGTH_SHORT
                                 ).show()
                             } else {
-                                val animalData = Animal(
-                                    key = navObject.key,
-                                    name = navObject.name,
-                                    age = navObject.age,
-                                    curatorPhone = navObject.curatorPhone,
-                                    location = navObject.location,
-                                    description = navObject.description,
-                                    imageUrl = navObject.imageUrl,
-                                    category = navObject.category,
-                                    feature = navObject.feature
-                                )
-                                onAdoptClick(animalData, user)
+                                onAdoptClick(animal, user)
                             }
                         }
                     )

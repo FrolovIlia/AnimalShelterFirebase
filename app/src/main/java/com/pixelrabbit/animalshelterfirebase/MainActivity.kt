@@ -69,7 +69,6 @@ class MainActivity : ComponentActivity() {
         currentIntent = intent
     }
 
-
     override fun onResume() {
         super.onResume()
         adManager.setCurrentActivity(this)
@@ -113,26 +112,7 @@ class MainActivity : ComponentActivity() {
 
                 if (animalKey != null) {
                     adManager.showAdIfAvailable()
-                    val animalRef =
-                        FirebaseFirestore.getInstance().collection("animals").document(animalKey)
-                    animalRef.get().addOnSuccessListener { doc ->
-                        val animal = doc.toObject(Animal::class.java)
-                        if (animal != null) {
-                            navController.navigate(
-                                AnimalDetailsNavObject(
-                                    uid = currentUid,
-                                    imageUrl = animal.imageUrl,
-                                    name = animal.name,
-                                    age = animal.age,
-                                    category = animal.category,
-                                    description = animal.description,
-                                    feature = animal.feature,
-                                    location = animal.location,
-                                    curatorPhone = animal.curatorPhone
-                                )
-                            )
-                        }
-                    }
+                    navController.navigate(AnimalDetailsNavObject(uid = currentUid, key = animalKey))
                 } else if (taskKey != null) {
                     val taskRef =
                         FirebaseFirestore.getInstance().collection("tasks").document(taskKey)
@@ -301,7 +281,7 @@ class MainActivity : ComponentActivity() {
                         onOwnerClick = {
                             val currentUid =
                                 Firebase.auth.currentUser?.uid ?: return@EditProfileScreen
-                            userViewModel.loadAllUsers() // <- загружаем список пользователей
+                            userViewModel.loadAllUsers()
                             navController.navigate(ListUsersNavObject(uid = currentUid))
                         }
                     )
@@ -313,7 +293,7 @@ class MainActivity : ComponentActivity() {
 
                     ListUsersScreen(
                         users = users,
-                        userViewModel = userViewModel, // передаём viewModel
+                        userViewModel = userViewModel,
                         navController = navController
                     )
                 }
