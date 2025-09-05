@@ -15,7 +15,8 @@ class AnimalRepository(private val db: FirebaseFirestore = FirebaseFirestore.get
         onResult: (List<Animal>) -> Unit
     ) {
         val collection = db.collection("animals")
-        val query = if (category == "Все") collection else collection.whereEqualTo("category", category)
+        val query =
+            if (category == "Все") collection else collection.whereEqualTo("category", category)
 
         query.get()
             .addOnSuccessListener { snapshot ->
@@ -39,7 +40,8 @@ class AnimalRepository(private val db: FirebaseFirestore = FirebaseFirestore.get
         db.collection("users").document(uid).collection("favourites")
             .get()
             .addOnSuccessListener { snapshot ->
-                val ids = snapshot.toObjects(Favourite::class.java).map { it.key }
+                // Извлекаем documentId из каждого документа
+                val ids = snapshot.documents.map { it.id }
                 onResult(ids)
             }
             .addOnFailureListener {
@@ -70,8 +72,14 @@ class AnimalRepository(private val db: FirebaseFirestore = FirebaseFirestore.get
             }
     }
 
-    fun toggleFavorite(uid: String, animalKey: String, add: Boolean, onComplete: (Boolean) -> Unit) {
-        val favRef = db.collection("users").document(uid).collection("favourites").document(animalKey)
+    fun toggleFavorite(
+        uid: String,
+        animalKey: String,
+        add: Boolean,
+        onComplete: (Boolean) -> Unit
+    ) {
+        val favRef =
+            db.collection("users").document(uid).collection("favourites").document(animalKey)
 
         if (add) {
             favRef.set(Favourite(animalKey))
@@ -90,7 +98,6 @@ class AnimalRepository(private val db: FirebaseFirestore = FirebaseFirestore.get
         }
     }
 
-    // --- Новый метод для получения задач
     fun getTasks(onLoaded: (List<Task>) -> Unit) {
         db.collection("tasks")
             .get()
@@ -107,40 +114,4 @@ class AnimalRepository(private val db: FirebaseFirestore = FirebaseFirestore.get
             }
     }
 
-    // Эти методы теперь не используются во ViewModel по новой архитектуре, но оставлены для совместимости
-    fun getUserName(uid: String, onResult: (String) -> Unit) {
-        if (uid == "guest" || uid.isBlank()) {
-            onResult("Гость")
-            return
-        }
-
-        db.collection("users").document(uid)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val name = snapshot.getString("name") ?: ""
-                onResult(name)
-            }
-            .addOnFailureListener {
-                Log.e("AnimalRepository", "Failed to get user name", it)
-                onResult("")
-            }
-    }
-
-    fun checkIfUserIsAdmin(uid: String, onResult: (Boolean) -> Unit) {
-        if (uid == "guest" || uid.isBlank()) {
-            onResult(false)
-            return
-        }
-
-        db.collection("users").document(uid)
-            .get()
-            .addOnSuccessListener { snapshot ->
-                val isAdmin = snapshot.getBoolean("isAdmin") == true
-                onResult(isAdmin)
-            }
-            .addOnFailureListener {
-                Log.e("AnimalRepository", "Failed to check admin status", it)
-                onResult(false)
-            }
-    }
 }

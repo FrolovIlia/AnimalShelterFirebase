@@ -83,7 +83,6 @@ fun ListUsersScreen(
                             if (index != -1) {
                                 val mutableList = users.toMutableList()
                                 mutableList[index] = mutableList[index].copy(isAdmin = isAdmin)
-                                // здесь можно использовать state для перерисовки
                             }
                         }
                     )
