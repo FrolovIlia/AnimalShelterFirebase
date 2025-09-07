@@ -31,7 +31,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.main_screen.MainScreenViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.navigation.TaskNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.*
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
-import android.util.Log // Добавили Log для отладки
+import android.util.Log
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -249,7 +249,6 @@ fun TasksScreen(
                             task = taskItem,
                             isAdmin = isAdmin,
                             onEditClick = {
-                                // Добавлена проверка на null, чтобы избежать вылета
                                 if (it.key != null) {
                                     navController.navigate("edit_task_screen/${it.key}")
                                 } else {
