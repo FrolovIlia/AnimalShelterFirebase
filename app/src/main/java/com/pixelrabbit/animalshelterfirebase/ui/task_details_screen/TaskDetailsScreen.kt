@@ -20,6 +20,7 @@ import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.ui.navigation.TaskDetailsNavObject
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
+import com.pixelrabbit.animalshelterfirebase.utils.AdUnitIds
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.common.AdRequest
@@ -31,6 +32,8 @@ fun TaskDetailsScreen(
     onBackClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
+    val adUnitId = AdUnitIds.taskBanner(context)
 
     Column(
         modifier = Modifier
@@ -92,7 +95,7 @@ fun TaskDetailsScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        AdBannerBlock()
+        AdBannerBlock(adUnitId = adUnitId)
     }
 }
 
@@ -158,12 +161,12 @@ private fun CuratorBlock(name: String, phone: String) {
 }
 
 @Composable
-private fun AdBannerBlock() {
+private fun AdBannerBlock(adUnitId: String) {
     val context = LocalContext.current
 
     val bannerAdView = remember {
         BannerAdView(context).apply {
-            setAdUnitId("R-M-16111641-3")
+            setAdUnitId(adUnitId)
             setAdSize(BannerAdSize.fixedSize(context, 320, 50))
             loadAd(AdRequest.Builder().build())
         }

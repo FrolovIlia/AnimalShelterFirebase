@@ -62,6 +62,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorBlue
 import com.pixelrabbit.animalshelterfirebase.ui.theme.ButtonColorWhite
 import com.pixelrabbit.animalshelterfirebase.ui.theme.TextBlack
 import com.pixelrabbit.animalshelterfirebase.ui.theme.TextSecondary
+import com.pixelrabbit.animalshelterfirebase.utils.AdUnitIds
 import com.pixelrabbit.animalshelterfirebase.utils.SearchField
 import com.yandex.mobile.ads.common.AdRequestConfiguration
 import com.yandex.mobile.ads.common.AdRequestError
@@ -108,6 +109,8 @@ fun MainScreen(
     var isFavoritesOnly by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     val interstitialAd = remember { mutableStateOf<InterstitialAd?>(null) }
+    val interstitialAdUnitId = AdUnitIds.interstitial(context) // динамический ID
+
     LaunchedEffect(Unit) {
         activity?.let {
             val adLoader = InterstitialAdLoader(it)
@@ -120,7 +123,7 @@ fun MainScreen(
                 }
             })
             val adRequestConfiguration =
-                AdRequestConfiguration.Builder("R-M-16111641-1").build()
+                AdRequestConfiguration.Builder(interstitialAdUnitId).build()
             adLoader.loadAd(adRequestConfiguration)
         }
     }

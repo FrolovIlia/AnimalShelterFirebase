@@ -21,13 +21,14 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.pixelrabbit.animalshelterfirebase.ui.donation_screen.shelter_data.ShelterViewModel
 import com.pixelrabbit.animalshelterfirebase.ui.theme.AnimalFont
-import androidx.compose.ui.viewinterop.AndroidView
 import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
-import com.yandex.mobile.ads.common.AdRequest
+import com.pixelrabbit.animalshelterfirebase.utils.AdUnitIds
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
+import com.yandex.mobile.ads.common.AdRequest
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,6 +38,7 @@ fun DonationScreen(
     onBack: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val adUnitId = AdUnitIds.donateBanner(context)
 
     Scaffold(
         modifier = Modifier
@@ -67,7 +69,7 @@ fun DonationScreen(
             )
         },
         bottomBar = {
-            AdBlock()
+            AdBlock(adUnitId = adUnitId)
         },
         content = { paddingValues ->
             Column(
@@ -80,7 +82,6 @@ fun DonationScreen(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Основной текст из БД с нормализацией переносов строк
                 val rawText = viewModel.shelterData.value?.donation ?: "Загрузка..."
                 val cleanedText = rawText.replace("\n\n", "\n")
 
@@ -94,7 +95,6 @@ fun DonationScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Ссылка "Оформить пожертвование онлайн"
                 val annotatedLinkString = buildAnnotatedString {
                     val linkText = "Оформить пожертвование онлайн"
                     val linkTag = "URL"
@@ -104,7 +104,7 @@ fun DonationScreen(
                     pushStringAnnotation(tag = linkTag, annotation = "https://leyka.iv-priyut.ru/campaign/donation/")
                     withStyle(
                         style = SpanStyle(
-                            color = Color(0xFF1976D2), // синий
+                            color = Color(0xFF1976D2),
                             textDecoration = TextDecoration.Underline,
                             fontFamily = AnimalFont,
                             fontSize = 16.sp,
@@ -134,12 +134,12 @@ fun DonationScreen(
 }
 
 @Composable
-private fun AdBlock() {
+private fun AdBlock(adUnitId: String) {
     val context = LocalContext.current
 
     val bannerAdView = remember {
         BannerAdView(context).apply {
-            setAdUnitId("R-M-16111641-2") // Замените на свой ID
+            setAdUnitId(adUnitId)
             setAdSize(BannerAdSize.fixedSize(context, 320, 250))
             loadAd(AdRequest.Builder().build())
         }

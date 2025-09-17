@@ -25,6 +25,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.model.Animal
+import com.pixelrabbit.animalshelterfirebase.utils.AdUnitIds
 import com.yandex.mobile.ads.banner.BannerAdSize
 import com.yandex.mobile.ads.banner.BannerAdView
 import com.yandex.mobile.ads.banner.BannerAdEventListener
@@ -51,16 +52,16 @@ fun SlideShowScreen(
         )
     }
 
-    val shuffledAnimals = remember(animals) {
-        animals.shuffled()
-    }
+    val shuffledAnimals = remember(animals) { animals.shuffled() }
 
     val configuration = LocalConfiguration.current
     val isPortrait = configuration.orientation == Configuration.ORIENTATION_PORTRAIT
 
-    val portraitAdUnitId = "R-M-16111641-5"
-    val landscapeAdUnitId = "R-M-16111641-4"
-    val adUnitId = if (isPortrait) portraitAdUnitId else landscapeAdUnitId
+    val adUnitId = if (isPortrait) {
+        AdUnitIds.slideShowPortrait(context)
+    } else {
+        AdUnitIds.slideShowLandscape(context)
+    }
 
     DisposableEffect(Unit) {
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR
@@ -75,7 +76,7 @@ fun SlideShowScreen(
 
     val pagerState = rememberPagerState { shuffledAnimals.size }
 
-    // 🔥 Автопереключение слайдов (фикс)
+    // Автопереключение слайдов
     LaunchedEffect(Unit) {
         while (true) {
             delay(10_000L)
@@ -84,9 +85,7 @@ fun SlideShowScreen(
         }
     }
 
-    BackHandler {
-        onBackClick()
-    }
+    BackHandler { onBackClick() }
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -110,9 +109,7 @@ fun SlideShowScreen(
             }
         }
     ) { paddingValues ->
-
         Box(modifier = Modifier.fillMaxSize()) {
-            // Фон
             Image(
                 painter = painterResource(id = R.drawable.background_gray_dark),
                 contentDescription = null,
@@ -120,7 +117,6 @@ fun SlideShowScreen(
                 modifier = Modifier.fillMaxSize()
             )
 
-            // Контент поверх
             if (isPortrait) {
                 Column(
                     modifier = Modifier
@@ -133,21 +129,16 @@ fun SlideShowScreen(
                             .weight(1f)
                             .fillMaxWidth()
                     ) { page ->
-                        val animal = shuffledAnimals[page]
-                        SlideShowItem(animal = animal, isPortrait = isPortrait)
+                        SlideShowItem(animal = shuffledAnimals[page], isPortrait = isPortrait)
                     }
 
-                    AdBanner(
-                        adUnitId = adUnitId,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                    )
+                    AdBanner(adUnitId = adUnitId, modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp))
                 }
             } else {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     Box(
                         modifier = Modifier
@@ -156,11 +147,9 @@ fun SlideShowScreen(
                     ) {
                         HorizontalPager(
                             state = pagerState,
-                            modifier = Modifier
-                                .fillMaxSize()
+                            modifier = Modifier.fillMaxSize()
                         ) { page ->
-                            val animal = shuffledAnimals[page]
-                            SlideShowItem(animal = animal, isPortrait = isPortrait)
+                            SlideShowItem(animal = shuffledAnimals[page], isPortrait = isPortrait)
                         }
 
                         TopAppBar(
@@ -181,18 +170,14 @@ fun SlideShowScreen(
                         )
                     }
 
-                    AdBanner(
-                        adUnitId = adUnitId,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp)
-                    )
+                    AdBanner(adUnitId = adUnitId, modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp))
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun SlideShowItem(animal: Animal, isPortrait: Boolean) {
@@ -200,28 +185,21 @@ fun SlideShowItem(animal: Animal, isPortrait: Boolean) {
     val screenHeight = configuration.screenHeightDp.dp
 
     Column(
-        modifier = Modifier
-            .fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f),
+            modifier = Modifier.fillMaxSize().weight(1f),
             contentAlignment = Alignment.Center
         ) {
             AsyncImage(
                 model = animal.imageUrl,
                 contentDescription = animal.name,
                 modifier = if (isPortrait) {
-                    Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(4f / 3f)
+                    Modifier.fillMaxWidth().aspectRatio(4f / 3f)
                 } else {
-                    Modifier
-                        .height(screenHeight)
-                        .aspectRatio(4f / 3f)
+                    Modifier.height(screenHeight).aspectRatio(4f / 3f)
                 },
                 contentScale = ContentScale.Crop
             )
@@ -253,13 +231,8 @@ fun AdBanner(adUnitId: String, modifier: Modifier) {
             loadAd(AdRequest.Builder().build())
         }
 
-        onDispose {
-            bannerAdView.destroy()
-        }
+        onDispose { bannerAdView.destroy() }
     }
 
-    AndroidView(
-        factory = { bannerAdView },
-        modifier = modifier
-    )
+    AndroidView(factory = { bannerAdView }, modifier = modifier)
 }

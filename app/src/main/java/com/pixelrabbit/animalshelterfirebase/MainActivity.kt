@@ -53,6 +53,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.start_screen.StartScreenObject
 import com.pixelrabbit.animalshelterfirebase.ui.task_details_screen.TaskDetailsScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksScreen
 import com.pixelrabbit.animalshelterfirebase.ui.tasks_screen.TasksViewModel
+import com.pixelrabbit.animalshelterfirebase.utils.AdUnitIds
 import com.pixelrabbit.animalshelterfirebase.utils.AppOpenAdManager
 
 class MainActivity : ComponentActivity() {
@@ -75,7 +76,8 @@ class MainActivity : ComponentActivity() {
         requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        adManager = AppOpenAdManager(application, "R-M-16111641-8")
+        val cardOpenId = AdUnitIds.cardOpen(this)
+        adManager = AppOpenAdManager(application, cardOpenId)
 
         setContent {
             val navController = rememberNavController()

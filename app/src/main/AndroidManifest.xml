@@ -2,15 +2,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pixelrabbit.animalshelterfirebase">
 
-    <!-- Разрешения -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="false" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -23,7 +20,6 @@
         android:theme="@style/Theme.AnimalShelterFirebase"
         tools:targetApi="31">
 
-        <!-- FileProvider 👇 -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -54,9 +50,10 @@
             </intent-filter>
         </service>
 
+        <!-- Yandex APP_ID через placeholder -->
         <meta-data
             android:name="com.yandex.mobileads.APP_ID"
-            android:value="16111641" />
+            android:value="${YandexAppId}" />
 
     </application>
 </manifest>
