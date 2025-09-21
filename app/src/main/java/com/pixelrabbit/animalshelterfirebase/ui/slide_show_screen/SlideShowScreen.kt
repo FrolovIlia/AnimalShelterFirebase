@@ -3,6 +3,7 @@ package com.pixelrabbit.animalshelterfirebase.ui.slide_show_screen
 import android.app.Activity
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -22,7 +23,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.pixelrabbit.animalshelterfirebase.R
 import com.pixelrabbit.animalshelterfirebase.data.model.Animal
 import com.pixelrabbit.animalshelterfirebase.utils.AdUnitIds
@@ -74,11 +77,11 @@ fun SlideShowScreen(
         }
     }
 
-    val pagerState = rememberPagerState { shuffledAnimals.size }
+    val pagerState = rememberPagerState(pageCount = { shuffledAnimals.size })
 
-    // Автопереключение слайдов
-    LaunchedEffect(Unit) {
-        while (true) {
+    // Автопереключение слайдов (без бесконечного цикла)
+    LaunchedEffect(pagerState.currentPage, shuffledAnimals.size) {
+        if (shuffledAnimals.isNotEmpty()) {
             delay(10_000L)
             val nextPage = (pagerState.currentPage + 1) % shuffledAnimals.size
             pagerState.animateScrollToPage(nextPage)
@@ -117,62 +120,79 @@ fun SlideShowScreen(
                 modifier = Modifier.fillMaxSize()
             )
 
-            if (isPortrait) {
-                Column(
+            if (shuffledAnimals.isEmpty()) {
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
                 ) {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
-                    ) { page ->
-                        SlideShowItem(animal = shuffledAnimals[page], isPortrait = isPortrait)
-                    }
-
-                    AdBanner(adUnitId = adUnitId, modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp))
+                    Text("Нет данных для отображения", color = Color.White)
                 }
             } else {
-                Column(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Box(
+                if (isPortrait) {
+                    Column(
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxWidth()
+                            .fillMaxSize()
+                            .padding(paddingValues)
                     ) {
                         HorizontalPager(
                             state = pagerState,
-                            modifier = Modifier.fillMaxSize()
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
                         ) { page ->
                             SlideShowItem(animal = shuffledAnimals[page], isPortrait = isPortrait)
                         }
 
-                        TopAppBar(
-                            title = { },
-                            navigationIcon = {
-                                IconButton(onClick = { onBackClick() }) {
-                                    Icon(
-                                        imageVector = Icons.Default.ArrowBack,
-                                        contentDescription = "Назад",
-                                        tint = Color.White
-                                    )
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Transparent
-                            ),
-                            modifier = Modifier.align(Alignment.TopStart)
+                        AdBanner(
+                            adUnitId = adUnitId,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(100.dp)
                         )
                     }
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        ) {
+                            HorizontalPager(
+                                state = pagerState,
+                                modifier = Modifier.fillMaxSize()
+                            ) { page ->
+                                SlideShowItem(animal = shuffledAnimals[page], isPortrait = isPortrait)
+                            }
 
-                    AdBanner(adUnitId = adUnitId, modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp))
+                            TopAppBar(
+                                title = { },
+                                navigationIcon = {
+                                    IconButton(onClick = { onBackClick() }) {
+                                        Icon(
+                                            imageVector = Icons.Default.ArrowBack,
+                                            contentDescription = "Назад",
+                                            tint = Color.White
+                                        )
+                                    }
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = Color.Transparent
+                                ),
+                                modifier = Modifier.align(Alignment.TopStart)
+                            )
+                        }
+
+                        AdBanner(
+                            adUnitId = adUnitId,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp)
+                        )
+                    }
                 }
             }
         }
@@ -190,11 +210,17 @@ fun SlideShowItem(animal: Animal, isPortrait: Boolean) {
         verticalArrangement = Arrangement.Center
     ) {
         Box(
-            modifier = Modifier.fillMaxSize().weight(1f),
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            AsyncImage(
-                model = animal.imageUrl,
+            SubcomposeAsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(animal.imageUrl)
+                    .crossfade(true)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .build(),
                 contentDescription = animal.name,
                 modifier = if (isPortrait) {
                     Modifier.fillMaxWidth().aspectRatio(4f / 3f)
@@ -214,9 +240,18 @@ fun AdBanner(adUnitId: String, modifier: Modifier) {
 
     DisposableEffect(adUnitId) {
         val listener = object : BannerAdEventListener {
-            override fun onAdLoaded() {}
-            override fun onAdFailedToLoad(error: AdRequestError) {}
-            override fun onAdClicked() {}
+            override fun onAdLoaded() {
+                Log.d("AdBanner", "Реклама загружена")
+            }
+
+            override fun onAdFailedToLoad(error: AdRequestError) {
+                Log.e("AdBanner", "Ошибка загрузки рекламы: ${error.description}")
+            }
+
+            override fun onAdClicked() {
+                Log.d("AdBanner", "Клик по рекламе")
+            }
+
             override fun onLeftApplication() {}
             override fun onReturnedToApplication() {}
             override fun onImpression(impressionData: ImpressionData?) {}
