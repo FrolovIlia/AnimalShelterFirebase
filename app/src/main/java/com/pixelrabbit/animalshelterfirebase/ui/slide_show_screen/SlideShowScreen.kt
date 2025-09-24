@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -79,12 +79,14 @@ fun SlideShowScreen(
 
     val pagerState = rememberPagerState(pageCount = { shuffledAnimals.size })
 
-    // Автопереключение слайдов (без бесконечного цикла)
-    LaunchedEffect(pagerState.currentPage, shuffledAnimals.size) {
+    // Автопереключение слайдов (с анимацией свайпа)
+    LaunchedEffect(shuffledAnimals.size) {
         if (shuffledAnimals.isNotEmpty()) {
-            delay(10_000L)
-            val nextPage = (pagerState.currentPage + 1) % shuffledAnimals.size
-            pagerState.animateScrollToPage(nextPage)
+            while (true) {
+                delay(10_000L)
+                val nextPage = (pagerState.currentPage + 1) % shuffledAnimals.size
+                pagerState.animateScrollToPage(nextPage)
+            }
         }
     }
 
@@ -99,7 +101,7 @@ fun SlideShowScreen(
                     navigationIcon = {
                         IconButton(onClick = { onBackClick() }) {
                             Icon(
-                                imageVector = Icons.Default.ArrowBack,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Назад",
                                 tint = Color.White
                             )
@@ -139,8 +141,8 @@ fun SlideShowScreen(
                         HorizontalPager(
                             state = pagerState,
                             modifier = Modifier
-                                .weight(1f)
                                 .fillMaxWidth()
+                                .weight(1f, fill = true)
                         ) { page ->
                             SlideShowItem(animal = shuffledAnimals[page], isPortrait = isPortrait)
                         }
@@ -173,7 +175,7 @@ fun SlideShowScreen(
                                 navigationIcon = {
                                     IconButton(onClick = { onBackClick() }) {
                                         Icon(
-                                            imageVector = Icons.Default.ArrowBack,
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                             contentDescription = "Назад",
                                             tint = Color.White
                                         )
@@ -201,35 +203,29 @@ fun SlideShowScreen(
 
 @Composable
 fun SlideShowItem(animal: Animal, isPortrait: Boolean) {
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp.dp
-
-    Column(
+    Box(
         modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(animal.imageUrl)
-                    .crossfade(true)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .build(),
-                contentDescription = animal.name,
-                modifier = if (isPortrait) {
-                    Modifier.fillMaxWidth().aspectRatio(4f / 3f)
-                } else {
-                    Modifier.height(screenHeight).aspectRatio(4f / 3f)
-                },
-                contentScale = ContentScale.Crop
-            )
-        }
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(animal.imageUrl)
+                .size(1080, 1920)
+                .crossfade(true)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .build(),
+            contentDescription = animal.name,
+            modifier = if (isPortrait) {
+                Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(4f / 3f)
+            } else {
+                Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(4f / 3f)
+            },
+            contentScale = ContentScale.Crop
+        )
     }
 }
 
