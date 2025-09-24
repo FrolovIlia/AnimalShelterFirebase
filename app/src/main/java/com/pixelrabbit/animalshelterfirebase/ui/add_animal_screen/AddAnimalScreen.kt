@@ -1,6 +1,8 @@
 package com.pixelrabbit.animalshelterfirebase.ui.add_animal_screen
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,7 +22,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.scale
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -35,6 +39,7 @@ import com.pixelrabbit.animalshelterfirebase.ui.theme.BackgroundGray
 import com.pixelrabbit.animalshelterfirebase.utils.AnimalImage
 import com.pixelrabbit.animalshelterfirebase.utils.ButtonWhite
 import com.pixelrabbit.animalshelterfirebase.utils.PhoneNumberField
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 @Composable
@@ -61,7 +66,6 @@ fun AddAnimalScreen(
     var curatorPhoneError by remember { mutableStateOf(false) }
 
     var isLoading by remember { mutableStateOf(false) }
-
     val isEditMode = navData.key.isNotBlank()
 
     val imageLauncher = rememberLauncherForActivityResult(
@@ -80,9 +84,9 @@ fun AddAnimalScreen(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            Toast.makeText(context, "Фото сохранено", Toast.LENGTH_SHORT).show()
             selectedImageUri = photoUri.value
             navImageUrl = ""
+            Toast.makeText(context, "Фото сохранено", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(context, "Ошибка при съёмке", Toast.LENGTH_SHORT).show()
         }
@@ -172,7 +176,7 @@ fun AddAnimalScreen(
                     value = curatorPhone,
                     onValueChange = {
                         curatorPhone = it
-                        curatorPhoneError = !isPhoneValid(it)
+                        curatorPhoneError = !isPhoneValid(it.trim())
                     },
                     isError = curatorPhoneError,
                     label = "Номер куратора"
@@ -198,10 +202,8 @@ fun AddAnimalScreen(
                         imageLauncher.launch("image/*")
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
-
                     ButtonWhite(text = "+ Снимок") {
-                        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                        if (ContextCompat.checkSelfPermission(
                                 context,
                                 android.Manifest.permission.CAMERA
                             ) == android.content.pm.PackageManager.PERMISSION_GRANTED
@@ -226,25 +228,22 @@ fun AddAnimalScreen(
                         .wrapContentWidth()
                         .align(Alignment.CenterHorizontally)
                 ) {
+                    // Проверка isLoading внутри кнопки
                     ButtonWhite(
-                        text = if (isEditMode) "Сохранить данные" else "Добавить данные",
+                        text = if (isEditMode) "Сохранить данные" else "Добавить данные"
                     ) {
-                        curatorPhoneError = !isPhoneValid(curatorPhone)
-                        if (
-                            name.isBlank() || feature.isBlank() || age.isBlank() ||
-                            description.isBlank() || location.isBlank() || curatorPhone.isBlank() ||
-                            curatorPhoneError || selectedCategory.isBlank()
+                        if (isLoading) return@ButtonWhite
+
+                        curatorPhoneError = !isPhoneValid(curatorPhone.trim())
+                        if (!isFormValid(
+                                name, feature, age, description, location, curatorPhone.trim(), selectedCategory
+                            )
                         ) {
-                            Toast.makeText(
-                                context,
-                                "Пожалуйста, заполните все поля корректно",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(context, "Пожалуйста, заполните все поля корректно", Toast.LENGTH_SHORT).show()
                             return@ButtonWhite
                         }
 
                         isLoading = true
-
                         val animal = Animal(
                             key = navData.key,
                             name = name,
@@ -252,50 +251,40 @@ fun AddAnimalScreen(
                             age = age,
                             category = selectedCategory,
                             imageUrl = "",
-                            curatorPhone = curatorPhone,
+                            curatorPhone = curatorPhone.trim(),
                             location = location,
                             feature = feature
                         )
 
                         if (selectedImageUri != null) {
-                            saveAnimalImage(
-                                oldImageUrl = navImageUrl,
-                                uri = selectedImageUri!!,
-                                storage = storage,
-                                firestore = firestore,
-                                animal = animal,
+                            uploadOptimizedImageToFirebase(
+                                context,
+                                selectedImageUri!!,
+                                storage,
+                                firestore,
+                                animal,
                                 onSaved = {
                                     isLoading = false
-                                    Toast.makeText(
-                                        context,
-                                        "Изменения сохранены",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
                                     onSaved()
                                 },
                                 onError = {
                                     isLoading = false
-                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT)
-                                        .show()
+                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
                                 }
                             )
                         } else {
                             saveAnimalToFireStore(
-                                firestore = firestore,
-                                animal = animal.copy(imageUrl = navImageUrl),
+                                firestore,
+                                animal.copy(imageUrl = navImageUrl),
                                 onSaved = {
                                     isLoading = false
-                                    Toast.makeText(
-                                        context,
-                                        "Изменения сохранены",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                    Toast.makeText(context, "Изменения сохранены", Toast.LENGTH_SHORT).show()
                                     onSaved()
                                 },
                                 onError = {
                                     isLoading = false
-                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT)
-                                        .show()
+                                    Toast.makeText(context, "Ошибка сохранения", Toast.LENGTH_SHORT).show()
                                 }
                             )
                         }
@@ -303,54 +292,9 @@ fun AddAnimalScreen(
 
                     if (isEditMode) {
                         ButtonWhite(text = "Удалить", modifier = Modifier.width(140.dp)) {
+                            if (isLoading) return@ButtonWhite
                             isLoading = true
-
-                            if (navImageUrl.isNotEmpty() && navImageUrl.startsWith("https://firebasestorage.googleapis.com/")) {
-                                val imageRef = storage.getReferenceFromUrl(navImageUrl)
-                                imageRef.delete().addOnCompleteListener {
-                                    firestore.collection("animals")
-                                        .document(navData.key)
-                                        .delete()
-                                        .addOnSuccessListener {
-                                            isLoading = false
-                                            Toast.makeText(
-                                                context,
-                                                "Животное удалено",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            onSaved()
-                                        }
-                                        .addOnFailureListener {
-                                            isLoading = false
-                                            Toast.makeText(
-                                                context,
-                                                "Ошибка удаления",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                }
-                            } else {
-                                firestore.collection("animals")
-                                    .document(navData.key)
-                                    .delete()
-                                    .addOnSuccessListener {
-                                        isLoading = false
-                                        Toast.makeText(
-                                            context,
-                                            "Животное удалено",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        onSaved()
-                                    }
-                                    .addOnFailureListener {
-                                        isLoading = false
-                                        Toast.makeText(
-                                            context,
-                                            "Ошибка удаления",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                            }
+                            deleteAnimal(navImageUrl, navData.key, storage, firestore, context, onSaved) { isLoading = false }
                         }
                     }
                 }
@@ -360,85 +304,129 @@ fun AddAnimalScreen(
     }
 }
 
-
-// Сохраняет изображение в Firebase Storage, затем сохраняет данные животного
-private fun saveAnimalImage(
-    oldImageUrl: String,
-    uri: Uri,
+// Загружает оптимизированное изображение
+fun uploadOptimizedImageToFirebase(
+    context: Context,
+    imageUri: Uri,
     storage: FirebaseStorage,
     firestore: FirebaseFirestore,
     animal: Animal,
     onSaved: () -> Unit,
     onError: () -> Unit
 ) {
-    val timeStamp = System.currentTimeMillis()
-    val storageRef = if (oldImageUrl.isEmpty()) {
-        storage.reference.child("animal_images").child("image_$timeStamp.jpg")
-    } else {
-        storage.getReferenceFromUrl(oldImageUrl)
-    }
+    try {
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close()
 
-    storageRef.putFile(uri)
-        .addOnSuccessListener {
-            storageRef.downloadUrl.addOnSuccessListener { url ->
-                saveAnimalToFireStore(
-                    firestore = firestore,
-                    animal = animal.copy(imageUrl = url.toString()),
-                    onSaved = onSaved,
-                    onError = onError
-                )
-            }.addOnFailureListener {
-                onError()
+        val maxWidth = 1080
+        val scale = if (bitmap.width > maxWidth) maxWidth.toFloat() / bitmap.width else 1f
+        val scaledBitmap = bitmap.scale((bitmap.width * scale).toInt(), (bitmap.height * scale).toInt())
+
+        val outputStream = ByteArrayOutputStream()
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+        val byteArray = outputStream.toByteArray()
+
+        val storageRef = storage.reference.child("animal_images/image_${System.currentTimeMillis()}.jpg")
+        storageRef.putBytes(byteArray)
+            .addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { url ->
+                    saveAnimalToFireStore(firestore, animal.copy(imageUrl = url.toString()), onSaved, onError)
+                }.addOnFailureListener { onError() }
             }
-        }
-        .addOnFailureListener {
-            onError()
-        }
+            .addOnFailureListener { onError() }
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+        onError()
+    }
 }
 
 // Сохраняет животное в Firestore
-private fun saveAnimalToFireStore(
+fun saveAnimalToFireStore(
     firestore: FirebaseFirestore,
     animal: Animal,
     onSaved: () -> Unit,
     onError: () -> Unit
 ) {
     val db = firestore.collection("animals")
-    val key = if (animal.key.isNotEmpty()) animal.key else db.document().id
+    val key = animal.key.ifEmpty { db.document().id }
 
     db.document(key)
         .set(animal.copy(key = key))
-        .addOnSuccessListener {
-            onSaved()
-        }
-        .addOnFailureListener {
-            onError()
-        }
+        .addOnSuccessListener { onSaved() }
+        .addOnFailureListener { onError() }
 }
 
-// Валидация телефона +7XXXXXXXXXX
-private fun isPhoneValid(phone: String): Boolean {
+// Валидация телефона
+fun isPhoneValid(phone: String): Boolean {
     return Regex("^\\+7\\d{10}$").matches(phone)
 }
 
+// Валидация формы
+fun isFormValid(
+    name: String,
+    feature: String,
+    age: String,
+    description: String,
+    location: String,
+    phone: String,
+    category: String
+): Boolean {
+    return name.isNotBlank() && feature.isNotBlank() && age.isNotBlank() &&
+            description.isNotBlank() && location.isNotBlank() &&
+            isPhoneValid(phone) && category.isNotBlank()
+}
 
+// Запуск камеры
 fun launchCamera(
     context: Context,
     imageFile: MutableState<File?>,
     photoUri: MutableState<Uri?>,
     cameraLauncher: ActivityResultLauncher<Uri>
 ) {
-    val file = File(context.cacheDir, "temp_photo.jpg").apply {
-        createNewFile()
-    }
+    val file = File.createTempFile("temp_photo_${System.currentTimeMillis()}", ".jpg", context.cacheDir)
     imageFile.value = file
-
-    val uri = FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.provider",
-        file
-    )
+    val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
     photoUri.value = uri
-
     cameraLauncher.launch(uri)
+}
+
+// Удаление животного
+fun deleteAnimal(
+    imageUrl: String,
+    key: String,
+    storage: FirebaseStorage,
+    firestore: FirebaseFirestore,
+    context: Context,
+    onSaved: () -> Unit,
+    onFinish: () -> Unit
+) {
+    if (imageUrl.startsWith("https://firebasestorage.googleapis.com/")) {
+        storage.getReferenceFromUrl(imageUrl).delete().addOnCompleteListener {
+            firestore.collection("animals").document(key)
+                .delete()
+                .addOnSuccessListener {
+                    Toast.makeText(context, "Животное удалено", Toast.LENGTH_SHORT).show()
+                    onSaved()
+                    onFinish()
+                }
+                .addOnFailureListener {
+                    Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT).show()
+                    onFinish()
+                }
+        }
+    } else {
+        firestore.collection("animals").document(key)
+            .delete()
+            .addOnSuccessListener {
+                Toast.makeText(context, "Животное удалено", Toast.LENGTH_SHORT).show()
+                onSaved()
+                onFinish()
+            }
+            .addOnFailureListener {
+                Toast.makeText(context, "Ошибка удаления", Toast.LENGTH_SHORT).show()
+                onFinish()
+            }
+    }
 }
